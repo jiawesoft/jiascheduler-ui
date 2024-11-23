@@ -90,7 +90,9 @@
   import {
     InstanceRecord,
     QueryInstanceListReq,
+    QueryUserServerReq,
     queryInstanceList,
+    queryUserServerList,
   } from '@/api/instance';
   import terminal from './components/terminal.vue';
   import quickCommand from './components/quick-command.vue';
@@ -114,11 +116,11 @@
   const { loading, setLoading } = useLoading(false);
   const serverIpList = ref<InstanceRecord[]>([]);
   const fetchData = async (
-    params: QueryInstanceListReq = { page: 1, page_size: 20, status: 1 }
+    params: QueryUserServerReq = { page: 1, page_size: 20, status: 1 }
   ) => {
     try {
       setLoading(true);
-      const { data } = await queryInstanceList(params);
+      const { data } = await queryUserServerList(params);
       serverIpList.value = data.list;
       setLoading(false);
     } catch (err) {
