@@ -482,7 +482,7 @@
   const handleViewTerminal = (e: any, record: any) => {
     const url = router.resolve({
       name: 'terminal',
-      query: { ip: record.ip },
+      query: { instance_id: record.instance_id },
     });
     window.open(url.href, '_blank');
   };
