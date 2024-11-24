@@ -111,6 +111,7 @@ const localeJob = {
   'job.scheduleName': '调度名称',
 
   'job.exitStatus': '退出状态',
+  'job.lastExitStatus': '上次退出状态',
   'job.scheduleStatus': '调度状态',
   'job.runStatus': '运行状态',
 

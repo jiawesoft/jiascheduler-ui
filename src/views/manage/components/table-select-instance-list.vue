@@ -121,7 +121,7 @@
       </a-col>
     </a-row>
     <a-table
-      row-key="id"
+      row-key="instance_id"
       :loading="loading"
       :pagination="pagination"
       :columns="(cloneColumns as TableColumnData[])"

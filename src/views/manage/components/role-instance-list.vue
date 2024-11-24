@@ -242,7 +242,7 @@
     try {
       await unbindInstance({
         role_id: props.modelValue,
-        instance_ids: [record.id],
+        instance_ids: [record.instance_id],
       });
     } catch (err) {
       return false;

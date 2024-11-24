@@ -113,6 +113,7 @@ const localeJob = {
   'job.scheduleName': 'Schedule Name',
 
   'job.exitStatus': 'Exit Status',
+  'job.lastExitStatus': 'Last Exit Status',
   'job.scheduleStatus': 'Schedule Status',
   'job.runStatus': 'Run Status',
 

@@ -207,8 +207,7 @@ export function queryExecList(params: QueryExecListReq) {
 
 export interface JobActionReq {
   action: 'StartTimer' | 'StopTimer' | 'Exec' | 'Stop';
-  namespace: string;
-  ip: string;
+  instance_id: string;
   schedule_id: string;
 }
 

@@ -35,14 +35,11 @@
           <a-tag v-if="record.response?.code === 20000" color="green">
             {{ record.response.msg }}
           </a-tag>
-
-          <a-tag v-else color="red">
-            {{ record.response?.msg || 'null' }}</a-tag
-          >
+          <a-tag v-else color="red"> {{ record.err }}</a-tag>
         </template>
       </a-table>
     </a-form-item>
-    {{ $props.value?.executor_id }}
+
     <a-form-item field="code" :label="$t('job.code')">
       <v-ace-editor
         v-model:value="$props.value.code"

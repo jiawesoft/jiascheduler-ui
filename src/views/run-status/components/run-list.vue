@@ -486,7 +486,7 @@
         width: 120,
       },
       {
-        title: t('job.exitStatus'),
+        title: t('job.lastExitStatus'),
         dataIndex: 'exit_status',
         ellipsis: true,
         slotName: 'exitStatus',
@@ -624,8 +624,7 @@
   ) => {
     await jobAction({
       action,
-      namespace: record.bind_namespace,
-      ip: record.bind_ip,
+      instance_id: record.instance_id,
       schedule_id: record.schedule_id,
     });
     Message.success(t('form.submit.success'));
