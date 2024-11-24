@@ -41,7 +41,7 @@
       </div>
       <div class="sub-title">{{ $t('terminal.create.listTitle') }}</div>
       <a-table
-        row-key="id"
+        row-key="instance_id"
         :loading="loading"
         :pagination="pagination"
         :columns="(columns as TableColumnData[])"
@@ -80,11 +80,16 @@
   import { Message } from '@arco-design/web-vue';
   import { Pagination } from '@/types/global';
   import type { TableColumnData } from '@arco-design/web-vue/es/table/interface';
-  import { InstanceRecord } from '@/api/instance';
+  import {
+    InstanceRecord,
+    QueryUserServerReq,
+    queryUserServerList,
+  } from '@/api/instance';
+  import useLoading from '@/hooks/loading';
 
   const { t } = useI18n();
 
-  const props = defineProps({
+  defineProps({
     isCreate: {
       type: Boolean,
       default: false,
@@ -142,11 +147,33 @@
       dataIndex: 'updated_time',
     },
   ]);
-  // const renderData = ref<InstanceRecord[]>([]);
+  const renderData = ref<InstanceRecord[]>([]);
   const size = ref<SizeProps>('medium');
 
+  const { loading, setLoading } = useLoading(false);
+  const fetchData = async (
+    params: QueryUserServerReq = {
+      page: 1,
+      page_size: 20,
+    }
+  ) => {
+    try {
+      setLoading(true);
+      const { data } = await queryUserServerList(params);
+      renderData.value = data?.list || [];
+      setLoading(false);
+    } catch (err) {
+      console.log(err);
+      setLoading(false);
+    }
+  };
+  fetchData({
+    page_size: pagination.pageSize,
+    page: pagination.page,
+    status: 1,
+  });
+
   function handleCancel() {
-    console.log('cancel');
     emit('cancelModal');
   }
 
@@ -156,8 +183,8 @@
       Message.error(t('terminal.create.notSelected'));
     } else {
       emit('cancelModal');
-      const selectItem = props.renderData.find(
-        (item) => item.id === selectedRowKeys.value[0]
+      const selectItem = renderData.value.find(
+        (item) => item.instance_id === selectedRowKeys.value[0]
       );
       emit('addTerminal', selectItem);
     }
@@ -165,7 +192,7 @@
     return true;
   }
   const onPageChange = (current: number) => {
-    emit('fetchData', {
+    fetchData({
       page_size: pagination.pageSize,
       page: current,
       ip: searchKey.value,
@@ -177,7 +204,7 @@
   };
 
   const searchIp = () => {
-    emit('fetchData', {
+    fetchData({
       page_size: pagination.pageSize,
       page: pagination.page,
       ip: searchKey.value,

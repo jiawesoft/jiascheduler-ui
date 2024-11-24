@@ -7,6 +7,7 @@ export interface InstanceRecord {
   info: string;
   instance_group_id: number;
   instance_group: string;
+  instance_id: string;
   sys_user: string;
   namespace: string;
   status: number;
@@ -108,8 +109,9 @@ export function grantedUser(req: GrantedUserReq) {
 
 export interface QueryUserServerReq extends Partial<InstanceRecord> {
   ip?: string;
+  instance_id?: string;
   instance_group_id?: number;
-  statu?: number;
+  status?: number;
   page: number;
   page_size: number;
 }

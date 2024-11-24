@@ -18,7 +18,6 @@
   import { FitAddon } from '@xterm/addon-fit';
   //   import { SearchAddon } from 'xterm-addon-search';
   import { WebLinksAddon } from '@xterm/addon-web-links';
-  import { useRoute } from 'vue-router';
   import {
     ref,
     nextTick,
@@ -51,6 +50,10 @@
     ip: {
       type: String,
     },
+    instanceId: {
+      type: String,
+      default: '',
+    },
     /**
      * 高度
      */
@@ -66,8 +69,6 @@
       type: Object,
     },
   });
-
-  const route = useRoute();
 
   const appStore = useAppStore();
 
@@ -207,11 +208,11 @@
 
   function initSocket() {
     if (props.ip) {
-      const namespace = route.query.namespace || 'default';
+      // const namespace = route.query.namespace || 'default';
       const currentEnv = import.meta.env.VITE_APP_ENV;
       const wsProtocol = currentEnv === 'development' ? 'ws:' : 'wss:';
       // const socketUrl = `${wsProtocol}//${window.location.host}/terminal/webssh/${props.ip}?rows=${term?.rows}&cols=${term?.cols}`;
-      const socketUrl = `${wsProtocol}//${window.location.host}/terminal/tunnel/${props.ip}?rows=${term?.rows}&cols=${term?.cols}&namespace=${namespace}`;
+      const socketUrl = `${wsProtocol}//${window.location.host}/terminal/tunnel/${props.instanceId}?rows=${term?.rows}&cols=${term?.cols}`;
 
       // const socketUrl = `${props.socketUrl}?rows=${term?.rows}&cols=${term?.cols}`;
       socket = new WebSocket(socketUrl);
@@ -224,12 +225,13 @@
 
     // 监听socket错误信息
     socket.onerror = (e: Event) => {
-      term.writeln('\r\n\x1b[31m提示: 连接错误...');
+      term.writeln('\r\n\x1b[31mNotice: Connection error...');
       state.status = TerminalStatus.Error;
-      console.log('连接错误', e);
+      console.log('Connection error', e);
     };
 
     socket.onclose = (e: CloseEvent) => {
+      term.writeln('\r\n\x1b[31mNotice: Connection is closed...');
       console.log('terminal socket close...', e.reason);
       const currentNum = appStore.connect_number;
       appStore.setConnectNumber(currentNum - 1);
@@ -244,7 +246,6 @@
 
   function init() {
     if (term) {
-      console.log('重新连接...');
       close();
     }
     term = new Terminal({

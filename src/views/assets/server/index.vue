@@ -341,9 +341,7 @@
     const url = router.resolve({
       name: 'terminal',
       query: {
-        ip: record.ip,
-        user: record.sys_user,
-        namespace: record.namespace,
+        instance_id: record.instance_id,
       },
     });
     window.open(url.href, '_blank');

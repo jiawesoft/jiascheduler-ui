@@ -12,11 +12,13 @@ export default mergeConfig(
       },
       proxy: {
         '/api': {
-          target: 'https://jiascheduler.iwannay.cn',
+          target: 'http://192.168.1.51:9090',
+          // target: 'https://jiascheduler.iwannay.cn',
           changeOrigin: true,
         },
         '/terminal': {
-          target: 'wss://jiascheduler.iwannay.cn',
+          target: 'ws://192.168.1.51:9090',
+          // target: 'wss://jiascheduler.iwannay.cn',
           changeOrigin: true,
           ws: true,
         },

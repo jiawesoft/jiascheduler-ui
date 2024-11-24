@@ -50,7 +50,7 @@
             <template #content>
               <a-doption
                 v-for="history in curHistoryList"
-                :key="history.ip"
+                :key="history.instance_id"
                 @click="handleAddTerminal(history)"
               >
                 <template #icon>
@@ -82,7 +82,10 @@
           </a-button> -->
         </div>
         <div class="handle-btn">
-          <a-button type="text" :disabled="splitNumber > 3">
+          <a-button
+            type="text"
+            :disabled="splitNumber > 3 || serverList.length === 0"
+          >
             <template #icon>
               <icon-layout
                 size="20"
@@ -105,7 +108,7 @@
         </div>
       </div>
     </div>
-    <div v-if="!isFull" class="terminal-sub-header">
+    <div v-if="!isFull && serverList.length > 0" class="terminal-sub-header">
       <div class="sub-header-left">
         <div class="handle-btn" @click="showFileManager">
           <icon-folder size="20" :stroke-width="2"></icon-folder>
@@ -121,6 +124,7 @@
           v-show="item.key === currentServerIndex"
           :ref="(el) => setRefMap(el, item.key)"
           :ip="item.ip"
+          :instance-id="item.instanceId"
           :terminal="item"
           @focus-terminal="focusTerminal"
         ></terminal-body>
@@ -140,7 +144,6 @@
       :visible="isShowFile"
       :file-ip="fileIp"
       :current-ip-params="currentIpParams"
-      :sys-user="sysUser"
       @handle-close="handleCloseFile"
     ></file-manager>
   </div>
@@ -149,6 +152,7 @@
 <script lang="ts" setup>
   import { nextTick, ref, watch, PropType, computed } from 'vue';
   import { useAppStore } from '@/store';
+  import { ServerList } from '@/api/terminal';
   import { InstanceRecord } from '@/api/instance';
   import { cloneDeep } from 'lodash';
 
@@ -170,11 +174,11 @@
       type: String,
       default: '',
     },
-    sysUser: {
+    namespace: {
       type: String,
       default: '',
     },
-    namespace: {
+    instanceId: {
       type: String,
       default: '',
     },
@@ -217,27 +221,28 @@
     ip: string;
     id?: number;
     namespace?: string;
+    instance_id?: string;
   }
   const historyList = ref<HistoryList[]>([]);
 
-  const HISTORYTERMINAL = 'historyTerminal';
+  const HISTORYTERMINAL = 'historyTerminalList';
   const setHistoryTerminal = (history: HistoryList) => {
     if (!history.ip) return;
     const historyString = localStorage.getItem(HISTORYTERMINAL);
     historyList.value = historyString ? JSON.parse(historyString) : [];
     const filterItem = historyList.value.filter(
-      (value) =>
-        value.ip === history.ip && value.namespace === history.namespace
+      (value) => value.instance_id === history.instance_id
     );
     if (filterItem.length > 0) {
       const index = historyList.value.findIndex(
-        (item) => item.ip === history.ip && item.namespace === history.namespace
+        (item) => item.instance_id === history.instance_id
       );
       historyList.value.splice(index, 1);
     }
     historyList.value.push({
       ip: history.ip,
       namespace: history.namespace || 'default',
+      instance_id: history.instance_id,
     });
     if (historyList.value.length > 5) {
       historyList.value.shift();
@@ -251,15 +256,16 @@
   });
 
   const currentServerIndex = ref<number>(1);
-  interface ServerList {
-    ip: string;
-    key: number;
-    info?: string;
-    config?: string;
-    color?: string;
-    selected?: boolean;
-    namespace?: string;
-  }
+  // interface ServerList {
+  //   ip: string;
+  //   key: number;
+  //   info?: string;
+  //   config?: string;
+  //   color?: string;
+  //   selected?: boolean;
+  //   namespace?: string;
+  //   instanceId?: string;
+  // }
   const serverList = ref<ServerList[]>([]);
   if (props.currentIp) {
     serverList.value = [
@@ -268,11 +274,13 @@
         key: currentServerIndex.value,
         selected: true,
         namespace: props.namespace || 'default',
+        instanceId: props.instanceId,
       },
     ];
     setHistoryTerminal({
       ip: `${props.currentIp}`,
       namespace: props.namespace || 'default',
+      instance_id: props.instanceId,
     });
   }
 
@@ -312,13 +320,14 @@
   }
 
   function handleAddTerminal(list: HistoryList) {
-    const curIp = list.ip || props.currentIp;
+    const curIp = list.ip;
     // const addServerKey = serverList.value.length + 1;
     const lastServer = serverList.value[serverList.value.length - 1];
     serverList.value.push({
       ip: `${curIp}`,
       key: lastServer ? lastServer.key + 1 : 1,
       namespace: list.namespace || 'default',
+      instanceId: list.instance_id,
     });
     currentServerIndex.value = lastServer ? lastServer.key + 1 : 1;
     nextTick(() => {
@@ -331,6 +340,7 @@
     setHistoryTerminal({
       ip: `${curIp}`,
       namespace: list.namespace || 'default',
+      instance_id: list.instance_id,
     });
   }
 
@@ -364,8 +374,8 @@
     const seletedItem = serverList.value.find(
       (v) => v.key === currentServerIndex.value
     );
-    emit('changeIp', seletedItem?.ip);
-    emit('addSplit');
+    // emit('changeIp', seletedItem?.ip);
+    emit('addSplit', seletedItem);
   }
 
   function handleFullScreenTerminal() {
@@ -450,7 +460,7 @@
     emit('outerSplitSelected', props.id);
   };
 
-  const sendCommand = (content: string, isAll) => {
+  const sendCommand = (content: string, isAll: boolean) => {
     nextTick(() => {
       if (isAll) {
         serverList.value.map((item) => {
@@ -472,6 +482,7 @@
   const currentIpParams = ref({
     ip: '',
     namespace: '',
+    instanceId: '',
   });
   const showFileManager = () => {
     isShowFile.value = true;
@@ -483,6 +494,7 @@
     currentIpParams.value = {
       ip: seletedItem?.ip || '',
       namespace: seletedItem?.namespace || 'default',
+      instanceId: seletedItem?.instanceId || '',
     };
   };
 

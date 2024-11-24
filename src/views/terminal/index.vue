@@ -43,9 +43,9 @@
                 :split-number="splitTerminalList.length"
                 :selected="item.selected"
                 :is-full="isFullscreen"
-                :current-ip="currentIp"
-                :sys-user="sysUser"
-                :namespace="namespace"
+                :current-ip="item.ip"
+                :namespace="item.namespace"
+                :instance-id="item.instanceId"
                 :server-ip-list="serverIpList"
                 :loading="loading"
                 @add-split="handleAddTerminal"
@@ -83,17 +83,16 @@
   import 'splitpanes/dist/splitpanes.css';
 
   import { computed, nextTick, ref } from 'vue';
-  import { useRoute, useRouter } from 'vue-router';
+  import { useRoute } from 'vue-router';
   import useLoading from '@/hooks/loading';
   import { useDark, useToggle, useFullscreen } from '@vueuse/core';
   import { useAppStore } from '@/store';
   import {
     InstanceRecord,
-    QueryInstanceListReq,
     QueryUserServerReq,
-    queryInstanceList,
     queryUserServerList,
   } from '@/api/instance';
+  import { ServerList } from '@/api/terminal';
   import terminal from './components/terminal.vue';
   import quickCommand from './components/quick-command.vue';
 
@@ -112,28 +111,54 @@
     },
   });
   useToggle(isDark);
+  const route = useRoute();
+  const currentIp = ref('');
+  const instanceId = ref(`${route.query.instance_id}`);
+
+  const terminalRefMap = ref({});
+
+  interface splitItem {
+    id: string;
+    config?: string;
+    selected?: boolean;
+    ip?: string;
+    namespace?: string;
+    instanceId?: string;
+  }
+  const splitTerminalList = ref<splitItem[]>([]);
 
   const { loading, setLoading } = useLoading(false);
   const serverIpList = ref<InstanceRecord[]>([]);
   const fetchData = async (
-    params: QueryUserServerReq = { page: 1, page_size: 20, status: 1 }
+    params: QueryUserServerReq = {
+      page: 1,
+      page_size: 20,
+    }
   ) => {
     try {
       setLoading(true);
       const { data } = await queryUserServerList(params);
-      serverIpList.value = data.list;
+      serverIpList.value = data?.list || [];
+
+      const currentIpItem = serverIpList.value.find(
+        (v) => v.instance_id === instanceId.value
+      );
+      splitTerminalList.value = [
+        {
+          id: Math.random().toString(16).substring(2),
+          ip: currentIpItem?.ip || '',
+          namespace: currentIpItem?.namespace,
+          instanceId: currentIpItem?.instance_id,
+        },
+      ];
+
       setLoading(false);
     } catch (err) {
       console.log(err);
       setLoading(false);
     }
   };
-  fetchData();
-
-  const route = useRoute();
-  const currentIp = ref(`${route.query.ip}`);
-  const sysUser = ref(`${route.query.user}`);
-  const namespace = ref(`${route.query.namespace}`);
+  fetchData({ page: 1, page_size: 20, instance_id: instanceId.value });
 
   const changeIp = (ip: string) => {
     if (!ip) return;
@@ -145,20 +170,6 @@
 
   // const router = useRouter();
   // router.replace('/terminal');
-  console.log(useRouter);
-
-  const terminalRefMap = ref({});
-
-  interface splitItem {
-    id: string;
-    config?: string;
-    selected?: boolean;
-  }
-  const splitTerminalList = ref<splitItem[]>([
-    {
-      id: Math.random().toString(16).substring(2),
-    },
-  ]);
 
   const connectChatNumber = computed(() => {
     return appStore.connect_number;
@@ -199,11 +210,14 @@
     });
   }
 
-  function handleAddTerminal() {
+  function handleAddTerminal(server: ServerList) {
     const currentNum = appStore.connect_number;
     appStore.setConnectNumber(currentNum + 1);
     splitTerminalList.value.push({
       id: Math.random().toString(16).substring(2),
+      ip: server.ip,
+      namespace: server?.namespace,
+      instanceId: server?.instanceId,
     });
     splitResized();
   }

@@ -174,6 +174,7 @@
         return {
           ip: '',
           namespace: '',
+          instanceId: '',
         };
       },
     },
@@ -230,9 +231,8 @@
 
   const fetchData = async (
     params: QueryFileListParams = {
-      ip: props.fileIp,
       dir: defaultPath.value,
-      namespace: props.currentIpParams.namespace,
+      instance_id: props.currentIpParams.instanceId,
     }
   ) => {
     setLoading(true);
@@ -242,7 +242,8 @@
       defaultPath.value = data.current_dir;
       fileData.value = data.entry;
     } catch (err) {
-      Message.error(`${err}`);
+      console.log('Error:', err);
+      // Message.error(`${err}`);
     } finally {
       setLoading(false);
     }
@@ -292,8 +293,7 @@
       } = options;
       onProgress(20);
       const formData = new FormData();
-      formData.append('ip', props.fileIp);
-      formData.append('namespace', props.currentIpParams.namespace);
+      formData.append('instanceId', props.currentIpParams.instanceId);
       formData.append('file_path', `${defaultPath.value}/${fileItem.name}`);
       formData.append(name as string, fileItem.file as Blob);
       const onUploadProgress = (event: ProgressEvent) => {
@@ -336,28 +336,27 @@
   const downloadFileEvent = async (record: FileRecord) => {
     try {
       const filePath = `${defaultPath.value}/${record.file_name}`;
-      const url = `/api/file/sftp/tunnel/download?ip=${props.fileIp}&file_path=${filePath}&namespace=${props.currentIpParams.namespace}`;
+      const url = `/api/file/sftp/tunnel/download?file_path=${filePath}&instance_id=${props.currentIpParams.instanceId}`;
       const downloadLink = document.createElement('a');
       downloadLink.href = url;
       downloadLink.download = record.file_name;
       downloadLink.click();
     } catch (err) {
-      Message.error(`${err}`);
+      console.log('Error:', err);
     }
   };
   const deleteFile = async (record: FileRecord) => {
     setLoading(true);
     try {
       await removeFile({
-        ip: props.fileIp,
         remove_type: record.file_type.toLowerCase(),
         path: `${defaultPath.value}/${record.file_name}`,
-        namespace: props.currentIpParams.namespace,
+        instance_id: props.currentIpParams.instanceId,
       });
       Message.success(`success`);
       fetchData();
     } catch (err) {
-      Message.error(`${err}`);
+      console.log('Error:', err);
     } finally {
       setLoading(false);
     }

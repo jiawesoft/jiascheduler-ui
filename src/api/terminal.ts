@@ -9,11 +9,12 @@ export interface FileRecord {
   user: string;
   group: string;
   modified: string;
+  instance_id: string;
 }
 export interface QueryFileListParams extends Partial<FileRecord> {
-  ip: string;
   dir?: string;
   namespace?: string;
+  instance_id: string;
   // status: number;
   // page: number;
   // page_size: number;
@@ -26,16 +27,27 @@ export interface QuryFileListRes {
 }
 
 export interface RemoveParams {
-  ip: string;
   remove_type: string;
   path: string;
-  namespace: string;
+  namespace?: string;
+  instance_id?: string;
 }
 
 export interface DownloadData {
   ip: string;
   file_path: string;
   namespace?: string;
+}
+
+export interface ServerList {
+  ip: string;
+  key: number;
+  info?: string;
+  config?: string;
+  color?: string;
+  selected?: boolean;
+  namespace?: string;
+  instanceId?: string;
 }
 
 export function queryFileList(params: QueryFileListParams) {
