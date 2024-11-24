@@ -77,7 +77,8 @@
 <script lang="ts" setup>
   import { ref, reactive, PropType, computed } from 'vue';
   import { useI18n } from 'vue-i18n';
-  import { Message } from '@arco-design/web-vue';
+  import { Message, Modal } from '@arco-design/web-vue';
+  import { useRouter } from 'vue-router';
   import { Pagination } from '@/types/global';
   import type { TableColumnData } from '@arco-design/web-vue/es/table/interface';
   import {
@@ -87,6 +88,7 @@
   } from '@/api/instance';
   import useLoading from '@/hooks/loading';
 
+  const router = useRouter();
   const { t } = useI18n();
 
   defineProps({
@@ -178,7 +180,6 @@
   }
 
   async function handleBeforeOk() {
-    console.log('before ok');
     if (selectedRowKeys.value.length === 0) {
       Message.error(t('terminal.create.notSelected'));
     } else {
@@ -186,7 +187,20 @@
       const selectItem = renderData.value.find(
         (item) => item.instance_id === selectedRowKeys.value[0]
       );
-      emit('addTerminal', selectItem);
+      if (!selectItem) {
+        Modal.error({
+          content: 'No data found!',
+          escToClose: false,
+          maskClosable: false,
+          onOk: () => {
+            router.push({
+              path: '/',
+            });
+          },
+        });
+      } else {
+        emit('addTerminal', selectItem);
+      }
     }
 
     return true;

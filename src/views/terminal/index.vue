@@ -59,11 +59,11 @@
           </splitpanes>
         </div>
         <quick-command
-          v-if="commandVisible"
+          v-if="commandVisible && splitTerminalList.length > 0"
           :connect-chat="connectChatNumber"
           @send-command="sendCommand"
         ></quick-command>
-        <div class="terminal-footer">
+        <div v-if="splitTerminalList.length > 0" class="terminal-footer">
           <div class="footer-inner" @click="showQuickCommand">
             <icon-code-square :stroke-width="2" :size="18" />
             <span class="command-text">{{
@@ -81,9 +81,10 @@
 <script lang="ts" setup>
   import { Splitpanes, Pane } from 'splitpanes';
   import 'splitpanes/dist/splitpanes.css';
+  import { Modal } from '@arco-design/web-vue';
 
   import { computed, nextTick, ref } from 'vue';
-  import { useRoute } from 'vue-router';
+  import { useRoute, useRouter } from 'vue-router';
   import useLoading from '@/hooks/loading';
   import { useDark, useToggle, useFullscreen } from '@vueuse/core';
   import { useAppStore } from '@/store';
@@ -96,6 +97,7 @@
   import terminal from './components/terminal.vue';
   import quickCommand from './components/quick-command.vue';
 
+  const router = useRouter();
   const terminalRef = ref<HTMLElement | null>(null);
   const { isFullscreen, toggle } = useFullscreen(terminalRef);
 
@@ -143,6 +145,19 @@
       const currentIpItem = serverIpList.value.find(
         (v) => v.instance_id === instanceId.value
       );
+      if (!currentIpItem) {
+        Modal.error({
+          content: 'No data found!',
+          escToClose: false,
+          maskClosable: false,
+          onOk: () => {
+            router.push({
+              path: '/',
+            });
+          },
+        });
+        return;
+      }
       splitTerminalList.value = [
         {
           id: Math.random().toString(16).substring(2),
