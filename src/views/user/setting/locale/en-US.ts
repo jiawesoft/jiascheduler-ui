@@ -19,6 +19,7 @@ export default {
   'userSetting.reset': 'Reset',
   // new
   'userSetting.label.certification': 'Certification',
+  'userSetting.label.accountStatus': 'Account Status',
   'userSetting.label.phone': 'Phone',
   'userSetting.label.accountId': 'Account Id',
   'userSetting.label.registrationDate': 'Registration Date',
@@ -31,6 +32,11 @@ export default {
   'userSetting.basicInfo.form.label.nickname': 'Nickname',
   'userSetting.basicInfo.placeholder.nickname': 'Please enter nickname',
   'userSetting.form.error.nickname.required': 'Please enter nickname',
+  'userSetting.basicInfo.form.label.gender': 'Gender',
+  'userSetting.basicInfo.form.label.male': 'Male',
+  'userSetting.basicInfo.form.label.female': 'Female',
+  'userSetting.basicInfo.form.label.phone': 'Phone',
+  'userSetting.basicInfo.placeholder.phone': 'Please enter the phone number',
   'userSetting.basicInfo.form.label.countryRegion': 'Country/region',
   'userSetting.basicInfo.placeholder.countryRegion':
     'Please select country/region',

@@ -135,7 +135,7 @@
 
 <style scoped lang="less">
   .form {
-    width: 540px;
+    width: 580px;
     margin: 0 auto;
   }
 </style>
