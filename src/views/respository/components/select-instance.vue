@@ -60,7 +60,7 @@
     <a-divider style="margin-top: 0" />
     <a-table
       v-model:selectedKeys="selectedKeys"
-      row-key="id"
+      row-key="instance_id"
       :loading="loading"
       :columns="columns"
       :data="instanceList"
@@ -114,7 +114,7 @@
   defineProps(['modelValue']);
   const emit = defineEmits(['update:modelValue']);
 
-  const selectedKeys = ref<number[]>([]);
+  const selectedKeys = ref<string[]>([]);
 
   const columns = computed<TableColumnData[]>(() => [
     {
@@ -202,7 +202,9 @@
   watch(
     () => selectedKeys.value,
     (val) => {
-      const list = instanceList.value.filter((item) => val.includes(item.id));
+      const list = instanceList.value.filter((item) =>
+        val.includes(item.instance_id)
+      );
       emit('update:modelValue', list);
     },
     { deep: true, immediate: true }
