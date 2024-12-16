@@ -335,7 +335,9 @@
               <a-upload
                 action="/api/file/upload"
                 :limit="1"
-                :file-list="defaultFileList()"
+                :default-file-list="defaultFileList()"
+                :file-list="uploadFileList"
+                v-model="uploadFileList"
                 @before-remove="removeUploadfile"
                 @success="onUploadSuccess"
               />
@@ -488,6 +490,7 @@
   const formModel = ref(generateFormModel());
   const cloneColumns = ref<Column[]>([]);
   const showColumns = ref<Column[]>([]);
+  const uploadFileList = ref<FileItem[]>([]);
   const jobOptions = ref<SelectOptionData[]>([]);
 
   const size = ref<SizeProps>('medium');
@@ -821,7 +824,11 @@
   const onUploadSuccess = (response: FileItem) => {
     if (response.response.code === 20000) {
       jobForm.value.upload_file = response.response.data.result;
+      uploadFileList.value = [response];
+      return;
     }
+    uploadFileList.value = [];
+    Message.error(response.response.msg);
   };
 
   fetchData();
