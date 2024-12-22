@@ -1,0 +1,663 @@
+<template>
+  <div class="container">
+    <Breadcrumb :items="['menu.repository', 'menu.repository.daemonJob']" />
+    <a-card class="general-card">
+      <a-row>
+        <a-col flex="auto">
+          <a-form
+            :model="formModel"
+            :label-col-props="{ span: 6 }"
+            :wrapper-col-props="{ span: 18 }"
+            label-align="left"
+            :auto-label-width="true"
+            @submit="search"
+          >
+            <a-row :gutter="20">
+              <a-col :span="10">
+                <a-form-item field="name" :label="$t('job.daemon.name')">
+                  <a-input
+                    v-model="formModel.name"
+                    @press-enter="search"
+                    :placeholder="$t('job.daemon.name.placeholder')"
+                  />
+                </a-form-item>
+              </a-col>
+
+              <a-col :span="10">
+                <a-form-item
+                  field="updated_time_range"
+                  :label="$t('columns.updatedTime')"
+                >
+                  <a-range-picker
+                    v-model="formModel.updated_time_range"
+                    style="width: 100%"
+                  />
+                </a-form-item>
+              </a-col>
+            </a-row>
+          </a-form>
+        </a-col>
+        <a-col flex="200px" style="text-align: right">
+          <a-space direction="horizontal" :wrap="true" :size="10">
+            <a-button type="primary" @click="search">
+              <template #icon>
+                <icon-search />
+              </template>
+              {{ $t('form.search') }}
+            </a-button>
+            <a-button @click="reset">
+              <template #icon>
+                <icon-refresh />
+              </template>
+              {{ $t('form.reset') }}
+            </a-button>
+          </a-space>
+        </a-col>
+      </a-row>
+      <a-divider style="margin-top: 0" />
+      <a-row style="margin-bottom: 16px">
+        <a-col :span="12">
+          <a-space direction="horizontal" size="large">
+            <a-button
+              type="primary"
+              size="small"
+              @click="handleOpenDeamonJobModal($event, null)"
+            >
+              <template #icon>
+                <icon-plus />
+              </template>
+              {{ $t('operations.create') }}
+            </a-button>
+          </a-space>
+        </a-col>
+        <a-col
+          :span="12"
+          style="display: flex; align-items: center; justify-content: end"
+        >
+          <a-tooltip :content="$t('columns.actions.refresh')">
+            <div class="action-icon" @click="search">
+              <icon-refresh size="18" />
+            </div>
+          </a-tooltip>
+          <a-dropdown @select="handleSelectDensity">
+            <a-tooltip :content="$t('columns.actions.density')">
+              <div class="action-icon"><icon-line-height size="18" /></div>
+            </a-tooltip>
+            <template #content>
+              <a-doption
+                v-for="item in densityList"
+                :key="item.value"
+                :value="item.value"
+                :class="{ active: item.value === size }"
+              >
+                <span>{{ item.name }}</span>
+              </a-doption>
+            </template>
+          </a-dropdown>
+          <a-tooltip :content="$t('columns.actions.columnSetting')">
+            <a-popover
+              trigger="click"
+              position="bl"
+              @popup-visible-change="popupVisibleChange"
+            >
+              <div class="action-icon"><icon-settings size="18" /></div>
+              <template #content>
+                <div id="tableSetting">
+                  <div
+                    v-for="(item, index) in showColumns"
+                    :key="item.dataIndex"
+                    class="setting"
+                  >
+                    <div style="margin-right: 4px; cursor: move">
+                      <icon-drag-arrow />
+                    </div>
+                    <div>
+                      <a-checkbox
+                        v-model="item.checked"
+                        @change="
+                          handleChange($event, item as TableColumnData, index)
+                        "
+                      >
+                      </a-checkbox>
+                    </div>
+                    <div class="title">
+                      {{ item.title === '#' ? '序列号' : item.title }}
+                    </div>
+                  </div>
+                </div>
+              </template>
+            </a-popover>
+          </a-tooltip>
+        </a-col>
+      </a-row>
+      <a-table
+        row-key="id"
+        :loading="loading"
+        :pagination="pagination"
+        :columns="(cloneColumns as TableColumnData[])"
+        :data="renderData"
+        :bordered="false"
+        :size="size"
+        @page-change="onPageChange"
+      >
+        <template #index="{ rowIndex }">
+          {{ rowIndex + 1 + (pagination.page - 1) * pagination.pageSize }}
+        </template>
+
+        <template #executor="{ record }">
+          {{ execuotrs[record.executor_id as string] }}
+        </template>
+
+        <template #operations="{ record }">
+          <a-button
+            type="text"
+            size="small"
+            @click="handleOpenDeamonJobModal($event, record)"
+          >
+            {{ $t('operations.view') }}
+          </a-button>
+          <a-button
+            type="text"
+            size="small"
+            @click="handleOpenDispatchJobTimerModal($event, record)"
+          >
+            {{ $t('operations.dispatch') }}
+          </a-button>
+        </template>
+      </a-table>
+    </a-card>
+    <a-modal
+      v-model:visible="daemonJobModalVisible"
+      title-align="start"
+      style="width: auto"
+      :draggable="true"
+      :ok-text="$t('form.save')"
+      width="50%"
+      @before-ok="handleSubmitJobTimer"
+      @cancel="handleCancel"
+    >
+      <template #title> {{ $t('job.saveTimer') }}</template>
+      <a-space direction="vertical" size="large" :style="{ width: '500px' }">
+        <a-form
+          ref="saveDaemonJobRef"
+          :rules="jobTimerFormValidateRules"
+          :model="daemonJobForm"
+          :auto-label-width="true"
+        >
+          <a-form-item
+            field="name"
+            required
+            validate-trigger="blur"
+            :label="$t('job.daemon.name')"
+          >
+            <a-input v-model="daemonJobForm.name" />
+          </a-form-item>
+          <a-form-item field="info" :label="$t('job.daemon.info')">
+            <a-textarea v-model="daemonJobForm.info" />
+          </a-form-item>
+
+          <a-form-item field="eid" :label="$t('job')">
+            <SelectJob
+              v-if="daemonJobModalVisible"
+              v-model:eid="daemonJobForm.eid"
+              job-type="default"
+            />
+          </a-form-item>
+        </a-form>
+      </a-space>
+    </a-modal>
+    <a-modal
+      v-model:visible="dispatchDaemonJobModalVisible"
+      title-align="start"
+      :draggable="true"
+      :ok-text="$t('job.dispatch')"
+      width="60%"
+      @before-ok="handleDispatchJobTimer"
+      @cancel="handleCancel"
+    >
+      <template #title> {{ $t('job.schedule') }}</template>
+      <a-form
+        ref="dispatchDaemonJobRef"
+        :model="dispatchDaemonJobForm"
+        :rules="dispatchDaemonJobFormValidateRules"
+        :auto-label-width="true"
+      >
+        <a-form-item
+          field="schedule_name"
+          validate-trigger="blur"
+          :label="$t('job.schedule.name')"
+        >
+          <a-input v-model="dispatchDaemonJobForm.schedule_name" />
+        </a-form-item>
+
+        <a-form-item field="eid" :disabled="true" :label="$t('job.selectJob')">
+          <SelectJob
+            v-if="dispatchDaemonJobModalVisible"
+            v-model:eid="dispatchDaemonJobForm.eid"
+            v-model:job-type="dispatchDaemonJobForm.job_type"
+          />
+        </a-form-item>
+        <a-form-item
+          field="endpoints"
+          validate-trigger="blur"
+          :label="$t('job.endpoint')"
+        >
+          <SelectInstance
+            v-if="dispatchDaemonJobModalVisible"
+            v-model="dispatchDaemonJobForm.endpoints"
+          />
+        </a-form-item>
+      </a-form>
+    </a-modal>
+  </div>
+</template>
+
+<script lang="ts" setup>
+  import {
+    dispatchJob,
+    endpoint,
+    JobAction,
+    JobTimerRecord,
+    QueryJobReq,
+    queryJobSupervisorList,
+    QueryJobSupervisorReq,
+    queryJobTimerList,
+    saveJobTimer,
+    ScheduleType,
+    TimerExpr,
+  } from '@/api/job';
+  import useLoading from '@/hooks/loading';
+  import { Pagination } from '@/types/global';
+  import type { SelectOptionData } from '@arco-design/web-vue/es/select/interface';
+  import type { TableColumnData } from '@arco-design/web-vue/es/table/interface';
+  import cloneDeep from 'lodash/cloneDeep';
+  import Sortable from 'sortablejs';
+  import { computed, nextTick, reactive, ref, toRefs, watch } from 'vue';
+  import { useI18n } from 'vue-i18n';
+
+  import { Message } from '@arco-design/web-vue';
+
+  import { useRouter } from 'vue-router';
+
+  import SelectInstance from '../components/select-instance.vue';
+  import SelectJob from '../components/select-job.vue';
+
+  type SizeProps = 'mini' | 'small' | 'medium' | 'large';
+  type Column = TableColumnData & { checked?: true };
+  const daemonJobModalVisible = ref(false);
+  const dispatchDaemonJobModalVisible = ref(false);
+  const saveDaemonJobRef = ref();
+  const dispatchDaemonJobRef = ref();
+  const router = useRouter();
+
+  interface DaemonJobForm {
+    id: number;
+    name: string;
+    eid: string;
+    executor_id: number;
+    info: string;
+  }
+
+  interface DispatchDaemonJobForm {
+    eid: string;
+    job_type: string;
+    schedule_name: string;
+    namespace: string;
+    restat_interval: number;
+    schedule_type: string;
+    action: string;
+    endpoints: endpoint[];
+  }
+
+  const generateFormModel = () => {
+    return {
+      name: '',
+      updated_time_range: [],
+    };
+  };
+  const { loading, setLoading } = useLoading(true);
+  const { t } = useI18n();
+  const renderData = ref<JobTimerRecord[]>([]);
+  const formModel = ref(generateFormModel());
+  const cloneColumns = ref<Column[]>([]);
+  const showColumns = ref<Column[]>([]);
+  const jobOptions = ref<SelectOptionData[]>([]);
+
+  const state = reactive<{
+    daemonJobForm: DaemonJobForm;
+    dispatchDaemonJobForm: DispatchDaemonJobForm;
+  }>({
+    daemonJobForm: {
+      id: 0,
+      name: '',
+      executor_id: 0,
+      eid: '',
+      info: '',
+    },
+    dispatchDaemonJobForm: {
+      eid: '',
+      schedule_name: '',
+      namespace: 'default',
+      job_type: 'default',
+      schedule_type: 'daemon',
+      action: 'exec',
+      endpoints: [],
+      restat_interval: 0,
+    },
+  });
+  const { daemonJobForm, dispatchDaemonJobForm } = toRefs(state);
+
+  const size = ref<SizeProps>('medium');
+
+  const basePagination: Pagination = {
+    page: 1,
+    pageSize: 20,
+  };
+
+  const execuotrs: { [key: string]: string } = {
+    '1': 'bash',
+    '2': 'python',
+  };
+
+  const pagination = reactive({
+    ...basePagination,
+  });
+  const densityList = computed(() => [
+    {
+      name: t('columns.size.mini'),
+      value: 'mini',
+    },
+    {
+      name: t('columns.size.small'),
+      value: 'small',
+    },
+    {
+      name: t('columns.size.medium'),
+      value: 'medium',
+    },
+    {
+      name: t('columns.size.large'),
+      value: 'large',
+    },
+  ]);
+  const columns = computed<TableColumnData[]>(() => [
+    {
+      title: t('columns.index'),
+      dataIndex: 'index',
+      slotName: 'index',
+    },
+    {
+      title: t('job.eid'),
+      dataIndex: 'eid',
+    },
+    {
+      title: t('job.timer.name'),
+      dataIndex: 'name',
+    },
+    {
+      title: t('job.type'),
+      dataIndex: 'job_type',
+    },
+    {
+      title: t('job.executor'),
+      dataIndex: 'executor_id',
+      slotName: 'executor',
+    },
+    {
+      title: t('columns.updatedTime'),
+      dataIndex: 'updated_time',
+    },
+    {
+      title: t('columns.updatedUser'),
+      dataIndex: 'updated_user',
+    },
+    {
+      title: t('operations'),
+      dataIndex: 'operations',
+      slotName: 'operations',
+    },
+  ]);
+
+  const jobTimerFormValidateRules = {
+    name: {
+      required: true,
+    },
+  };
+  const dispatchDaemonJobFormValidateRules = {
+    schedule_name: {
+      required: true,
+    },
+    endpoints: {
+      required: true,
+    },
+  };
+
+  const fetchData = async (
+    params: QueryJobSupervisorReq = {
+      page: basePagination.page,
+      page_size: basePagination.pageSize,
+    }
+  ) => {
+    setLoading(true);
+    try {
+      const { data } = await queryJobSupervisorList(params);
+
+      renderData.value = data.list;
+      pagination.page = params.page;
+      pagination.total = data.total;
+      jobOptions.value = data.list.map((v) => {
+        return {
+          label: v.name,
+          value: v.eid,
+        };
+      });
+    } catch (err) {
+      // you can report use errorHandler or other
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleOpenDeamonJobModal = (e: any, record: any) => {
+    saveDaemonJobRef.value.clearValidate();
+    if (record) {
+      daemonJobForm.value = { ...record };
+    } else {
+      daemonJobForm.value = {
+        id: 0,
+        name: '',
+        eid: '',
+        executor_id: 1,
+        info: '',
+      };
+    }
+    daemonJobModalVisible.value = true;
+  };
+
+  const handleOpenDispatchJobTimerModal = (e: any, record: any) => {
+    dispatchDaemonJobRef.value.clearValidate();
+    dispatchDaemonJobForm.value = {
+      ...record,
+      ip: [],
+      job_type: 'default',
+      action: 'start_supervising',
+      schedule_type: 'timer',
+    };
+    dispatchDaemonJobModalVisible.value = true;
+  };
+
+  const handleSubmitJobTimer = async () => {
+    const ret = await saveDaemonJobRef.value.validate();
+    if (ret) {
+      return false;
+    }
+    try {
+      const data = { ...daemonJobForm.value };
+      await saveJobTimer({
+        ...data,
+      });
+      Message.success(t('form.submit.success'));
+    } catch (err) {
+      return false;
+    }
+
+    search();
+    return true;
+  };
+
+  const handleDispatchJobTimer = async () => {
+    const ret = await dispatchDaemonJobRef.value.validate();
+    if (ret) {
+      return false;
+    }
+    try {
+      await dispatchJob({
+        schedule_type: dispatchDaemonJobForm.value
+          .schedule_type as ScheduleType,
+        eid: dispatchDaemonJobForm.value.eid,
+        schedule_name: dispatchDaemonJobForm.value.schedule_name,
+        action: dispatchDaemonJobForm.value.action as JobAction,
+        is_sync: false,
+        endpoints: dispatchDaemonJobForm.value.endpoints,
+      });
+    } catch (err) {
+      return false;
+    }
+
+    Message.success(t('form.submit.success'));
+
+    router.push('/run-status/run-list');
+    return true;
+  };
+
+  const handleCancel = () => {
+    daemonJobModalVisible.value = false;
+  };
+
+  const search = () => {
+    fetchData({
+      page: basePagination.page,
+      page_size: basePagination.pageSize,
+      ...formModel.value,
+    } as unknown as QueryJobReq);
+  };
+  const onPageChange = (current: number) => {
+    fetchData({
+      page_size: pagination.pageSize,
+      page: current,
+      ...formModel.value,
+    });
+  };
+
+  fetchData();
+  const reset = () => {
+    formModel.value = generateFormModel();
+  };
+
+  const handleSelectDensity = (
+    val: string | number | Record<string, any> | undefined,
+    e: Event
+  ) => {
+    size.value = val as SizeProps;
+  };
+
+  const handleChange = (
+    checked: boolean | (string | boolean | number)[],
+    column: Column,
+    index: number
+  ) => {
+    if (!checked) {
+      cloneColumns.value = showColumns.value.filter(
+        (item) => item.dataIndex !== column.dataIndex
+      );
+    } else {
+      cloneColumns.value.splice(index, 0, column);
+    }
+  };
+
+  const exchangeArray = <T extends Array<any>>(
+    array: T,
+    beforeIdx: number,
+    newIdx: number,
+    isDeep = false
+  ): T => {
+    const newArray = isDeep ? cloneDeep(array) : array;
+    if (beforeIdx > -1 && newIdx > -1) {
+      // 先替换后面的，然后拿到替换的结果替换前面的
+      newArray.splice(
+        beforeIdx,
+        1,
+        newArray.splice(newIdx, 1, newArray[beforeIdx]).pop()
+      );
+    }
+    return newArray;
+  };
+
+  const popupVisibleChange = (val: boolean) => {
+    if (val) {
+      nextTick(() => {
+        const el = document.getElementById('tableSetting') as HTMLElement;
+        const sortable = new Sortable(el, {
+          onEnd(e: any) {
+            const { oldIndex, newIndex } = e;
+            exchangeArray(cloneColumns.value, oldIndex, newIndex);
+            exchangeArray(showColumns.value, oldIndex, newIndex);
+          },
+        });
+      });
+    }
+  };
+
+  watch(
+    () => columns.value,
+    (val) => {
+      cloneColumns.value = cloneDeep(val);
+      cloneColumns.value.forEach((item, index) => {
+        item.checked = true;
+      });
+      showColumns.value = cloneDeep(cloneColumns.value);
+    },
+    { deep: true, immediate: true }
+  );
+</script>
+
+<script lang="ts">
+  export default {
+    name: 'JobList',
+  };
+</script>
+
+<style scoped lang="less">
+  .container {
+    padding: 0 20px 20px 20px;
+  }
+
+  :deep(.arco-table-th) {
+    &:last-child {
+      .arco-table-th-item-title {
+        margin-left: 16px;
+      }
+    }
+  }
+
+  .action-icon {
+    margin-left: 12px;
+    cursor: pointer;
+  }
+
+  .active {
+    color: #0960bd;
+    background-color: #e3f4fc;
+  }
+
+  .setting {
+    display: flex;
+    align-items: center;
+    width: 200px;
+
+    .title {
+      margin-left: 12px;
+      cursor: pointer;
+    }
+  }
+</style>

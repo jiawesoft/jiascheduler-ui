@@ -43,9 +43,10 @@ const localeExecutor = {
 };
 
 const localeJob = {
-  'menu.repository.jobList': '作业列表',
+  'menu.repository.jobList': '作业',
   'menu.repository.jobTimer': '定时器',
   'menu.repository.jobBundleScript': '批任务',
+  'menu.repository.daemonJob': '常驻任务',
   'menu.runStatus.runList': '运行列表',
   'menu.runStatus.scheduleList': '调度记录',
   'menu.runStatus.execList': '执行记录',
@@ -89,6 +90,10 @@ const localeJob = {
   'job.timer.info': '简介',
   'job.timer.name': '名称',
   'job.timer.name.placeholder': '请输入名称',
+
+  'job.daemon.name': '名称',
+  'job.daemon.name.placeholder': '请输入常驻任务名称',
+  'job.daemon.info': '描述',
 
   'jobBundleScript.name': '名称',
   'jobBundleScript.validator.eid.required': '请选择批任务',
@@ -271,6 +276,7 @@ export default {
 
   'columns.index': '#',
   'columns.sn': '序号',
+  'columns.name': '名称',
   // size
   'columns.size.mini': '迷你',
   'columns.size.small': '偏小',

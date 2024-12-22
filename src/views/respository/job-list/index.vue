@@ -774,7 +774,6 @@
         schedule_type: dispatchJobForm.value.schedule_type as ScheduleType,
         eid: dispatchJobForm.value.eid,
         schedule_name: dispatchJobForm.value.schedule_name,
-        namespace: 'default',
         action: dispatchJobForm.value.action as JobAction,
         is_sync: false,
         endpoints: dispatchJobForm.value.endpoints,

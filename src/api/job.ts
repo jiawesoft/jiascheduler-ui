@@ -48,8 +48,15 @@ export function saveJob(data: SaveJobReq) {
   return axios.post<SaveJobResp>('/api/job/save', data);
 }
 
-export type ScheduleType = 'once' | 'timer' | 'flow';
-export type JobAction = 'exec' | 'kill' | 'start_schedule' | 'stop_schedule';
+export type ScheduleType = 'once' | 'timer' | 'flow' | 'daemon';
+export type JobAction =
+  | 'exec'
+  | 'kill'
+  | 'start_timer'
+  | 'stop_timer'
+  | 'start_supervising'
+  | 'stop_supervising'
+  | 'start_supervising';
 
 export interface TimerExpr {
   second: string;
@@ -68,7 +75,6 @@ export interface endpoint {
 export interface DispatchJobReq {
   eid: string;
   schedule_name: string;
-  namespace: 'default';
   schedule_type: ScheduleType;
   timer_expr?: TimerExpr;
   action: JobAction;
@@ -323,4 +329,54 @@ type RedispatchJobResp = DispatchJobResult[];
 
 export function redispatchJob(req: RedispatchJobReq) {
   return axios.post<RedispatchJobResp>('/api/job/redispatch', req);
+}
+
+export interface JobSupervisorRecord {
+  id?: number;
+  name: string;
+  code: string;
+  eid: string;
+  info: string;
+  restart_interval: string;
+  executor_id: number;
+  executor_name: string;
+  executor_platform: string;
+}
+
+export interface QueryJobSupervisorReq extends Partial<JobSupervisorRecord> {
+  page: number;
+  page_size: number;
+}
+
+export interface QueryJobSupervisorListResp {
+  list: JobSupervisorRecord[];
+  total: number;
+}
+
+export function queryJobSupervisorList(params: QueryJobTimerReq) {
+  return axios.get<QueryJobTimerListResp>('/api/job/supervisor-list', {
+    params,
+    paramsSerializer: (obj) => {
+      return qs.stringify(obj);
+    },
+  });
+}
+
+export interface SaveSupervisorReq {
+  id?: number;
+  name: string;
+  eid: string;
+  info: string;
+  restart_interval: number;
+}
+
+export interface SaveDaemonJobTimerResp {
+  ret: number;
+}
+
+export function saveJobSupervisor(data: SaveSupervisorReq) {
+  if (data?.id === 0) {
+    delete data.id;
+  }
+  return axios.post<SaveSupervisorReq>('/api/job/save-supervisor', data);
 }

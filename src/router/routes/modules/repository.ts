@@ -44,6 +44,17 @@ const REPOSITORY: AppRouteRecordRaw = {
       },
     },
     {
+      path: 'daemon-job-list',
+      name: 'daemonJobList',
+      component: () => import('@/views/respository/daemon-job-list/index.vue'),
+      meta: {
+        locale: 'menu.repository.daemonJob',
+        requiresAuth: true,
+        roles: ['*'],
+      },
+    },
+
+    {
       path: 'job-bundle-script-list', // The midline path complies with SEO specifications
       name: 'jobBundleScriptList',
       component: () =>

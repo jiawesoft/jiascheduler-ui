@@ -45,6 +45,7 @@ const localeJob = {
   'menu.repository.jobList': 'Job List',
   'menu.repository.jobTimer': 'Timer',
   'menu.repository.jobBundleScript': 'Batch Task',
+  'menu.repository.daemonJob': 'Daemon Job',
   'menu.runStatus.runList': 'Run List',
   'menu.runStatus.scheduleList': 'Schedule List',
   'menu.runStatus.execList': 'Execution List',
@@ -278,6 +279,7 @@ export default {
 
   'columns.index': '#',
   'columns.sn': 'Sequence Number',
+  'columns.name': 'Name',
   // size
   'columns.size.mini': 'Mini',
   'columns.size.small': 'Small',
