@@ -35,6 +35,40 @@
       </a-col>
     </a-row>
 
+    <a-row :gutter="16">
+      <a-col :span="8">
+        <a-form-item field="schedule_type" :label="$t('job.scheduleType')">
+          <a-input :default-value="$props.value.schedule_type" />
+        </a-form-item>
+      </a-col>
+      <a-col v-if="$props.value.job_type === 'default'" :span="8">
+        <a-form-item field="executor_id" :label="$t('job.executor')">
+          <select-executor v-model="$props.value.executor_id" />
+        </a-form-item>
+      </a-col>
+      <a-col v-if="$props.value.schedule_type == 'timer'" :span="8">
+        <a-form-item field="timer_expr" :label="$t('job.timer')">
+          <a-input
+            :default-value="$props.value.dispatch_data.params.timer_expr"
+          />
+        </a-form-item>
+      </a-col>
+      <a-col v-if="$props.value.schedule_type == 'daemon'" :span="8">
+        <a-form-item
+          field="restart_interval"
+          :label="$t('job.daemon.restartInterval')"
+          :tooltip="$t('job.daemon.restartInterval.tips')"
+        >
+          <a-input-number
+            mode="button"
+            :default-value="
+              $props.value.dispatch_data.params.restart_interval ?? 0
+            "
+          />
+        </a-form-item>
+      </a-col>
+    </a-row>
+
     <template v-if="$props.value.job_type === 'bundle'">
       <a-form-item
         v-for="(val, index) in $props.value.bundle_script"
@@ -56,9 +90,6 @@
     </template>
 
     <template v-else-if="$props.value.job_type === 'default'">
-      <a-form-item field="executor_id" :label="$t('job.executor')">
-        <select-executor v-model="$props.value.executor_id" />
-      </a-form-item>
       <a-form-item field="code" :label="$t('job.code')">
         <v-ace-editor
           v-model:value="$props.value.code"
@@ -73,6 +104,10 @@
         field="upload_file"
         :label="$t('job.upload_file')"
         :tooltip="$t('job.upload_file.tooltip')"
+        v-if="
+          $props.value.schedule_type == 'job' ||
+          $props.value.schedule_type == 'timer'
+        "
       >
         <a-space direction="vertical" :style="{ width: '100%' }">
           <a-upload
@@ -98,6 +133,9 @@
   import { useAppStore } from '@/store';
   import { VAceEditor } from 'vue3-ace-editor';
   import 'ace-builds/src-noconflict/mode-text';
+  import 'ace-builds/src-noconflict/mode-python';
+  import 'ace-builds/src-noconflict/mode-sh';
+  import 'ace-builds/src-noconflict/mode-powershell';
   import 'ace-builds/src-noconflict/theme-chrome';
   import 'ace-builds/src-noconflict/theme-chaos';
 
@@ -107,10 +145,12 @@
 
   export interface JobProps {
     id?: number;
+    schedule_type: string;
     name: string;
     code: string;
     eid: string;
     executor_id: number;
+    dispatch_data: any;
     args?: { [key: string]: string };
     info?: string;
     work_user: string;

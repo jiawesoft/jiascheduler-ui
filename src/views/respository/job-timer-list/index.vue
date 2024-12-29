@@ -296,8 +296,8 @@
           <a-input v-model="dispatchJobTimerForm.schedule_name" />
         </a-form-item>
 
-        <a-form-item field="eid" :disabled="true" :label="$t('job.selectJob')">
-          <SelectJob
+        <a-form-item field="eid" :disabled="true" :label="$t('job.timer')">
+          <SelectJobTimer
             v-if="dispatchJobTimerModalVisible"
             v-model:eid="dispatchJobTimerForm.eid"
             v-model:job-type="dispatchJobTimerForm.job_type"
@@ -345,6 +345,7 @@
 
   import SelectInstance from '../components/select-instance.vue';
   import SelectJob from '../components/select-job.vue';
+  import SelectJobTimer from '../components/select-job-timer.vue';
 
   type SizeProps = 'mini' | 'small' | 'medium' | 'large';
   type Column = TableColumnData & { checked?: true };
@@ -599,7 +600,6 @@
         eid: dispatchJobTimerForm.value.eid,
         schedule_name: dispatchJobTimerForm.value.schedule_name,
         timer_expr: dispatchJobTimerForm.value.timer_expr,
-        namespace: 'default',
         action: dispatchJobTimerForm.value.action as JobAction,
         is_sync: false,
         endpoints: dispatchJobTimerForm.value.endpoints,

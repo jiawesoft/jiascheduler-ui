@@ -159,7 +159,7 @@
           <a-button
             type="text"
             size="small"
-            @click="handleOpenDispatchJobTimerModal($event, record)"
+            @click="handleOpenDispatchJobSupervisorModal($event, record)"
           >
             {{ $t('operations.dispatch') }}
           </a-button>
@@ -167,59 +167,67 @@
       </a-table>
     </a-card>
     <a-modal
-      v-model:visible="daemonJobModalVisible"
+      v-model:visible="jobSupervisorModalVisible"
       title-align="start"
-      style="width: auto"
       :draggable="true"
       :ok-text="$t('form.save')"
-      width="50%"
-      @before-ok="handleSubmitJobTimer"
+      @before-ok="handleSubmitJobSupervisor"
       @cancel="handleCancel"
     >
       <template #title> {{ $t('job.saveTimer') }}</template>
-      <a-space direction="vertical" size="large" :style="{ width: '500px' }">
-        <a-form
-          ref="saveDaemonJobRef"
-          :rules="jobTimerFormValidateRules"
-          :model="daemonJobForm"
-          :auto-label-width="true"
+      <a-form
+        ref="saveJobSupervisorRef"
+        :rules="jobSupervisorFormValidateRules"
+        :model="jobSupervisorForm"
+        :auto-label-width="true"
+      >
+        <a-form-item
+          field="name"
+          required
+          validate-trigger="blur"
+          :label="$t('job.daemon.name')"
         >
-          <a-form-item
-            field="name"
-            required
-            validate-trigger="blur"
-            :label="$t('job.daemon.name')"
-          >
-            <a-input v-model="daemonJobForm.name" />
-          </a-form-item>
-          <a-form-item field="info" :label="$t('job.daemon.info')">
-            <a-textarea v-model="daemonJobForm.info" />
-          </a-form-item>
+          <a-input v-model="jobSupervisorForm.name" />
+        </a-form-item>
+        <a-form-item field="info" :label="$t('job.daemon.info')">
+          <a-textarea v-model="jobSupervisorForm.info" />
+        </a-form-item>
 
-          <a-form-item field="eid" :label="$t('job')">
-            <SelectJob
-              v-if="daemonJobModalVisible"
-              v-model:eid="daemonJobForm.eid"
-              job-type="default"
-            />
-          </a-form-item>
-        </a-form>
-      </a-space>
+        <a-form-item
+          field="restart_interval"
+          :label="$t('job.daemon.restartInterval')"
+          :tooltip="$t('job.daemon.restartInterval.tips')"
+        >
+          <a-input-number
+            placeholder="Please Enter"
+            mode="button"
+            size="large"
+            v-model="jobSupervisorForm.restart_interval"
+          />
+        </a-form-item>
+        <a-form-item field="eid" :label="$t('job')">
+          <select-job-supervisor
+            v-if="jobSupervisorModalVisible"
+            v-model:eid="jobSupervisorForm.eid"
+            job-type="default"
+          />
+        </a-form-item>
+      </a-form>
     </a-modal>
     <a-modal
-      v-model:visible="dispatchDaemonJobModalVisible"
+      v-model:visible="dispatchJobSupervisorModalVisible"
       title-align="start"
       :draggable="true"
       :ok-text="$t('job.dispatch')"
       width="60%"
-      @before-ok="handleDispatchJobTimer"
+      @before-ok="handleDispatchJobSupervisor"
       @cancel="handleCancel"
     >
       <template #title> {{ $t('job.schedule') }}</template>
       <a-form
-        ref="dispatchDaemonJobRef"
-        :model="dispatchDaemonJobForm"
-        :rules="dispatchDaemonJobFormValidateRules"
+        ref="dispatchJobSupervisorRef"
+        :model="dispatchJobSupervisorForm"
+        :rules="dispatchJobSupervisorFormValidateRules"
         :auto-label-width="true"
       >
         <a-form-item
@@ -227,14 +235,14 @@
           validate-trigger="blur"
           :label="$t('job.schedule.name')"
         >
-          <a-input v-model="dispatchDaemonJobForm.schedule_name" />
+          <a-input v-model="dispatchJobSupervisorForm.schedule_name" />
         </a-form-item>
 
-        <a-form-item field="eid" :disabled="true" :label="$t('job.selectJob')">
-          <SelectJob
-            v-if="dispatchDaemonJobModalVisible"
-            v-model:eid="dispatchDaemonJobForm.eid"
-            v-model:job-type="dispatchDaemonJobForm.job_type"
+        <a-form-item field="eid" :disabled="true" :label="$t('job.daemon')">
+          <SelectJobSupervisor
+            v-if="dispatchJobSupervisorModalVisible"
+            v-model:eid="dispatchJobSupervisorForm.eid"
+            v-model:job-type="dispatchJobSupervisorForm.job_type"
           />
         </a-form-item>
         <a-form-item
@@ -243,8 +251,8 @@
           :label="$t('job.endpoint')"
         >
           <SelectInstance
-            v-if="dispatchDaemonJobModalVisible"
-            v-model="dispatchDaemonJobForm.endpoints"
+            v-if="dispatchJobSupervisorModalVisible"
+            v-model="dispatchJobSupervisorForm.endpoints"
           />
         </a-form-item>
       </a-form>
@@ -257,14 +265,12 @@
     dispatchJob,
     endpoint,
     JobAction,
-    JobTimerRecord,
+    JobSupervisorRecord,
     QueryJobReq,
     queryJobSupervisorList,
     QueryJobSupervisorReq,
-    queryJobTimerList,
-    saveJobTimer,
+    saveJobSupervisor,
     ScheduleType,
-    TimerExpr,
   } from '@/api/job';
   import useLoading from '@/hooks/loading';
   import { Pagination } from '@/types/global';
@@ -280,25 +286,26 @@
   import { useRouter } from 'vue-router';
 
   import SelectInstance from '../components/select-instance.vue';
-  import SelectJob from '../components/select-job.vue';
+  import SelectJobSupervisor from '../components/select-job-supervisor.vue';
 
   type SizeProps = 'mini' | 'small' | 'medium' | 'large';
   type Column = TableColumnData & { checked?: true };
-  const daemonJobModalVisible = ref(false);
-  const dispatchDaemonJobModalVisible = ref(false);
-  const saveDaemonJobRef = ref();
-  const dispatchDaemonJobRef = ref();
+  const jobSupervisorModalVisible = ref(false);
+  const dispatchJobSupervisorModalVisible = ref(false);
+  const saveJobSupervisorRef = ref();
+  const dispatchJobSupervisorRef = ref();
   const router = useRouter();
 
-  interface DaemonJobForm {
+  interface JobSupervisorForm {
     id: number;
     name: string;
     eid: string;
     executor_id: number;
     info: string;
+    restart_interval: number;
   }
 
-  interface DispatchDaemonJobForm {
+  interface DispatchJobSupervisorForm {
     eid: string;
     job_type: string;
     schedule_name: string;
@@ -317,24 +324,25 @@
   };
   const { loading, setLoading } = useLoading(true);
   const { t } = useI18n();
-  const renderData = ref<JobTimerRecord[]>([]);
+  const renderData = ref<JobSupervisorRecord[]>([]);
   const formModel = ref(generateFormModel());
   const cloneColumns = ref<Column[]>([]);
   const showColumns = ref<Column[]>([]);
   const jobOptions = ref<SelectOptionData[]>([]);
 
   const state = reactive<{
-    daemonJobForm: DaemonJobForm;
-    dispatchDaemonJobForm: DispatchDaemonJobForm;
+    jobSupervisorForm: JobSupervisorForm;
+    dispatchJobSupervisorForm: DispatchJobSupervisorForm;
   }>({
-    daemonJobForm: {
+    jobSupervisorForm: {
       id: 0,
       name: '',
       executor_id: 0,
       eid: '',
+      restart_interval: 1,
       info: '',
     },
-    dispatchDaemonJobForm: {
+    dispatchJobSupervisorForm: {
       eid: '',
       schedule_name: '',
       namespace: 'default',
@@ -345,7 +353,7 @@
       restat_interval: 0,
     },
   });
-  const { daemonJobForm, dispatchDaemonJobForm } = toRefs(state);
+  const { jobSupervisorForm, dispatchJobSupervisorForm } = toRefs(state);
 
   const size = ref<SizeProps>('medium');
 
@@ -395,10 +403,6 @@
       dataIndex: 'name',
     },
     {
-      title: t('job.type'),
-      dataIndex: 'job_type',
-    },
-    {
       title: t('job.executor'),
       dataIndex: 'executor_id',
       slotName: 'executor',
@@ -418,12 +422,12 @@
     },
   ]);
 
-  const jobTimerFormValidateRules = {
+  const jobSupervisorFormValidateRules = {
     name: {
       required: true,
     },
   };
-  const dispatchDaemonJobFormValidateRules = {
+  const dispatchJobSupervisorFormValidateRules = {
     schedule_name: {
       required: true,
     },
@@ -459,41 +463,42 @@
   };
 
   const handleOpenDeamonJobModal = (e: any, record: any) => {
-    saveDaemonJobRef.value.clearValidate();
+    saveJobSupervisorRef.value.clearValidate();
     if (record) {
-      daemonJobForm.value = { ...record };
+      jobSupervisorForm.value = { ...record };
     } else {
-      daemonJobForm.value = {
+      jobSupervisorForm.value = {
         id: 0,
         name: '',
         eid: '',
         executor_id: 1,
+        restart_interval: 1,
         info: '',
       };
     }
-    daemonJobModalVisible.value = true;
+    jobSupervisorModalVisible.value = true;
   };
 
-  const handleOpenDispatchJobTimerModal = (e: any, record: any) => {
-    dispatchDaemonJobRef.value.clearValidate();
-    dispatchDaemonJobForm.value = {
+  const handleOpenDispatchJobSupervisorModal = (e: any, record: any) => {
+    dispatchJobSupervisorRef.value.clearValidate();
+    dispatchJobSupervisorForm.value = {
       ...record,
       ip: [],
       job_type: 'default',
       action: 'start_supervising',
-      schedule_type: 'timer',
+      schedule_type: 'daemon',
     };
-    dispatchDaemonJobModalVisible.value = true;
+    dispatchJobSupervisorModalVisible.value = true;
   };
 
-  const handleSubmitJobTimer = async () => {
-    const ret = await saveDaemonJobRef.value.validate();
+  const handleSubmitJobSupervisor = async () => {
+    const ret = await saveJobSupervisorRef.value.validate();
     if (ret) {
       return false;
     }
     try {
-      const data = { ...daemonJobForm.value };
-      await saveJobTimer({
+      const data = { ...jobSupervisorForm.value };
+      await saveJobSupervisor({
         ...data,
       });
       Message.success(t('form.submit.success'));
@@ -505,20 +510,20 @@
     return true;
   };
 
-  const handleDispatchJobTimer = async () => {
-    const ret = await dispatchDaemonJobRef.value.validate();
+  const handleDispatchJobSupervisor = async () => {
+    const ret = await dispatchJobSupervisorRef.value.validate();
     if (ret) {
       return false;
     }
     try {
       await dispatchJob({
-        schedule_type: dispatchDaemonJobForm.value
+        schedule_type: dispatchJobSupervisorForm.value
           .schedule_type as ScheduleType,
-        eid: dispatchDaemonJobForm.value.eid,
-        schedule_name: dispatchDaemonJobForm.value.schedule_name,
-        action: dispatchDaemonJobForm.value.action as JobAction,
+        eid: dispatchJobSupervisorForm.value.eid,
+        schedule_name: dispatchJobSupervisorForm.value.schedule_name,
+        action: dispatchJobSupervisorForm.value.action as JobAction,
         is_sync: false,
-        endpoints: dispatchDaemonJobForm.value.endpoints,
+        endpoints: dispatchJobSupervisorForm.value.endpoints,
       });
     } catch (err) {
       return false;
@@ -531,7 +536,7 @@
   };
 
   const handleCancel = () => {
-    daemonJobModalVisible.value = false;
+    jobSupervisorModalVisible.value = false;
   };
 
   const search = () => {

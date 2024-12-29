@@ -212,7 +212,7 @@ export function queryExecList(params: QueryExecListReq) {
 }
 
 export interface JobActionReq {
-  action: 'StartTimer' | 'StopTimer' | 'Exec' | 'Stop';
+  action: JobAction;
   instance_id: string;
   schedule_id: string;
 }
@@ -353,8 +353,8 @@ export interface QueryJobSupervisorListResp {
   total: number;
 }
 
-export function queryJobSupervisorList(params: QueryJobTimerReq) {
-  return axios.get<QueryJobTimerListResp>('/api/job/supervisor-list', {
+export function queryJobSupervisorList(params: QueryJobSupervisorReq) {
+  return axios.get<QueryJobSupervisorListResp>('/api/job/supervisor-list', {
     params,
     paramsSerializer: (obj) => {
       return qs.stringify(obj);

@@ -67,6 +67,7 @@
   import 'ace-builds/src-noconflict/theme-chrome';
   import 'ace-builds/src-noconflict/mode-python';
   import 'ace-builds/src-noconflict/mode-sh';
+  import 'ace-builds/src-noconflict/mode-powershell';
   import 'ace-builds/src-noconflict/theme-chaos';
   import { TableColumnData } from '@arco-design/web-vue';
   import { computed, ref } from 'vue';

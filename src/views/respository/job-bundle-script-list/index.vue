@@ -235,6 +235,7 @@
   import { Message } from '@arco-design/web-vue';
   import 'ace-builds/src-noconflict/mode-python';
   import 'ace-builds/src-noconflict/mode-sh';
+  import 'ace-builds/src-noconflict/mode-powershell';
   import 'ace-builds/src-noconflict/theme-chrome';
   import 'ace-builds/src-noconflict/theme-chaos';
 

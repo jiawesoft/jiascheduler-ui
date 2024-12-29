@@ -84,13 +84,23 @@ const localeJob = {
     'The script process will be automatically killed after the timeout, in seconds',
   'job.displayOnDashboard': 'Display on the dashboard',
 
+  'job.timer': 'Timer',
   'job.saveTimer': 'Save Timer',
   'job.timerExpr': 'Timer Expression',
   'job.timerExpr.tooltips':
-    'The time is in UTC by default, not your local time zone. Please note that the year can be omitted. Comma-separated values (like 5,8,10) represent multiple time values. For example, a schedule of 0 2,14,26 * * * will execute at the 0th, 2nd, 14th, and 26th minutes of every hour.\nRanges can be specified with hyphens. A schedule of 0 0 * 5-10 * * will execute once an hour, but only on the 5th to 10th days of the month.\nThe day of the week can be specified as an abbreviation or full name. A schedule of 0 0 6 * * Sun,Sat will execute at 6 am on Sundays and Saturdays.',
+    'Please note that the year can be omitted. Comma-separated values (like 5,8,10) represent multiple time values. For example, a schedule of 0 2,14,26 * * * will execute at the 0th, 2nd, 14th, and 26th minutes of every hour.\nRanges can be specified with hyphens. A schedule of 0 0 * 5-10 * * will execute once an hour, but only on the 5th to 10th days of the month.\nThe day of the week can be specified as an abbreviation or full name. A schedule of 0 0 6 * * Sun,Sat will execute at 6 am on Sundays and Saturdays.',
   'job.timer.info': 'Description',
   'job.timer.name': 'Name',
   'job.timer.name.placeholder': 'Please enter a name',
+
+  'job.daemon': 'Daemon Job',
+  'job.daemon.name': 'Name',
+  'job.daemon.name.placeholder': 'Place enter a name of daemon job',
+  'job.daemon.info': 'Description',
+  'job.daemon.restartInterval': 'Restart Interval',
+  'job.daemon.restartInterval.placeholder': 'Please enter the restart interval',
+  'job.daemon.restartInterval.tips':
+    'Restart interval after failure, in seconds',
 
   'jobBundleScript.name': 'Name',
   'jobBundleScript.validator.eid.required': 'Please select a batch task',
@@ -313,6 +323,8 @@ export default {
   'operations.stop': 'Stop',
   'operations.startTimer': 'Start Timer',
   'operations.stopTimer': 'Stop Timer',
+  'operations.startSupervising': 'Start Supervising',
+  'operations.stopSupervising': 'Stop Supervising',
   'operations.update': 'Update',
   'operations.granted': 'Grant',
   'operations.delete': 'Delete',

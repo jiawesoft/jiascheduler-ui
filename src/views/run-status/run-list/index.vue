@@ -11,12 +11,6 @@
   import RunList from '../components/run-list.vue';
 </script>
 
-<script lang="ts">
-  export default {
-    name: 'RunList',
-  };
-</script>
-
 <style scoped lang="less">
   .container {
     padding: 0 20px 20px 20px;
