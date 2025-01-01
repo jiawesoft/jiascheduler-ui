@@ -476,6 +476,14 @@
       dataIndex: 'name',
     },
     {
+      title: t('job'),
+      dataIndex: 'job_name',
+    },
+    {
+      title: t('job.timer.info'),
+      dataIndex: 'info',
+    },
+    {
       title: t('job.type'),
       dataIndex: 'job_type',
     },

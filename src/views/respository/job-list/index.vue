@@ -594,6 +594,10 @@
       dataIndex: 'name',
     },
     {
+      title: t('job.info'),
+      dataIndex: 'info',
+    },
+    {
       title: t('job.type'),
       dataIndex: 'job_type',
     },

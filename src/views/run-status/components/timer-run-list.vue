@@ -490,13 +490,6 @@
       width: 120,
     },
     {
-      title: t('operations'),
-      dataIndex: 'operations',
-      slotName: 'operations',
-      width: 250,
-      fixed: 'right',
-    },
-    {
       title: t('job.prevTime'),
       dataIndex: 'prev_time',
       width: 170,
@@ -505,6 +498,13 @@
       title: t('job.nextTime'),
       dataIndex: 'next_time',
       width: 170,
+    },
+    {
+      title: t('operations'),
+      dataIndex: 'operations',
+      slotName: 'operations',
+      width: 250,
+      fixed: 'right',
     },
   ]);
 

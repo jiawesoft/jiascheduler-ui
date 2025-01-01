@@ -206,7 +206,7 @@
           />
         </a-form-item>
         <a-form-item field="eid" :label="$t('job')">
-          <select-job-supervisor
+          <select-job
             v-if="jobSupervisorModalVisible"
             v-model:eid="jobSupervisorForm.eid"
             job-type="default"
@@ -287,6 +287,7 @@
 
   import SelectInstance from '../components/select-instance.vue';
   import SelectJobSupervisor from '../components/select-job-supervisor.vue';
+  import SelectJob from '../components/select-job.vue';
 
   type SizeProps = 'mini' | 'small' | 'medium' | 'large';
   type Column = TableColumnData & { checked?: true };
@@ -399,8 +400,16 @@
       dataIndex: 'eid',
     },
     {
-      title: t('job.timer.name'),
+      title: t('job.daemon.name'),
       dataIndex: 'name',
+    },
+    {
+      title: t('job'),
+      dataIndex: 'job_name',
+    },
+    {
+      title: t('job.daemon.info'),
+      dataIndex: 'info',
     },
     {
       title: t('job.executor'),
