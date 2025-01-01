@@ -232,7 +232,7 @@
   import { computed, nextTick, reactive, ref, toRefs, watch } from 'vue';
   import { useI18n } from 'vue-i18n';
 
-  import ExecHistory from '@/views/run-status/components/exec-list.vue';
+  import ExecHistory from '@/views/run-status/components/once-exec-list.vue';
   import ScheduleDetail from '@/views/run-status/schedule-list/components/schedule-detail.vue';
 
   type SizeProps = 'mini' | 'small' | 'medium' | 'large';

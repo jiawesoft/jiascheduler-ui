@@ -3,13 +3,33 @@
     <Breadcrumb :items="['menu.runStatus', 'menu.runStatus.execList']" />
 
     <a-card class="general-card">
-      <ExecHistory :title="$t('menu.runStatus.execList')" />
+      <!-- <ExecHistory :title="$t('menu.runStatus.execList')" /> -->
+
+      <a-tabs size="small" v-model:active-key="currentTab">
+        <a-tab-pane key="once" :title="$t('job.scheduleType.once')">
+          <once-exec-list v-if="currentTab == 'once'" />
+        </a-tab-pane>
+        <a-tab-pane key="timer" :title="$t('job.scheduleType.timer')">
+          <timer-exec-list v-if="currentTab == 'timer'" />
+        </a-tab-pane>
+        <a-tab-pane key="daemon" :title="$t('job.scheduleType.daemon')">
+          <daemon-exec-list v-if="currentTab == 'daemon'" />
+        </a-tab-pane>
+      </a-tabs>
     </a-card>
   </div>
 </template>
 
 <script lang="ts" setup>
-  import ExecHistory from '../components/exec-list.vue';
+  import { ref } from 'vue';
+  import { useI18n } from 'vue-i18n';
+  // import ExecHistory from '../components/exec-list.vue';
+  import onceExecList from '../components/once-exec-list.vue';
+  import timerExecList from '../components/timer-exec-list.vue';
+  import daemonExecList from '../components/daemon-exec-list.vue';
+
+  const currentTab = ref('once');
+  const { t } = useI18n();
 </script>
 
 <script lang="ts">

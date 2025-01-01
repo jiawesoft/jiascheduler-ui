@@ -268,7 +268,7 @@
   import type { TableColumnData } from '@arco-design/web-vue/es/table/interface';
   import cloneDeep from 'lodash/cloneDeep';
   import Sortable from 'sortablejs';
-  import ExecHistory from './exec-list.vue';
+  import ExecHistory from './daemon-exec-list.vue';
   import JobDetail from './job-detail.vue';
 
   type SizeProps = 'mini' | 'small' | 'medium' | 'large';

@@ -1,8 +1,8 @@
 <template>
   <a-row v-if="!$props.disableSearch">
-    <a-col :flex="1">
+    <a-col flex="auto">
       <a-form
-        key="search-exec-list"
+        key="search-once-exec-list"
         :model="formModel"
         :label-col-props="{ span: 6 }"
         :auto-label-width="true"
@@ -11,23 +11,7 @@
         @submit="search"
       >
         <a-row :gutter="20">
-          <a-col :span="10" v-if="!$props.hideScheduleTypeSwitch">
-            <a-form-item field="schedule_type" :label="$t('job.scheduleType')">
-              <a-radio-group
-                v-model="formModel.schedule_type"
-                type="button"
-                @change="fetchData()"
-              >
-                <a-radio value="once">
-                  {{ $t('job.scheduleType.once') }}
-                </a-radio>
-                <a-radio value="timer">
-                  {{ $t('job.scheduleType.timer') }}
-                </a-radio>
-              </a-radio-group>
-            </a-form-item>
-          </a-col>
-          <a-col :span="10" v-if="!$props.hideJobTypeSwitch">
+          <a-col :span="5" v-if="!$props.hideJobTypeSwitch">
             <a-form-item field="job_type" :label="$t('job.type')">
               <a-radio-group
                 v-model="formModel.job_type"
@@ -39,10 +23,7 @@
               </a-radio-group>
             </a-form-item>
           </a-col>
-        </a-row>
-
-        <a-row :gutter="20">
-          <a-col :span="10">
+          <a-col :span="7">
             <a-form-item field="schedule_name" :label="$t('job.scheduleName')">
               <a-input
                 v-model="formModel.schedule_name"
@@ -63,16 +44,9 @@
         </a-row>
       </a-form>
     </a-col>
-    <a-divider
-      :style="{ height: $props.hideJobTypeSwitch ? '34px' : '84px' }"
-      direction="vertical"
-    />
 
-    <a-col :flex="'86px'" style="text-align: right">
-      <a-space
-        :direction="$props.hideJobTypeSwitch ? 'horizontal' : 'vertical'"
-        :size="18"
-      >
+    <a-col flex="0">
+      <a-space direction="horizontal">
         <a-button type="primary" @click="search">
           <template #icon>
             <icon-search />
@@ -318,12 +292,10 @@
 
   const props = defineProps<{
     scheduleId?: string;
-    scheduleType?: string;
     bindIp?: string;
     title?: string;
     eid?: string;
     hideJobTypeSwitch?: boolean;
-    hideScheduleTypeSwitch?: boolean;
     disableSearch?: boolean;
     jobType?: string;
     bindNamespace?: string;
@@ -365,7 +337,7 @@
     return {
       schedule_name: '',
       job_type: props.jobType || 'default',
-      schedule_type: props.scheduleType || 'once',
+      schedule_type: 'once',
       start_time_range: [],
     };
   };
