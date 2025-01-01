@@ -81,6 +81,10 @@
         <template #index="{ rowIndex }">
           {{ rowIndex + 1 }}
         </template>
+        <template #isAdmin="{ record }">
+          <a-tag v-if="record.is_admin" size="small" color="red"> admin </a-tag>
+          <a-tag v-else size="small" color="arcoblue"> member </a-tag>
+        </template>
 
         <template #operations="{ record }">
           <a-popconfirm
@@ -182,6 +186,11 @@
     {
       title: t('team.member.username'),
       dataIndex: 'username',
+    },
+    {
+      title: t('team.member.isAdmin'),
+      dataIndex: 'is_admin',
+      slotName: 'isAdmin',
     },
     {
       title: t('team.member.createdTime'),

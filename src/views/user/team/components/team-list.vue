@@ -16,15 +16,23 @@
           :class="{ active: teamIndex === item.id }"
           @click="switchTeam(item)"
         >
-          <a-list-item-meta :title="item.name">
+          <a-list-item-meta>
             <template #avatar>
               <icon-user-group />
+            </template>
+            <template #title>
+              <div>
+                {{ item.name }}
+                <!-- <a-tag v-if="item?.is_admin" size="small" color="red">
+                  admin
+                </a-tag> -->
+              </div>
             </template>
           </a-list-item-meta>
           <template #actions>
             <icon-edit @click="editTeam(item)" />
-            <icon-delete @click="removeTeam(item)" />
           </template>
+          <!-- <icon-delete @click="removeTeam(item)" /> -->
         </a-list-item>
       </a-list>
     </div>
@@ -80,7 +88,7 @@
   import { useI18n } from 'vue-i18n';
   import useLoading from '@/hooks/loading';
   import { useAppStore } from '@/store';
-  import { TeamListRes, addTeam, removeFile } from '@/api/team';
+  import { TeamListRes, addTeam } from '@/api/team';
   import { Message } from '@arco-design/web-vue';
 
   const appStore = useAppStore();
@@ -146,19 +154,19 @@
     teamForm.value.info = data.info || '';
     editId.value = data.id;
   };
-  const removeTeam = async (data: TeamListRes) => {
-    try {
-      await removeFile({
-        team_id: data.id,
-      });
-    } catch (err) {
-      return false;
-    }
-    Message.success(t('form.submit.success'));
-    appStore.queryTeamList({});
+  // const removeTeam = async (data: TeamListRes) => {
+  //   try {
+  //     await removeFile({
+  //       team_id: data.id,
+  //     });
+  //   } catch (err) {
+  //     return false;
+  //   }
+  //   Message.success(t('form.submit.success'));
+  //   appStore.queryTeamList({});
 
-    return true;
-  };
+  //   return true;
+  // };
 
   const switchTeam = (data: TeamListRes) => {
     appStore.setTeamId(data.id);
@@ -188,6 +196,12 @@
     }
     :deep(.arco-list-item-action li) {
       margin-left: 15px;
+    }
+    :deep(.arco-tag) {
+      padding: 0 4px;
+    }
+    :deep(.arco-list-item-meta-avatar:not(:last-child)) {
+      margin-right: 10px;
     }
   }
 </style>

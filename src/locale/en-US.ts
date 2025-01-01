@@ -272,6 +272,7 @@ const localeTeam = {
   'team.add.user': 'add user',
   'team.member.username': 'username',
   'team.member.createdTime': 'create time',
+  'team.member.isAdmin': 'type',
 };
 
 export default {

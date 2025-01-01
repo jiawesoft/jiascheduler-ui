@@ -268,6 +268,7 @@ const localeTeam = {
   'team.add.user': '添加用户',
   'team.member.username': '用户名称',
   'team.member.createdTime': '创建时间',
+  'team.member.isAdmin': '类型',
 };
 
 export default {
