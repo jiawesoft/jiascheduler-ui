@@ -204,7 +204,6 @@
       :job-type="formModel.job_type"
       :hide-job-type-switch="true"
       :eid="form.eid"
-      :schedule-type="formModel.schedule_type"
       :schedule-id="form.schedule_id"
       :disable-search="true"
     />

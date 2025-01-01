@@ -239,10 +239,6 @@
     <JobDetail v-if="viewType == 'jobDetail'" :value="scheduleJobRecord" />
     <ExecHistory
       v-if="viewType == 'execHistory' && runDetailModalVisible"
-      :schedule-type="scheduleJobRecord.schedule_type"
-      :job-type="scheduleJobRecord.job_type"
-      :hide-job-type-switch="true"
-      :hide-schedule-type-switch="true"
       :eid="scheduleJobRecord.eid"
       :bind-ip="scheduleJobRecord.bind_ip"
       :bind-namespace="scheduleJobRecord.bind_namespace"
