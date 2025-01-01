@@ -1,18 +1,16 @@
 <template>
   <div class="container">
     <Breadcrumb :items="['menu.manage', 'menu.manage.instanceList']" />
-    <a-row class="wrapper">
-      <a-col :span="24">
-        <a-tabs default-active-key="user" type="line">
-          <a-tab-pane key="user" title="实例">
-            <instance-list />
-          </a-tab-pane>
-          <a-tab-pane key="role" title="分组">
-            <instance-group-list />
-          </a-tab-pane>
-        </a-tabs>
-      </a-col>
-    </a-row>
+    <a-card class="general-card">
+      <a-tabs default-active-key="user" type="line">
+        <a-tab-pane key="user" title="实例">
+          <instance-list />
+        </a-tab-pane>
+        <a-tab-pane key="role" title="分组">
+          <instance-group-list />
+        </a-tab-pane>
+      </a-tabs>
+    </a-card>
   </div>
 </template>
 

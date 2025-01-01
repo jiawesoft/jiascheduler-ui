@@ -3,7 +3,7 @@
     <Breadcrumb :items="['menu.repository', 'menu.repository.jobList']" />
     <a-card class="general-card">
       <a-row>
-        <a-col :flex="1">
+        <a-col flex="auto">
           <a-form
             :model="formModel"
             :label-col-props="{ span: 6 }"
@@ -13,7 +13,7 @@
             @submit="search"
           >
             <a-row :gutter="20">
-              <a-col :span="10">
+              <a-col :span="5">
                 <a-form-item field="job_type" :label="$t('job.type')">
                   <a-radio-group
                     v-model="formModel.job_type"
@@ -29,9 +29,8 @@
                   </a-radio-group>
                 </a-form-item>
               </a-col>
-            </a-row>
-            <a-row :gutter="20">
-              <a-col :span="10">
+
+              <a-col :span="7">
                 <a-form-item field="name" :label="$t('job.name')">
                   <a-input
                     v-model="formModel.name"
@@ -55,9 +54,9 @@
             </a-row>
           </a-form>
         </a-col>
-        <a-divider style="height: 84px" direction="vertical" />
-        <a-col :flex="'86px'" style="text-align: right">
-          <a-space direction="horizontal" :wrap="true" :size="18">
+
+        <a-col flex="0">
+          <a-space direction="horizontal">
             <a-button type="primary" @click="search">
               <template #icon>
                 <icon-search />

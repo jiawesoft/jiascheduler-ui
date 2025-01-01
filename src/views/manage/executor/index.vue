@@ -2,8 +2,8 @@
   <div class="container">
     <Breadcrumb :items="['menu.manage', 'menu.manage.executor']" />
     <a-card class="general-card">
-      <a-row :align="'end'">
-        <a-col :flex="'auto'">
+      <a-row>
+        <a-col flex="auto">
           <a-form
             :model="formModel"
             :label-col-props="{ span: 6 }"
@@ -22,17 +22,12 @@
                   />
                 </a-form-item>
               </a-col>
-
-              <a-col :span="10"> </a-col>
             </a-row>
           </a-form>
         </a-col>
-        <a-divider
-          style="height: 35px; margin-bottom: 15px"
-          direction="vertical"
-        />
-        <a-col :flex="'200px'" style="text-align: right">
-          <a-space direction="horizontal" :wrap="true" :size="18">
+
+        <a-col flex="0">
+          <a-space direction="horizontal">
             <a-button type="primary" @click="search">
               <template #icon>
                 <icon-search />

@@ -1,7 +1,7 @@
 <template>
   <a-card class="general-card">
     <a-row>
-      <a-col :flex="1">
+      <a-col flex="auto">
         <a-form
           :model="formModel"
           :label-col-props="{ span: 6 }"
@@ -22,9 +22,9 @@
           </a-row>
         </a-form>
       </a-col>
-      <a-divider style="height: 35px" direction="vertical" />
-      <a-col :flex="'86px'" style="text-align: right">
-        <a-space direction="horizontal" :size="18">
+
+      <a-col flex="0">
+        <a-space direction="horizontal">
           <a-button type="primary" @click="search">
             <template #icon>
               <icon-search />

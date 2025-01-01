@@ -1,18 +1,16 @@
 <template>
   <div class="container">
     <Breadcrumb :items="['menu.manage', 'menu.manage.usersAndPermissions']" />
-    <a-row class="wrapper">
-      <a-col :span="24">
-        <a-tabs default-active-key="user" type="line">
-          <a-tab-pane key="user" title="用户">
-            <UserList />
-          </a-tab-pane>
-          <a-tab-pane key="role" title="角色">
-            <RoleList />
-          </a-tab-pane>
-        </a-tabs>
-      </a-col>
-    </a-row>
+    <a-card class="general-card">
+      <a-tabs default-active-key="user" type="line">
+        <a-tab-pane key="user" title="用户">
+          <UserList />
+        </a-tab-pane>
+        <a-tab-pane key="role" title="角色">
+          <RoleList />
+        </a-tab-pane>
+      </a-tabs>
+    </a-card>
   </div>
 </template>
 

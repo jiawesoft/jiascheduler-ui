@@ -1,177 +1,174 @@
 <template>
-  <a-card class="general-card">
-    <a-row>
-      <a-col :flex="1">
-        <a-form
-          :model="formModel"
-          :label-col-props="{ span: 6 }"
-          :wrapper-col-props="{ span: 18 }"
-          label-align="left"
-          auto-label-width
-          @submit="search"
-        >
-          <a-row :gutter="20">
-            <a-col :span="10">
-              <a-form-item field="schedule_name" :label="$t('instance.ip')">
-                <a-input
-                  v-model="formModel.ip"
-                  @press-enter="search"
-                  :placeholder="$t('instance.ip.placeholder')"
-                />
-              </a-form-item>
-            </a-col>
-
-            <a-col :span="10">
-              <a-form-item field="status" :label="$t('instance.status')">
-                <a-radio-group
-                  @change="search"
-                  v-model="formModel.status"
-                  type="button"
-                >
-                  <a-radio :value="1">
-                    {{ $t('instance.online') }}
-                  </a-radio>
-                  <a-radio :value="0">
-                    {{ $t('instance.offline') }}
-                  </a-radio>
-                </a-radio-group>
-              </a-form-item>
-            </a-col>
-          </a-row>
-        </a-form>
-      </a-col>
-      <a-divider style="height: 35px" direction="vertical" />
-      <a-col :flex="'86px'" style="text-align: right">
-        <a-space direction="horizontal" :size="18">
-          <a-button type="primary" @click="search">
-            <template #icon>
-              <icon-search />
-            </template>
-            {{ $t('form.search') }}
-          </a-button>
-          <a-button @click="reset">
-            <template #icon>
-              <icon-refresh />
-            </template>
-            {{ $t('form.reset') }}
-          </a-button>
-        </a-space>
-      </a-col>
-    </a-row>
-    <a-divider style="margin-top: 0" />
-    <a-row style="margin-bottom: 16px">
-      <a-col :span="12">
-        <a-button
-          type="primary"
-          size="small"
-          @click="handleSaveInstanceModal($event, null)"
-        >
-          <template #icon>
-            <icon-plus />
-          </template>
-          {{ $t('operations.create') }}
-        </a-button>
-      </a-col>
-      <a-col
-        :span="12"
-        style="display: flex; align-items: center; justify-content: end"
+  <a-row>
+    <a-col flex="auto">
+      <a-form
+        :model="formModel"
+        :label-col-props="{ span: 6 }"
+        :wrapper-col-props="{ span: 18 }"
+        label-align="left"
+        auto-label-width
+        @submit="search"
       >
-        <a-tooltip :content="$t('columns.actions.refresh')">
-          <div class="action-icon" @click="search"
-            ><icon-refresh size="18"
-          /></div>
-        </a-tooltip>
-        <a-dropdown @select="handleSelectDensity">
-          <a-tooltip :content="$t('columns.actions.density')">
-            <div class="action-icon"><icon-line-height size="18" /></div>
-          </a-tooltip>
-          <template #content>
-            <a-doption
-              v-for="item in densityList"
-              :key="item.value"
-              :value="item.value"
-              :class="{ active: item.value === size }"
-            >
-              <span>{{ item.name }}</span>
-            </a-doption>
+        <a-row :gutter="20">
+          <a-col :span="10">
+            <a-form-item field="schedule_name" :label="$t('instance.ip')">
+              <a-input
+                v-model="formModel.ip"
+                @press-enter="search"
+                :placeholder="$t('instance.ip.placeholder')"
+              />
+            </a-form-item>
+          </a-col>
+
+          <a-col :span="10">
+            <a-form-item field="status" :label="$t('instance.status')">
+              <a-radio-group
+                @change="search"
+                v-model="formModel.status"
+                type="button"
+              >
+                <a-radio :value="1">
+                  {{ $t('instance.online') }}
+                </a-radio>
+                <a-radio :value="0">
+                  {{ $t('instance.offline') }}
+                </a-radio>
+              </a-radio-group>
+            </a-form-item>
+          </a-col>
+        </a-row>
+      </a-form>
+    </a-col>
+    <a-col flex="0">
+      <a-space direction="horizontal">
+        <a-button type="primary" @click="search">
+          <template #icon>
+            <icon-search />
           </template>
-        </a-dropdown>
-        <a-tooltip :content="$t('columns.actions.columnSetting')">
-          <a-popover
-            trigger="click"
-            position="bl"
-            @popup-visible-change="popupVisibleChange"
+          {{ $t('form.search') }}
+        </a-button>
+        <a-button @click="reset">
+          <template #icon>
+            <icon-refresh />
+          </template>
+          {{ $t('form.reset') }}
+        </a-button>
+      </a-space>
+    </a-col>
+  </a-row>
+  <a-divider style="margin-top: 0" />
+  <a-row style="margin-bottom: 16px">
+    <a-col :span="12">
+      <a-button
+        type="primary"
+        size="small"
+        @click="handleSaveInstanceModal($event, null)"
+      >
+        <template #icon>
+          <icon-plus />
+        </template>
+        {{ $t('operations.create') }}
+      </a-button>
+    </a-col>
+    <a-col
+      :span="12"
+      style="display: flex; align-items: center; justify-content: end"
+    >
+      <a-tooltip :content="$t('columns.actions.refresh')">
+        <div class="action-icon" @click="search"
+          ><icon-refresh size="18"
+        /></div>
+      </a-tooltip>
+      <a-dropdown @select="handleSelectDensity">
+        <a-tooltip :content="$t('columns.actions.density')">
+          <div class="action-icon"><icon-line-height size="18" /></div>
+        </a-tooltip>
+        <template #content>
+          <a-doption
+            v-for="item in densityList"
+            :key="item.value"
+            :value="item.value"
+            :class="{ active: item.value === size }"
           >
-            <div class="action-icon"><icon-settings size="18" /></div>
-            <template #content>
-              <div id="tableSetting">
-                <div
-                  v-for="(item, index) in showColumns"
-                  :key="item.dataIndex"
-                  class="setting"
-                >
-                  <div style="margin-right: 4px; cursor: move">
-                    <icon-drag-arrow />
-                  </div>
-                  <div>
-                    <a-checkbox
-                      v-model="item.checked"
-                      @change="
-                        handleChange($event, item as TableColumnData, index)
-                      "
-                    >
-                    </a-checkbox>
-                  </div>
-                  <div class="title">
-                    {{ item.title === '#' ? t('index.sn') : item.title }}
-                  </div>
+            <span>{{ item.name }}</span>
+          </a-doption>
+        </template>
+      </a-dropdown>
+      <a-tooltip :content="$t('columns.actions.columnSetting')">
+        <a-popover
+          trigger="click"
+          position="bl"
+          @popup-visible-change="popupVisibleChange"
+        >
+          <div class="action-icon"><icon-settings size="18" /></div>
+          <template #content>
+            <div id="tableSetting">
+              <div
+                v-for="(item, index) in showColumns"
+                :key="item.dataIndex"
+                class="setting"
+              >
+                <div style="margin-right: 4px; cursor: move">
+                  <icon-drag-arrow />
+                </div>
+                <div>
+                  <a-checkbox
+                    v-model="item.checked"
+                    @change="
+                      handleChange($event, item as TableColumnData, index)
+                    "
+                  >
+                  </a-checkbox>
+                </div>
+                <div class="title">
+                  {{ item.title === '#' ? t('index.sn') : item.title }}
                 </div>
               </div>
-            </template>
-          </a-popover>
-        </a-tooltip>
-      </a-col>
-    </a-row>
-    <a-table
-      row-key="id"
-      :loading="loading"
-      :pagination="pagination"
-      :columns="(cloneColumns as TableColumnData[])"
-      :data="renderData"
-      :bordered="false"
-      :size="size"
-      @page-change="onPageChange"
-    >
-      <template #index="{ rowIndex }">
-        {{ rowIndex + 1 + (pagination.page - 1) * pagination.pageSize }}
-      </template>
+            </div>
+          </template>
+        </a-popover>
+      </a-tooltip>
+    </a-col>
+  </a-row>
+  <a-table
+    row-key="id"
+    :loading="loading"
+    :pagination="pagination"
+    :columns="(cloneColumns as TableColumnData[])"
+    :data="renderData"
+    :bordered="false"
+    :size="size"
+    @page-change="onPageChange"
+  >
+    <template #index="{ rowIndex }">
+      {{ rowIndex + 1 + (pagination.page - 1) * pagination.pageSize }}
+    </template>
 
-      <template #status="{ record }">
-        <a-tag v-if="record.status === 0" color="red"><icon-close /></a-tag>
-        <a-tag v-else color="green"> <icon-check /></a-tag>
-      </template>
+    <template #status="{ record }">
+      <a-tag v-if="record.status === 0" color="red"><icon-close /></a-tag>
+      <a-tag v-else color="green"> <icon-check /></a-tag>
+    </template>
 
-      <template #operations="{ record }">
-        <a-space direction="horizontal">
-          <a-space>
-            <a-button
-              v-permission="['admin']"
-              status="normal"
-              size="mini"
-              @click="handleSaveInstanceModal($event, record)"
-            >
-              {{ $t('operations.update') }}
-            </a-button>
-          </a-space>
-          <a-space>
-            <a-button size="mini" @click="handleViewTerminal($event, record)">
-              {{ $t('operations.websshLogin') }}
-            </a-button>
-          </a-space>
+    <template #operations="{ record }">
+      <a-space direction="horizontal">
+        <a-space>
+          <a-button
+            v-permission="['admin']"
+            status="normal"
+            size="mini"
+            @click="handleSaveInstanceModal($event, record)"
+          >
+            {{ $t('operations.update') }}
+          </a-button>
         </a-space>
-      </template>
-    </a-table>
-  </a-card>
+        <a-space>
+          <a-button size="mini" @click="handleViewTerminal($event, record)">
+            {{ $t('operations.websshLogin') }}
+          </a-button>
+        </a-space>
+      </a-space>
+    </template>
+  </a-table>
 
   <a-modal
     v-model:visible="saveInstanceModalvisible"
