@@ -2,16 +2,15 @@
   <a-row>
     <a-col flex="auto">
       <a-form
-        key="search-run-status"
         :model="formModel"
-        :auto-label-width="true"
         :label-col-props="{ span: 6 }"
+        :auto-label-width="true"
         :wrapper-col-props="{ span: 18 }"
-        label-align="right"
+        label-align="left"
         @submit="search"
       >
         <a-row :gutter="20">
-          <a-col :span="6">
+          <a-col :span="5">
             <a-form-item field="job_type" :label="$t('job.type')">
               <a-radio-group
                 v-model="formModel.job_type"
@@ -23,24 +22,30 @@
               </a-radio-group>
             </a-form-item>
           </a-col>
-          <a-col :span="8">
-            <a-form-item field="schedule_name" :label="$t('job.schedule.name')">
+          <a-col :span="7">
+            <a-form-item field="name" :label="$t('job.name')">
               <a-input
-                v-model="formModel.schedule_name"
+                v-model="formModel.name"
+                :placeholder="$t('job.name.placeholder')"
                 @press-enter="search"
-                :placeholder="$t('job.schedule.name.placeholder')"
               />
             </a-form-item>
           </a-col>
-
-          <a-col :span="8">
-            <a-form-item field="bind_ip" :label="$t('instance.ip')">
-              <a-input @press-enter="search" v-model="formModel.bind_ip" />
+          <a-col :span="10">
+            <a-form-item
+              field="updated_time_range"
+              :label="$t('columns.updatedTime')"
+            >
+              <a-range-picker
+                v-model="formModel.updated_time_range"
+                style="width: 100%"
+              />
             </a-form-item>
           </a-col>
         </a-row>
       </a-form>
     </a-col>
+
     <a-col flex="0">
       <a-space direction="horizontal">
         <a-button type="primary" @click="search">
@@ -58,30 +63,17 @@
       </a-space>
     </a-col>
   </a-row>
-
   <a-divider style="margin-top: 0" />
   <a-row style="margin-bottom: 16px">
-    <a-col :span="12">
-      <a-space direction="horizontal" size="large">
-        <a-button
-          type="primary"
-          size="small"
-          style="display: none"
-          @click="handleOpenJobModal($event, null)"
-        >
-          <template #icon> <IconPlayArrowFill /> </template>hidden
-          {{ $t('operations.quickStart') }}
-        </a-button>
-      </a-space>
-    </a-col>
+    <a-col :span="12"></a-col>
     <a-col
       :span="12"
-      style="display: flex; align-items: center; justify-content: end"
+      style="display: flex; align-items: center; justify-content: right"
     >
       <a-tooltip :content="$t('columns.actions.refresh')">
-        <div class="action-icon" @click="search"
-          ><icon-refresh size="18"
-        /></div>
+        <div class="action-icon" @click="search">
+          <icon-refresh size="18" />
+        </div>
       </a-tooltip>
       <a-dropdown @select="handleSelectDensity">
         <a-tooltip :content="$t('columns.actions.density')">
@@ -125,7 +117,7 @@
                   </a-checkbox>
                 </div>
                 <div class="title">
-                  {{ item.title === '#' ? '序列号' : item.title }}
+                  {{ item.title === '#' ? t('columns.sn') : item.title }}
                 </div>
               </div>
             </div>
@@ -148,213 +140,154 @@
       {{ rowIndex + 1 + (pagination.page - 1) * pagination.pageSize }}
     </template>
 
-    <template #executor="{ record }">
-      {{ executors[record.executor_id as string] }}
-    </template>
-
     <template #jobName="{ record }">
-      {{ record.schedule_snapshot_data?.name }}
-    </template>
-    <template #runStatus="{ record }">
-      <a-tag v-if="record.run_status === 'stop'" color="blue">
-        {{ record.run_status }}
-      </a-tag>
-      <a-tag v-else-if="record.run_status === 'prepare'" color="orangered">
-        {{ record.run_status }}
-      </a-tag>
-      <a-tag v-else color="green">{{ record.run_status }}</a-tag>
-    </template>
-
-    <template #exitStatus="{ record }">
-      <a-tooltip :content="record.exit_status">
-        <a-tag v-if="record.exit_status === 'exit status: 0'" color="green">
-          <icon-check />
-        </a-tag>
-        <a-tag v-else-if="record.exit_status === ''" color="orange"> -- </a-tag>
-        <a-tag
-          v-else
-          color="red"
-          style="display: block; text-overflow: ellipsis"
-        >
-          {{ record.exit_status }}
-        </a-tag>
-      </a-tooltip>
+      {{ record.snapshot_data?.name }}
     </template>
 
     <template #operations="{ record }">
-      <a-space direction="horizontal">
-        <a-space>
-          <a-button
-            type="dashed"
-            size="mini"
-            @click="handleOpenRunDetailModal($event, record)"
-          >
-            {{ $t('operations.view') }}
-          </a-button>
-        </a-space>
-        <a-space>
-          <a-popconfirm
-            :content="$t('job.action.confirm.start')"
-            @before-ok="handleAction($event, record, 'exec')"
-          >
-            <a-button type="dashed" size="mini" status="success">
-              {{ $t('operations.start') }}
-            </a-button>
-          </a-popconfirm>
-        </a-space>
-        <a-space>
-          <a-popconfirm
-            :content="$t('job.action.confirm.stop')"
-            @before-ok="handleAction($event, record, 'kill')"
-          >
-            <a-button type="dashed" size="mini" status="danger">
-              {{ $t('operations.stop') }}
-            </a-button>
-          </a-popconfirm>
-        </a-space>
+      <a-space>
+        <a-dropdown-button
+          :hide-on-select="false"
+          @click="handleViewScheduleDetailModal($event, record)"
+        >
+          {{ $t('operations.view') }}
+          <template #icon>
+            <icon-down />
+          </template>
+          <template #content>
+            <a-doption>
+              <a-popconfirm
+                :content="$t('job.action.confirm.start')"
+                @before-ok="handleAction($event, record, 'exec')"
+              >
+                <a-button type="dashed" size="mini" status="success">
+                  {{ $t('job.start') }}
+                </a-button>
+              </a-popconfirm>
+            </a-doption>
+            <a-doption>
+              <a-popconfirm
+                :content="$t('job.action.confirm.start')"
+                @before-ok="handleAction($event, record, 'kill')"
+              >
+                <a-button type="dashed" size="mini" status="warning">
+                  {{ $t('job.stop') }}
+                </a-button>
+              </a-popconfirm>
+            </a-doption>
+          </template>
+        </a-dropdown-button>
       </a-space>
     </template>
   </a-table>
 
   <a-modal
-    v-model:visible="runModalVisible"
+    v-model:visible="scheduleDetailVisible"
     title-align="start"
-    style="width: auto"
     :draggable="true"
-    :ok-text="$t('job.start')"
-    width="50%"
+    width="70%"
+    hide-cancel
     @cancel="handleCancel"
-  >
-    <template #title> {{ $t('job.quickStart') }}</template>
-    devlopment...
-  </a-modal>
-
-  <a-modal
-    v-model:visible="runDetailModalVisible"
-    title-align="start"
-    :draggable="true"
-    :hide-cancel="true"
-    width="80%"
   >
     <template #title>
       <a-space direction="vertical" size="large">
         <a-radio-group v-model="viewType" type="button">
           <a-radio value="execHistory">{{ $t('job.runHistory') }}</a-radio>
-          <a-radio value="jobDetail">{{ $t('job.detail') }}</a-radio>
+          <a-radio value="scheduleDetail">{{
+            $t('job.schedule.detail')
+          }}</a-radio>
         </a-radio-group>
       </a-space>
     </template>
-    <JobDetail v-if="viewType == 'jobDetail'" :value="scheduleJobRecord" />
     <ExecHistory
-      v-if="viewType == 'execHistory' && runDetailModalVisible"
-      schedule-type="once"
-      :job-type="scheduleJobRecord.job_type"
+      v-if="viewType == 'execHistory' && scheduleDetailVisible"
+      :job-type="formModel.job_type"
       :hide-job-type-switch="true"
-      :hide-schedule-type-switch="true"
-      :eid="scheduleJobRecord.eid"
-      :bind-ip="scheduleJobRecord.bind_ip"
-      :bind-namespace="scheduleJobRecord.bind_namespace"
+      :eid="form.eid"
+      :schedule-type="formModel.schedule_type"
+      :schedule-id="form.schedule_id"
+      :disable-search="true"
+    />
+    <ScheduleDetail
+      v-if="viewType == 'scheduleDetail' && scheduleDetailVisible"
+      :value="form"
     />
   </a-modal>
 </template>
 
 <script lang="ts" setup>
   import {
-    JobAction,
+    JobRecord,
     QueryJobReq,
-    QueryRunListReq,
-    RunRecord,
-    jobAction,
-    queryRunList,
+    QueryScheduleListReq,
+    ScheduleType,
+    queryScheduleList,
+    redispatchJob,
   } from '@/api/job';
   import useLoading from '@/hooks/loading';
   import { Pagination } from '@/types/global';
-  import { computed, nextTick, reactive, ref, toRefs, watch } from 'vue';
-  import { useI18n } from 'vue-i18n';
-
-  import { Message } from '@arco-design/web-vue';
   import type { TableColumnData } from '@arco-design/web-vue/es/table/interface';
   import cloneDeep from 'lodash/cloneDeep';
   import Sortable from 'sortablejs';
-  import ExecHistory from './exec-list.vue';
-  import JobDetail from './job-detail.vue';
+  import { computed, nextTick, reactive, ref, toRefs, watch } from 'vue';
+  import { useI18n } from 'vue-i18n';
+
+  import ExecHistory from '@/views/run-status/components/exec-list.vue';
+  import ScheduleDetail from '@/views/run-status/schedule-list/components/schedule-detail.vue';
 
   type SizeProps = 'mini' | 'small' | 'medium' | 'large';
   type Column = TableColumnData & { checked?: true };
-  const runModalVisible = ref(false);
+  const scheduleDetailVisible = ref(false);
   const viewType = ref('execHistory');
-  const runDetailModalVisible = ref(false);
 
   const state = reactive({
-    jobForm: {
+    form: {
       id: 0,
-      name: '',
-      code: 'echo hello world',
-      executor_id: 1,
-      args: {},
-      info: '',
-    },
-    dispatchJobForm: {
-      eid: '',
-      schedule_name: '',
-      namespace: 'default',
-      schedule_type: 'once',
-      action: 'exec',
-      is_sync: false,
-      ip: '192.168.1.36',
-    },
-    scheduleJobRecord: {
-      id: 0,
-      job_type: '',
-      schedule_id: '',
-      bind_ip: '',
-      bundle_script: [],
-      dispatch_data: {},
-      schedule_type: 'once',
-      name: '',
+      schedule_id: 'string',
+      name: 'string',
+      eid: 'string',
+      dispatch_result: [],
+      schedule_type: 'string',
+      action: 'string',
       code: '',
-      eid: '',
-      executor_id: 0,
-      args: {},
-      info: '',
-      upload_file: '',
-      created_user: '',
-      created_time: '',
-      max_parallel: 1,
-      max_retry: 0,
-      work_dir: '',
-      work_user: '',
-      timeout: 0,
-      bind_namespace: 'default',
+      job_name: '',
+      dispatch_data: 'string',
+      snapshot_data: 'string',
+      created_user: 'string',
+      updated_user: 'string',
+      created_time: 'string',
+      updated_time: 'string',
+      executor_id: 1,
     },
   });
-  const { jobForm, scheduleJobRecord } = toRefs(state);
+  const { form } = toRefs(state);
 
-  const generateFormModel = () => {
+  const generateFormModel = (): {
+    name: string;
+    job_type: string;
+    schedule_type: ScheduleType;
+    updated_time_range: any[];
+  } => {
     return {
-      schedule_name: '',
+      name: '',
       job_type: 'default',
       schedule_type: 'once',
-      bind_ip: '',
+      updated_time_range: [],
     };
   };
   const { loading, setLoading } = useLoading(true);
   const { t } = useI18n();
-  const renderData = ref<RunRecord[]>([]);
+  const renderData = ref<JobRecord[]>([]);
   const formModel = ref(generateFormModel());
   const cloneColumns = ref<Column[]>([]);
   const showColumns = ref<Column[]>([]);
+  // const jobActionPopupVisible = ref(true);
 
   const size = ref<SizeProps>('medium');
 
   const basePagination: Pagination = {
     page: 1,
     pageSize: 20,
-  };
-
-  const executors: { [key: string]: string } = {
-    '1': 'bash',
-    '2': 'python',
   };
 
   const pagination = reactive({
@@ -383,107 +316,54 @@
       title: t('columns.index'),
       dataIndex: 'index',
       slotName: 'index',
-      fixed: 'left',
-      width: 30,
-    },
-    {
-      title: t('instance.namespace'),
-      dataIndex: 'bind_namespace',
-      fixed: 'left',
-      width: 130,
-    },
-    {
-      title: t('job.bindIp'),
-      dataIndex: 'bind_ip',
-      fixed: 'left',
-      width: 130,
-    },
-    {
-      title: t('job.scheduleName'),
-      dataIndex: 'schedule_name',
-      ellipsis: true,
-      tooltip: true,
-      fixed: 'left',
-      width: 120,
-    },
-    {
-      title: t('job.name'),
-      dataIndex: 'job_name',
-      slotName: 'jobName',
-      tooltip: true,
-      ellipsis: true,
-      width: 120,
-    },
-    {
-      title: t('executor'),
-      dataIndex: 'executor_name',
-      width: 120,
-    },
-
-    {
-      title: t('job.type'),
-      dataIndex: 'job_type',
-      width: 120,
-    },
-
-    {
-      title: t('job.runStatus'),
-      dataIndex: 'run_status',
-      slotName: 'runStatus',
-      width: 120,
-    },
-    {
-      title: t('job.lastExitStatus'),
-      dataIndex: 'exit_status',
-      ellipsis: true,
-      slotName: 'exitStatus',
-      width: 120,
     },
     {
       title: t('job.scheduleId'),
       dataIndex: 'schedule_id',
-      ellipsis: true,
-      tooltip: true,
-      width: 120,
-    },
-
-    {
-      title: t('job.startTime'),
-      dataIndex: 'start_time',
-      width: 170,
     },
     {
-      title: t('job.endTime'),
-      dataIndex: 'end_time',
-      width: 170,
+      title: t('job.scheduleName'),
+      dataIndex: 'name',
+    },
+    {
+      title: t('job.type'),
+      dataIndex: 'job_type',
+    },
+    {
+      title: t('job.name'),
+      dataIndex: 'snapshot_data',
+      slotName: 'jobName',
+    },
+    {
+      title: t('job.action'),
+      dataIndex: 'action',
+    },
+    {
+      title: t('columns.updatedTime'),
+      dataIndex: 'updated_time',
     },
     {
       title: t('columns.updatedUser'),
       dataIndex: 'updated_user',
-      ellipsis: true,
-      width: 120,
     },
     {
       title: t('operations'),
       dataIndex: 'operations',
       slotName: 'operations',
-      width: 250,
-      fixed: 'right',
     },
   ]);
 
   const fetchData = async (
-    params: QueryRunListReq = {
+    params: QueryScheduleListReq = {
       page: 1,
       page_size: 20,
-      bind_ip: '',
       job_type: formModel.value.job_type,
-      schedule_type: 'once',
+      schedule_type: formModel.value.schedule_type as ScheduleType,
     }
   ) => {
     setLoading(true);
     try {
-      const { data } = await queryRunList(params);
+      const { data } = await queryScheduleList(params);
       renderData.value = data.list;
       pagination.page = params.page;
       pagination.total = data.total;
@@ -494,61 +374,37 @@
     }
   };
 
-  const search = () => {
-    fetchData({
-      ...basePagination,
-      ...formModel.value,
-      job_type: formModel.value.job_type,
-      schedule_type: 'once',
-    } as unknown as QueryJobReq);
-  };
-
-  const handleOpenJobModal = (e: any, record: any) => {
+  const handleViewScheduleDetailModal = (e: any, record: any) => {
     if (record) {
-      console.log('record:', record);
-      // jobForm.value = { ...record, args: JSON.parse(record.args) };
-    } else {
-      jobForm.value = {
-        id: 0,
-        name: '',
-        code: '# type your code',
-        executor_id: 1,
-        args: {},
-        info: '',
+      const job = record.snapshot_data;
+      form.value = {
+        ...record,
+        dispatch_result: (record.dispatch_result as any[]).map((v, i) => {
+          v.id = i;
+          return v;
+        }),
+        code: job?.code,
+        job_name: job?.name,
+        executor_id: job?.executor_id,
       };
     }
-    runModalVisible.value = true;
-  };
 
-  const handleOpenRunDetailModal = (e: any, record: any) => {
-    if (record) {
-      scheduleJobRecord.value = record.schedule_snapshot_data || {};
-      scheduleJobRecord.value.schedule_id = record.schedule_id;
-      scheduleJobRecord.value.bind_ip = record.bind_ip;
-      scheduleJobRecord.value.schedule_type = record.schedule_type;
-      scheduleJobRecord.value.eid = record.eid;
-      scheduleJobRecord.value.bind_namespace = record.bind_namespace;
-    }
-    runDetailModalVisible.value = true;
+    scheduleDetailVisible.value = true;
   };
 
   const handleCancel = () => {
-    runModalVisible.value = false;
+    scheduleDetailVisible.value = false;
   };
 
-  const handleAction = async (e: any, record: any, action: JobAction) => {
-    await jobAction({
-      action,
-      instance_id: record.instance_id,
-      schedule_id: record.schedule_id,
-    });
-    Message.success(t('form.submit.success'));
-    search();
-    return true;
+  const search = () => {
+    fetchData({
+      page: basePagination.page,
+      page_zie: basePagination.pageSize,
+      ...formModel.value,
+      scheduleType: formModel.value.schedule_type,
+      job_type: formModel.value.job_type,
+    } as unknown as QueryJobReq);
   };
-
-  fetchData();
-
   const onPageChange = (current: number) => {
     fetchData({
       page_size: pagination.pageSize,
@@ -557,6 +413,7 @@
     });
   };
 
+  fetchData();
   const reset = () => {
     formModel.value = generateFormModel();
   };
@@ -615,6 +472,20 @@
     }
   };
 
+  const handleAction = async (
+    e: any,
+    record: any,
+    action: 'exec' | 'kill' | 'start_timer' | 'stop_timer'
+  ) => {
+    await redispatchJob({
+      schedule_id: record.schedule_id,
+      action,
+    });
+
+    search();
+    return true;
+  };
+
   watch(
     () => columns.value,
     (val) => {
@@ -632,7 +503,6 @@
   .container {
     padding: 0 20px 20px 20px;
   }
-
   :deep(.arco-table-th) {
     &:last-child {
       .arco-table-th-item-title {
@@ -640,22 +510,18 @@
       }
     }
   }
-
   .action-icon {
     margin-left: 12px;
     cursor: pointer;
   }
-
   .active {
     color: #0960bd;
     background-color: #e3f4fc;
   }
-
   .setting {
     display: flex;
     align-items: center;
     width: 200px;
-
     .title {
       margin-left: 12px;
       cursor: pointer;

@@ -42,8 +42,8 @@
       </a-form>
     </a-col>
 
-    <a-col :flex="'200px'" style="text-align: right">
-      <a-space direction="horizontal" :wrap="true" :size="18">
+    <a-col flex="0">
+      <a-space direction="horizontal">
         <a-button type="primary" @click="search">
           <template #icon>
             <icon-search />
