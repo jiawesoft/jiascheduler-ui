@@ -30,6 +30,48 @@
         </a-tooltip>
       </li> -->
       <li>
+        <!-- allow-search -->
+        <a-select
+          :popup-visible="teamVisible"
+          class="team-select"
+          :placeholder="$t('team.select.placeholder')"
+          popup-container=".navbar"
+          allow-clear
+          @popup-visible-change="handlePopupVisibleChange"
+        >
+          <!-- <a-option>
+            <a-space>
+              <icon-user />
+              <div class="select-option-text">我的个人空间</div>
+            </a-space>
+          </a-option> -->
+          <a-option v-for="item in teamList" :key="item.name">
+            <a-space>
+              <icon-user-group />
+              <div class="select-option-text">{{ item.name }}</div>
+            </a-space>
+          </a-option>
+          <!-- <a-option>
+            <a-space>
+              <icon-user-group />
+              <div class="select-option-text"
+                >16421941642194060团队1642194060团队060团队</div
+              >
+            </a-space>
+          </a-option> -->
+          <template #footer>
+            <div class="team-manager">
+              <a-button type="text" @click="goToTeamPage">
+                <template #icon>
+                  <icon-relation />
+                </template>
+                <span class="team-text">{{ $t('menu.user.team') }}</span>
+              </a-button>
+            </div>
+          </template>
+        </a-select>
+      </li>
+      <li>
         <a-tooltip :content="$t('settings.language')">
           <a-button
             class="nav-btn"
@@ -127,7 +169,7 @@
           </a-button>
         </a-tooltip>
       </li>
-      <li>
+      <!-- <li>
         <a-tooltip :content="$t('settings.title')">
           <a-button
             class="nav-btn"
@@ -140,7 +182,7 @@
             </template>
           </a-button>
         </a-tooltip>
-      </li>
+      </li> -->
       <li>
         <a-dropdown trigger="click">
           <a-avatar
@@ -173,6 +215,14 @@
               </a-space>
             </a-doption> -->
             <a-doption>
+              <a-space @click="setVisible">
+                <icon-apps />
+                <span>
+                  {{ $t('settings.title') }}
+                </span>
+              </a-space>
+            </a-doption>
+            <a-doption>
               <a-space @click="$router.push({ name: 'Setting' })">
                 <icon-settings />
                 <span>
@@ -197,6 +247,7 @@
 
 <script lang="ts" setup>
   import { computed, ref, inject } from 'vue';
+  import { useRouter } from 'vue-router';
   // import { Message } from '@arco-design/web-vue';
   import { useDark, useToggle, useFullscreen } from '@vueuse/core';
   import { useAppStore, useUserStore } from '@/store';
@@ -207,6 +258,7 @@
   import Menu from '@/components/menu/index.vue';
   // import MessageBox from '../message-box/index.vue';
 
+  const router = useRouter();
   const appStore = useAppStore();
   const userStore = useUserStore();
   const { logout } = useUser();
@@ -218,6 +270,9 @@
   });
   const theme = computed(() => {
     return appStore.theme;
+  });
+  const teamList = computed(() => {
+    return appStore.getTeamList;
   });
   const topMenu = computed(() => appStore.topMenu && appStore.menu);
   const isDark = useDark({
@@ -265,6 +320,18 @@
   // };
   const toggleDrawerMenu = inject('toggleDrawerMenu') as () => void;
 
+  const teamVisible = ref(false);
+  appStore.queryTeamList({});
+
+  const handlePopupVisibleChange = (visible: boolean) => {
+    teamVisible.value = visible;
+  };
+
+  const goToTeamPage = () => {
+    router.push({ name: 'Team' });
+    teamVisible.value = false;
+  };
+
   // const stringColor = (str: string) => {
   //   let hash = 0;
   //   for (let i = 0; i < str.length; i += 1) {
@@ -290,6 +357,35 @@
     height: 100%;
     background-color: var(--color-bg-2);
     border-bottom: 1px solid var(--color-border);
+    :deep(.team-select) {
+      min-width: 186px;
+    }
+    :deep(.team-select.arco-select-view-single) {
+      border: 1px solid rgb(var(--primary-3));
+    }
+    :deep(
+        .team-select.arco-select-view-single:focus-within,
+        .team-select.arco-select-view-single.arco-select-view-focus
+      ) {
+      border: 1px solid rgb(var(--primary-6));
+    }
+
+    .team-manager {
+      :deep(.arco-btn) {
+        width: 100%;
+        padding: 0 12px;
+        justify-content: flex-start;
+      }
+      .team-text {
+        padding-left: 2px;
+      }
+    }
+    .select-option-text {
+      width: 140px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
   }
 
   .left-side {

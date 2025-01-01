@@ -258,6 +258,18 @@ const localeInstall = {
     '如果你想要重新安装，可以直接删除该配置文件。你也可以在启动时设置--config参数，重新指定此配置文件生成路径',
 };
 
+const localeTeam = {
+  'menu.user.team': '团队管理',
+  'team.select.placeholder': '选择团队',
+  'team.modal.addTitle': '创建团队',
+  'team.modal.editTitle': '编辑团队',
+  'team.modal.teamName': '团队名称',
+  'team.modal.teamInfo': '团队描述',
+  'team.add.user': '添加用户',
+  'team.member.username': '用户名称',
+  'team.member.createdTime': '创建时间',
+};
+
 export default {
   'app.name': 'Jiascheduler 调度平台',
 
@@ -357,4 +369,5 @@ export default {
   ...localeUserInfo,
   ...localeUserSetting,
   ...localeTerminal,
+  ...localeTeam,
 };

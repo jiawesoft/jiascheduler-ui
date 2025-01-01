@@ -32,6 +32,16 @@ const USER: AppRouteRecordRaw = {
         roles: ['*'],
       },
     },
+    {
+      path: 'team',
+      name: 'Team',
+      component: () => import('@/views/user/team/index.vue'),
+      meta: {
+        locale: 'menu.user.team',
+        requiresAuth: true,
+        roles: ['*'],
+      },
+    },
   ],
 };
 

@@ -1,4 +1,5 @@
 import type { RouteRecordNormalized } from 'vue-router';
+import { TeamListRes } from '@/api/team';
 
 export interface AppState {
   theme: string;
@@ -23,4 +24,6 @@ export interface AppState {
   needUpgrade: boolean;
   appVersion: string;
   configFile: string;
+  teamList: TeamListRes[];
+  currentTeamId: number;
 }

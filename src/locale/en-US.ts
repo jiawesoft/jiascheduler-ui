@@ -262,6 +262,18 @@ const localeInstall = {
     'If you want to reinstall, you can directly delete this configuration file. You can also set the --config parameter during startup to specify a new path for generating this configuration file.',
 };
 
+const localeTeam = {
+  'menu.user.team': 'Team Manager',
+  'team.select.placeholder': 'Select Team',
+  'team.modal.addTitle': 'Create Team',
+  'team.modal.editTitle': 'Edit Team',
+  'team.modal.teamName': 'Team Name',
+  'team.modal.teamInfo': 'Team Info',
+  'team.add.user': 'add user',
+  'team.member.username': 'username',
+  'team.member.createdTime': 'create time',
+};
+
 export default {
   'app.name': 'Jiascheduler Scheduling Platform',
 
@@ -361,4 +373,5 @@ export default {
   ...localeUserInfo,
   ...localeUserSetting,
   ...localeTerminal,
+  ...localeTeam,
 };
