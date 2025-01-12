@@ -32,11 +32,13 @@
       <li>
         <!-- allow-search -->
         <a-select
+          v-model="teamId"
           :popup-visible="teamVisible"
           class="team-select"
           :placeholder="$t('team.select.placeholder')"
           popup-container=".navbar"
           allow-clear
+          @change="handleSelectTeamChange"
           @popup-visible-change="handlePopupVisibleChange"
         >
           <!-- <a-option>
@@ -45,7 +47,7 @@
               <div class="select-option-text">我的个人空间</div>
             </a-space>
           </a-option> -->
-          <a-option v-for="item in teamList" :key="item.name">
+          <a-option v-for="item in teamList" :key="item.id" :value="item.id">
             <a-space>
               <icon-user-group />
               <div class="select-option-text">{{ item.name }}</div>
@@ -256,6 +258,7 @@
   import useLocale from '@/hooks/locale';
   import useUser from '@/hooks/user';
   import Menu from '@/components/menu/index.vue';
+  import { getTeamId, setTeamId } from '@/utils/auth';
   // import MessageBox from '../message-box/index.vue';
 
   const router = useRouter();
@@ -264,6 +267,9 @@
   const { logout } = useUser();
   const { changeLocale, currentLocale } = useLocale();
   const { isFullscreen, toggle: toggleFullScreen } = useFullscreen();
+
+  const teamId = ref(getTeamId());
+
   const locales = [...LOCALE_OPTIONS];
   const avatar = computed(() => {
     return userStore.avatar || userStore.nickname;
@@ -271,10 +277,9 @@
   const theme = computed(() => {
     return appStore.theme;
   });
-  const teamList = computed(() => {
-    return appStore.getTeamList;
-  });
+
   const topMenu = computed(() => appStore.topMenu && appStore.menu);
+
   const isDark = useDark({
     selector: 'body',
     attribute: 'arco-theme',
@@ -321,33 +326,28 @@
   const toggleDrawerMenu = inject('toggleDrawerMenu') as () => void;
 
   const teamVisible = ref(false);
-  appStore.queryTeamList({});
+
+  appStore.queryTeamList({
+    default_id: teamId.value as unknown as number,
+  });
+
+  const teamList = computed(() => {
+    return appStore.teamList;
+  });
 
   const handlePopupVisibleChange = (visible: boolean) => {
     teamVisible.value = visible;
+  };
+
+  const handleSelectTeamChange = (teamId: any) => {
+    setTeamId(teamId);
+    window.location.reload();
   };
 
   const goToTeamPage = () => {
     router.push({ name: 'Team' });
     teamVisible.value = false;
   };
-
-  // const stringColor = (str: string) => {
-  //   let hash = 0;
-  //   for (let i = 0; i < str.length; i += 1) {
-  //     /* eslint no-bitwise: 0 */
-  //     hash = str.charCodeAt(i) + ((hash << 5) - hash);
-  //   }
-
-  //   let color = '#';
-  //   for (let i = 0; i < 3; i += 1) {
-  //     /* eslint no-bitwise: 0 */
-  //     const value = (hash >> (i * 8)) & 0xff;
-  //     const str = `00${value.toString(16)}`.slice(-2);
-  //     color = `${color}${str}`;
-  //   }
-  //   return color;
-  // };
 </script>
 
 <style scoped lang="less">

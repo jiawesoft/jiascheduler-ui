@@ -140,7 +140,7 @@
 
   import { Message } from '@arco-design/web-vue';
   import { queryUserList, QueryUserListReq, UserInfo } from '@/api/user';
-  import { TeamUserPrams } from '@/api/team';
+  import { TeamMember } from '@/api/team';
 
   type SizeProps = 'mini' | 'small' | 'medium' | 'large';
   type Column = TableColumnData & { checked?: true };
@@ -152,7 +152,7 @@
   });
 
   const props = defineProps<{
-    userId: TeamUserPrams[];
+    userId: TeamMember[];
   }>();
 
   // const defaultUser = defineModel<TeamUserPrams[]>('userId', {

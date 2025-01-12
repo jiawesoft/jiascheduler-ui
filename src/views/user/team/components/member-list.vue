@@ -133,11 +133,11 @@
   import { Message } from '@arco-design/web-vue';
   import {
     queryTeamDetail,
-    TeamDetailRes,
-    QueryTeamDetailParams,
+    TeamDetailRecord,
+    QueryTeamDetailReq,
     addTeamUser,
     removeFile,
-    TeamUserPrams,
+    TeamMember,
   } from '@/api/team';
   import tableSelectUserList from './table-select-user-list.vue';
 
@@ -153,7 +153,7 @@
 
   const { loading, setLoading } = useLoading(true);
   const { t } = useI18n();
-  const renderData = ref<TeamDetailRes[]>([]);
+  const renderData = ref<TeamDetailRecord[]>([]);
   const cloneColumns = ref<Column[]>([]);
   const showColumns = ref<Column[]>([]);
 
@@ -204,7 +204,7 @@
   ]);
 
   const fetchData = async (
-    params: QueryTeamDetailParams = {
+    params: QueryTeamDetailReq = {
       id: teamId.value,
     }
   ) => {
@@ -220,7 +220,7 @@
     }
   };
 
-  const selectUser = ref<TeamUserPrams[]>([]);
+  const selectUser = ref<TeamMember[]>([]);
 
   const handleCancel = () => {
     memberModalvisible.value = false;
@@ -293,7 +293,7 @@
     });
   };
 
-  const handleDeleteMemberModal = async (record: TeamDetailRes) => {
+  const handleDeleteMemberModal = async (record: TeamDetailRecord) => {
     console.log(record);
     try {
       await removeFile({

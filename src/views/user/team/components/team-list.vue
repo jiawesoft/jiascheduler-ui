@@ -88,7 +88,7 @@
   import { useI18n } from 'vue-i18n';
   import useLoading from '@/hooks/loading';
   import { useAppStore } from '@/store';
-  import { TeamListRes, addTeam } from '@/api/team';
+  import { TeamRecord, addTeam } from '@/api/team';
   import { Message } from '@arco-design/web-vue';
 
   const appStore = useAppStore();
@@ -147,7 +147,7 @@
     modelType.value = 'add';
     teamModalvisible.value = true;
   };
-  const editTeam = (data: TeamListRes) => {
+  const editTeam = (data: TeamRecord) => {
     modelType.value = 'edit';
     teamModalvisible.value = true;
     teamForm.value.name = data.name;
@@ -168,7 +168,7 @@
   //   return true;
   // };
 
-  const switchTeam = (data: TeamListRes) => {
+  const switchTeam = (data: TeamRecord) => {
     appStore.setTeamId(data.id);
   };
 </script>

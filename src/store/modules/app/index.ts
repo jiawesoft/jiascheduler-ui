@@ -2,7 +2,7 @@ import { getMenuList } from '@/api/user';
 import defaultSettings from '@/config/settings.json';
 import { Notification } from '@arco-design/web-vue';
 import type { NotificationReturn } from '@arco-design/web-vue/es/notification/interface';
-import { queryTeamList, QueryTeamListParams } from '@/api/team';
+import { queryTeamList, QueryTeamListReq } from '@/api/team';
 import { defineStore } from 'pinia';
 import type { RouteRecordNormalized } from 'vue-router';
 import { AppState } from './types';
@@ -15,7 +15,7 @@ const useAppStore = defineStore('app', {
   state: (): AppState => ({
     ...defaultConfig,
     connect_number: 1,
-    "teamList": [],
+    teamList: [],
     currentTeamId: -99,
   }),
 
@@ -94,7 +94,7 @@ const useAppStore = defineStore('app', {
     setTeamId(id: number) {
       this.currentTeamId = id;
     },
-    async queryTeamList(params: QueryTeamListParams) {
+    async queryTeamList(params: QueryTeamListReq) {
       const { data } = await queryTeamList(params);
       this.teamList = data?.list || [];
       if (this.currentTeamId === -99 && this.teamList.length > 0) {

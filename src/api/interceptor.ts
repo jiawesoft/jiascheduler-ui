@@ -1,5 +1,5 @@
 import { useUserStore } from '@/store';
-import { getToken } from '@/utils/auth';
+import { getTeamId, getToken } from '@/utils/auth';
 import { Message, Modal } from '@arco-design/web-vue';
 import type { AxiosResponse, InternalAxiosRequestConfig } from 'axios';
 import axios from 'axios';
@@ -27,6 +27,10 @@ axios.interceptors.request.use(
         // config.headers = {};
       }
       config.headers.Authorization = `Bearer ${token}`;
+    }
+    const teamId = getTeamId();
+    if (teamId) {
+      config.headers.set('X-Team-Id', teamId);
     }
     return config;
   },
