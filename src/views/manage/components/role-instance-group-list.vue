@@ -23,7 +23,7 @@
         </a-form>
       </a-col>
 
-      <a-col flex="0">
+      <a-col flex="auto" style="display: flex; justify-content: end">
         <a-space direction="horizontal">
           <a-button type="primary" @click="search">
             <template #icon>

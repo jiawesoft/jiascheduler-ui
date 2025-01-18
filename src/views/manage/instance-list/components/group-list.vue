@@ -9,7 +9,7 @@
         :auto-label-width="true"
         @submit="search"
       >
-        <a-row :gutter="20">
+        <a-row :gutter="5">
           <a-col :span="10">
             <a-form-item field="name" :label="$t('instanceGroup.name')">
               <a-input
@@ -22,7 +22,7 @@
       </a-form>
     </a-col>
 
-    <a-col flex="0">
+    <a-col flex="auto" style="display: flex; justify-content: end">
       <a-space direction="horizontal" :size="18">
         <a-button type="primary" @click="search">
           <template #icon>

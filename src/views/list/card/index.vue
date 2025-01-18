@@ -1,7 +1,7 @@
 <template>
   <div class="container">
     <Breadcrumb :items="['menu.list', 'menu.list.cardList']" />
-    <a-row :gutter="20" align="stretch">
+    <a-row :gutter="5" align="stretch">
       <a-col :span="24">
         <a-card class="general-card" :title="$t('menu.list.cardList')">
           <a-row justify="space-between">

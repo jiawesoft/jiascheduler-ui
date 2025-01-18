@@ -10,7 +10,7 @@
           auto-label-width
           @submit="search"
         >
-          <a-row :gutter="20">
+          <a-row :gutter="5">
             <a-col :span="15">
               <a-form-item field="ip" :label="$t('instance.ip')">
                 <a-input
