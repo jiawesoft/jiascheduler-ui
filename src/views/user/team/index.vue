@@ -1,28 +1,14 @@
 <template>
   <div class="container">
     <Breadcrumb :items="['menu.user', 'menu.user.team']" />
-    <a-card class="general-card team-card">
-      <a-split
-        v-model:size="splitSize"
-        :style="{
-          height: '100%',
-          width: '100%',
-          minWidth: '500px',
-        }"
-        :min="300"
-      >
-        <template #first>
-          <a-typography-paragraph>
-            <team-list></team-list>
-          </a-typography-paragraph>
-        </template>
-        <template #second>
-          <a-typography-paragraph>
-            <member-list></member-list>
-          </a-typography-paragraph>
-        </template>
-      </a-split>
-    </a-card>
+    <div class="team-wrapper">
+      <a-card class="general-card team-card">
+        <team-list></team-list>
+      </a-card>
+      <a-card class="general-card team-list-user-card">
+        <member-list></member-list>
+      </a-card>
+    </div>
   </div>
 </template>
 
@@ -30,8 +16,6 @@
   import { ref } from 'vue';
   import teamList from './components/team-list.vue';
   import memberList from './components/member-list.vue';
-
-  const splitSize = ref(300);
 </script>
 
 <script lang="ts">
@@ -45,11 +29,20 @@
     padding: 0 20px 10px 20px;
     height: 100%;
   }
-  .team-card {
+  .team-wrapper {
+    display: flex;
     height: calc(100% - 56px);
+  }
+  .team-card {
+    min-width: 300px;
     :deep(& > .arco-card-body) {
       padding: 0;
       height: 100%;
+      overflow-y: auto;
     }
+  }
+  .team-list-user-card {
+    flex: 1;
+    margin-left: 10px;
   }
 </style>

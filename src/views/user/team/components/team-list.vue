@@ -2,11 +2,20 @@
   <a-spin :loading="loading" style="width: 100%">
     <div style="padding: 15px">
       <div
-        style="margin-bottom: 10px; display: flex; justify-content: flex-start"
+        style="
+          margin-bottom: 10px;
+          display: flex;
+          justify-content: space-between;
+        "
       >
         <a-button type="outline" @click="createTeam">{{
           $t('team.modal.addTitle')
         }}</a-button>
+        <a-button shape="circle" @click="refreshTeamList">
+          <template #icon>
+            <icon-refresh />
+          </template>
+        </a-button>
       </div>
 
       <a-list class="team-list-wrapper">
@@ -21,16 +30,21 @@
               <icon-user-group />
             </template>
             <template #title>
-              <div>
-                {{ item.name }}
-                <!-- <a-tag v-if="item?.is_admin" size="small" color="red">
+              <div class="team-name">
+                <div class="text-overflow" :title="item.name">
+                  {{ item.name }}
+                </div>
+                <a-tag v-if="item?.is_admin" size="small" color="red">
                   admin
-                </a-tag> -->
+                </a-tag>
               </div>
             </template>
           </a-list-item-meta>
           <template #actions>
-            <icon-edit @click="editTeam(item)" />
+            <icon-edit
+              :class="item?.is_admin ? 'can-edit' : 'not-edit'"
+              @click="editTeam(item)"
+            />
           </template>
           <!-- <icon-delete @click="removeTeam(item)" /> -->
         </a-list-item>
@@ -112,7 +126,7 @@
   const modelType = ref('add');
   const editId = ref();
 
-  const { loading } = useLoading(false);
+  const { loading, setLoading } = useLoading(false);
   const { t } = useI18n();
 
   // 团队编辑、新增、删除
@@ -142,12 +156,15 @@
 
   const handleTeamCancel = () => {
     teamModalvisible.value = false;
+    teamForm.value.name = '';
+    teamForm.value.info = '';
   };
   const createTeam = () => {
     modelType.value = 'add';
     teamModalvisible.value = true;
   };
   const editTeam = (data: TeamRecord) => {
+    if (!data?.is_admin) return;
     modelType.value = 'edit';
     teamModalvisible.value = true;
     teamForm.value.name = data.name;
@@ -171,6 +188,12 @@
   const switchTeam = (data: TeamRecord) => {
     appStore.setTeamId(data.id);
   };
+
+  const refreshTeamList = async () => {
+    setLoading(true);
+    await appStore.queryTeamList({});
+    setLoading(false);
+  };
 </script>
 
 <style scoped lang="less">
@@ -181,7 +204,7 @@
           .arco-list-content
           > .arco-list-item
       ) {
-      padding: 10px 12px;
+      padding: 7px 12px;
       cursor: pointer;
     }
     .active {
@@ -203,5 +226,14 @@
     :deep(.arco-list-item-meta-avatar:not(:last-child)) {
       margin-right: 10px;
     }
+    .not-edit {
+      color: var(--color-neutral-4);
+    }
+  }
+  .text-overflow {
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    max-width: 190px;
   }
 </style>
