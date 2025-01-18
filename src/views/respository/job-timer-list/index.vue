@@ -6,13 +6,11 @@
         <a-col flex="auto">
           <a-form
             :model="formModel"
-            :label-col-props="{ span: 6 }"
-            :wrapper-col-props="{ span: 18 }"
             :auto-label-width="true"
             label-align="left"
             @submit="search"
           >
-            <a-row :gutter="20">
+            <a-row :gutter="5">
               <a-col :span="5">
                 <a-form-item field="job_type" :label="$t('job.type')">
                   <a-radio-group
@@ -54,7 +52,7 @@
           </a-form>
         </a-col>
 
-        <a-col flex="0">
+        <a-col flex="auto" style="display: flex; justify-content: end">
           <a-space direction="horizontal">
             <a-button type="primary" @click="search">
               <template #icon>
