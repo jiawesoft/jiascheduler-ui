@@ -260,6 +260,7 @@ const localeInstall = {
 
 const localeTeam = {
   'menu.user.team': '团队管理',
+  'team.name': '团队',
   'team.select.placeholder': '选择团队',
   'team.modal.addTitle': '创建团队',
   'team.modal.editTitle': '编辑团队',

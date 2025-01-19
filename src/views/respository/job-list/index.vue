@@ -605,6 +605,10 @@
       dataIndex: 'executor_name',
     },
     {
+      title: t('team.name'),
+      dataIndex: 'team_name',
+    },
+    {
       title: t('columns.updatedTime'),
       dataIndex: 'updated_time',
     },

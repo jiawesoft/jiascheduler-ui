@@ -144,10 +144,6 @@
           {{ rowIndex + 1 + (pagination.page - 1) * pagination.pageSize }}
         </template>
 
-        <template #executor="{ record }">
-          {{ execuotrs[record.executor_id as string] }}
-        </template>
-
         <template #operations="{ record }">
           <a-button
             type="text"
@@ -413,8 +409,11 @@
     },
     {
       title: t('job.executor'),
-      dataIndex: 'executor_id',
-      slotName: 'executor',
+      dataIndex: 'executor_name',
+    },
+    {
+      title: t('team.name'),
+      dataIndex: 'team_name',
     },
     {
       title: t('columns.updatedTime'),

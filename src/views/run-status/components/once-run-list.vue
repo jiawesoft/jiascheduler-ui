@@ -148,10 +148,6 @@
       {{ rowIndex + 1 + (pagination.page - 1) * pagination.pageSize }}
     </template>
 
-    <template #executor="{ record }">
-      {{ executors[record.executor_id as string] }}
-    </template>
-
     <template #jobName="{ record }">
       {{ record.schedule_snapshot_data?.name }}
     </template>
@@ -350,11 +346,6 @@
     pageSize: 20,
   };
 
-  const executors: { [key: string]: string } = {
-    '1': 'bash',
-    '2': 'python',
-  };
-
   const pagination = reactive({
     ...basePagination,
   });
@@ -454,6 +445,11 @@
       title: t('job.endTime'),
       dataIndex: 'end_time',
       width: 170,
+    },
+    {
+      title: t('team.name'),
+      dataIndex: 'team_name',
+      width: 120,
     },
     {
       title: t('columns.updatedUser'),

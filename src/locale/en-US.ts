@@ -264,6 +264,7 @@ const localeInstall = {
 
 const localeTeam = {
   'menu.user.team': 'Team Manager',
+  'team.name': 'Team',
   'team.select.placeholder': 'Select Team',
   'team.modal.addTitle': 'Create Team',
   'team.modal.editTitle': 'Edit Team',

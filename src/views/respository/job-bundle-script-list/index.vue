@@ -333,8 +333,11 @@
     },
     {
       title: t('job.executor'),
-      dataIndex: 'executor_id',
-      slotName: 'executor',
+      dataIndex: 'executor_name',
+    },
+    {
+      title: t('team.name'),
+      dataIndex: 'team_name',
     },
     {
       title: t('columns.updatedTime'),

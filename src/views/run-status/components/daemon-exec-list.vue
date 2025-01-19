@@ -367,6 +367,10 @@
           dataIndex: 'bind_ip',
           width: 100,
         },
+        {
+          title: t('team.name'),
+          dataIndex: 'team_name',
+        },
       ];
 
       if (
@@ -449,6 +453,12 @@
         title: t('job.endTime'),
         dataIndex: 'end_time',
         width: 170,
+      },
+      {
+        title: t('team.name'),
+        dataIndex: 'team_name',
+        ellipsis: true,
+        width: 120,
       },
       {
         title: t('columns.createdUser'),
