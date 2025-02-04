@@ -336,8 +336,8 @@
   import { useRouter } from 'vue-router';
 
   import SelectInstance from '../components/select-instance.vue';
-  import SelectJob from '../components/select-job.vue';
   import SelectJobTimer from '../components/select-job-timer.vue';
+  import SelectJob from '../components/select-job.vue';
 
   type SizeProps = 'mini' | 'small' | 'medium' | 'large';
   type Column = TableColumnData & { checked?: true };
@@ -427,11 +427,6 @@
     pageSize: 20,
   };
 
-  const execuotrs: { [key: string]: string } = {
-    '1': 'bash',
-    '2': 'python',
-  };
-
   const pagination = reactive({
     ...basePagination,
   });
@@ -505,6 +500,22 @@
   const jobTimerFormValidateRules = {
     name: {
       required: true,
+    },
+    timer_expr: {
+      required: true,
+      type: 'object' as any,
+      validator: (value: any, cb: (error?: string) => void) => {
+        if (
+          !value.second ||
+          !value.minute ||
+          !value.hour ||
+          !value.day_of_month ||
+          !value.month ||
+          !value.year
+        ) {
+          return cb(t('job.timerExpr.validation.error'));
+        }
+      },
     },
   };
   const dispatchJobTimerFormValidateRules = {

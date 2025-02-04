@@ -92,6 +92,8 @@ const localeJob = {
   'job.timer.info': '简介',
   'job.timer.name': '名称',
   'job.timer.name.placeholder': '请输入名称',
+  'job.timerExpr.validation.error':
+    '时间表达式不正确，请确实检查时间表达式是否正确，例如: 0 * * * * *',
 
   'job.daemon': '常驻任务',
   'job.daemon.name': '名称',

@@ -93,6 +93,8 @@ const localeJob = {
   'job.timer.info': 'Description',
   'job.timer.name': 'Name',
   'job.timer.name.placeholder': 'Please enter a name',
+  'job.timerExpr.validation.error':
+    'The time expression is incorrect. Please verify the time expression carefully. For example: 0 * * * *',
 
   'job.daemon': 'Daemon Job',
   'job.daemon.name': 'Name',
