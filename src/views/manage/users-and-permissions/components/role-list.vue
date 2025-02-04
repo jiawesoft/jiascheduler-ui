@@ -147,9 +147,8 @@
   <a-modal
     v-model:visible="saveRoleModalVisible"
     title-align="start"
-    style="width: auto"
     :draggable="true"
-    width="80%"
+    width="auto"
     hide-cancel
     @before-ok="handleSubmitSaveRoleForm"
     @cancel="handleSaveRoleFormModalCancel"
