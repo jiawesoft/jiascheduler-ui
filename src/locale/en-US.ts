@@ -65,6 +65,7 @@ const localeJob = {
   'job.scheduleType': 'Schedule Type',
   'job.scheduleType.once': 'Once',
   'job.scheduleType.timer': 'Timer',
+  'job.scheduleType.daemon': 'Daemon',
   'job.task': 'Task',
   'job.schedule': 'Job Schedule',
   'job.schedule.name': 'Schedule Name',
@@ -88,7 +89,7 @@ const localeJob = {
   'job.saveTimer': 'Save Timer',
   'job.timerExpr': 'Timer Expression',
   'job.timerExpr.tooltips':
-    'Please note that the year can be omitted. Comma-separated values (like 5,8,10) represent multiple time values. For example, a schedule of 0 2,14,26 * * * will execute at the 0th, 2nd, 14th, and 26th minutes of every hour.\nRanges can be specified with hyphens. A schedule of 0 0 * 5-10 * * will execute once an hour, but only on the 5th to 10th days of the month.\nThe day of the week can be specified as an abbreviation or full name. A schedule of 0 0 6 * * Sun,Sat will execute at 6 am on Sundays and Saturdays.',
+    'Comma-separated values (like 5,8,10) represent multiple time values. For example, a schedule of 0 2,14,26 * * * will execute at the 0th, 2nd, 14th, and 26th minutes of every hour.\nRanges can be specified with hyphens. A schedule of 0 0 * 5-10 * * will execute once an hour, but only on the 5th to 10th days of the month.\nThe day of the week can be specified as an abbreviation or full name. A schedule of 0 0 6 * * Sun,Sat will execute at 6 am on Sundays and Saturdays.',
   'job.timer.info': 'Description',
   'job.timer.name': 'Name',
   'job.timer.name.placeholder': 'Please enter a name',
