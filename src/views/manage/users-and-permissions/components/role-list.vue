@@ -194,7 +194,7 @@
       </a-form-item>
 
       <a-form-item
-        v-if="saveRoleModalVisible"
+        v-if="form.id !== 0"
         field="user_id"
         :label="$t('role.bind')"
       >
@@ -205,23 +205,23 @@
 </template>
 
 <script lang="ts" setup>
-  import { computed, ref, reactive, watch, nextTick, toRefs } from 'vue';
-  import { useI18n } from 'vue-i18n';
   import useLoading from '@/hooks/loading';
+  import { computed, nextTick, reactive, ref, toRefs, watch } from 'vue';
+  import { useI18n } from 'vue-i18n';
 
-  import { Pagination } from '@/types/global';
-  import type { TableColumnData } from '@arco-design/web-vue/es/table/interface';
-  import cloneDeep from 'lodash/cloneDeep';
-  import Sortable from 'sortablejs';
+  import { PermissionRecord, queryAllPermission } from '@/api/admin';
   import { QueryInstanceListReq } from '@/api/instance';
-  import { Message } from '@arco-design/web-vue';
   import {
     QueryRoleListReq,
     RoleRecord,
     queryRoleList,
     saveRole,
   } from '@/api/role';
-  import { PermissionRecord, queryAllPermission } from '@/api/admin';
+  import { Pagination } from '@/types/global';
+  import { Message } from '@arco-design/web-vue';
+  import type { TableColumnData } from '@arco-design/web-vue/es/table/interface';
+  import cloneDeep from 'lodash/cloneDeep';
+  import Sortable from 'sortablejs';
   import rolePermissions from '../../components/role-permissions.vue';
 
   type SizeProps = 'mini' | 'small' | 'medium' | 'large';
