@@ -1,123 +1,121 @@
 <template>
-  <a-spin :loading="loading" style="width: 100%">
-    <div style="padding: 15px">
-      <a-row style="margin-bottom: 16px">
-        <a-col :span="12">
-          <a-button type="primary" @click="handleAddMemberModal">
-            <template #icon>
-              <icon-plus />
-            </template>
-            {{ $t('team.add.user') }}
-          </a-button>
-        </a-col>
-        <a-col
-          :span="12"
-          style="display: flex; align-items: center; justify-content: end"
-        >
-          <a-tooltip :content="$t('columns.actions.refresh')">
-            <div class="action-icon" @click="search"
-              ><icon-refresh size="18"
-            /></div>
+  <div style="padding: 15px">
+    <a-row style="margin-bottom: 16px">
+      <a-col :span="12">
+        <a-button type="primary" @click="handleAddMemberModal">
+          <template #icon>
+            <icon-plus />
+          </template>
+          {{ $t('team.add.user') }}
+        </a-button>
+      </a-col>
+      <a-col
+        :span="12"
+        style="display: flex; align-items: center; justify-content: end"
+      >
+        <a-tooltip :content="$t('columns.actions.refresh')">
+          <div class="action-icon" @click="search"
+            ><icon-refresh size="18"
+          /></div>
+        </a-tooltip>
+        <a-dropdown @select="handleSelectDensity">
+          <a-tooltip :content="$t('columns.actions.density')">
+            <div class="action-icon"><icon-line-height size="18" /></div>
           </a-tooltip>
-          <a-dropdown @select="handleSelectDensity">
-            <a-tooltip :content="$t('columns.actions.density')">
-              <div class="action-icon"><icon-line-height size="18" /></div>
-            </a-tooltip>
-            <template #content>
-              <a-doption
-                v-for="item in densityList"
-                :key="item.value"
-                :value="item.value"
-                :class="{ active: item.value === size }"
-              >
-                <span>{{ item.name }}</span>
-              </a-doption>
-            </template>
-          </a-dropdown>
-          <a-tooltip :content="$t('columns.actions.columnSetting')">
-            <a-popover
-              trigger="click"
-              position="bl"
-              @popup-visible-change="popupVisibleChange"
+          <template #content>
+            <a-doption
+              v-for="item in densityList"
+              :key="item.value"
+              :value="item.value"
+              :class="{ active: item.value === size }"
             >
-              <div class="action-icon"><icon-settings size="18" /></div>
-              <template #content>
-                <div id="tableSetting">
-                  <div
-                    v-for="(item, index) in showColumns"
-                    :key="item.dataIndex"
-                    class="setting"
-                  >
-                    <div style="margin-right: 4px; cursor: move">
-                      <icon-drag-arrow />
-                    </div>
-                    <div>
-                      <a-checkbox
-                        v-model="item.checked"
-                        @change="
-                          handleChange($event, item as TableColumnData, index)
-                        "
-                      >
-                      </a-checkbox>
-                    </div>
-                    <div class="title">
-                      {{ item.title === '#' ? '序列号' : item.title }}
-                    </div>
+              <span>{{ item.name }}</span>
+            </a-doption>
+          </template>
+        </a-dropdown>
+        <a-tooltip :content="$t('columns.actions.columnSetting')">
+          <a-popover
+            trigger="click"
+            position="bl"
+            @popup-visible-change="popupVisibleChange"
+          >
+            <div class="action-icon"><icon-settings size="18" /></div>
+            <template #content>
+              <div id="tableSetting">
+                <div
+                  v-for="(item, index) in showColumns"
+                  :key="item.dataIndex"
+                  class="setting"
+                >
+                  <div style="margin-right: 4px; cursor: move">
+                    <icon-drag-arrow />
+                  </div>
+                  <div>
+                    <a-checkbox
+                      v-model="item.checked"
+                      @change="
+                        handleChange($event, item as TableColumnData, index)
+                      "
+                    >
+                    </a-checkbox>
+                  </div>
+                  <div class="title">
+                    {{ item.title === '#' ? '序列号' : item.title }}
                   </div>
                 </div>
-              </template>
-            </a-popover>
-          </a-tooltip>
-        </a-col>
-      </a-row>
-      <a-table
-        row-key="id"
-        :loading="loading"
-        :columns="(cloneColumns as TableColumnData[])"
-        :data="renderData"
-        :bordered="false"
-        :size="size"
-      >
-        <template #index="{ rowIndex }">
-          {{ rowIndex + 1 }}
-        </template>
-        <template #isAdmin="{ record }">
-          <a-tag v-if="record.is_admin" size="small" color="red"> admin </a-tag>
-          <a-tag v-else size="small" color="arcoblue"> member </a-tag>
-        </template>
-
-        <template #operations="{ record }">
-          <a-popconfirm
-            :content="$t('operations.delete.confirm')"
-            @ok="handleDeleteMemberModal(record)"
-          >
-            <a-button status="danger" size="small">
-              {{ $t('operations.delete') }}
-            </a-button>
-          </a-popconfirm>
-        </template>
-      </a-table>
-    </div>
-
-    <!-- 新增成员 -->
-    <a-modal
-      v-model:visible="memberModalvisible"
-      title-align="start"
-      style="width: auto"
-      :draggable="true"
-      width="60%"
-      hide-cancel
-      :ok-text="$t('form.save')"
-      @before-ok="handleSubmitSaveMember"
-      @cancel="handleCancel"
+              </div>
+            </template>
+          </a-popover>
+        </a-tooltip>
+      </a-col>
+    </a-row>
+    <a-table
+      row-key="id"
+      :loading="loading"
+      :columns="(cloneColumns as TableColumnData[])"
+      :data="renderData"
+      :bordered="false"
+      :size="size"
     >
-      <template #title> {{ $t('team.add.user') }}</template>
-      <table-select-user-list
-        v-if="memberModalvisible"
-        v-model:userId="selectUser"
-      />
-    </a-modal>
-  </a-spin>
+      <template #index="{ rowIndex }">
+        {{ rowIndex + 1 }}
+      </template>
+      <template #isAdmin="{ record }">
+        <a-tag v-if="record.is_admin" size="small" color="red"> admin </a-tag>
+        <a-tag v-else size="small" color="arcoblue"> member </a-tag>
+      </template>
+
+      <template #operations="{ record }">
+        <a-popconfirm
+          :content="$t('operations.delete.confirm')"
+          @ok="handleDeleteMemberModal(record)"
+        >
+          <a-button status="danger" size="small">
+            {{ $t('operations.delete') }}
+          </a-button>
+        </a-popconfirm>
+      </template>
+    </a-table>
+  </div>
+
+  <!-- 新增成员 -->
+  <a-modal
+    v-model:visible="memberModalvisible"
+    title-align="start"
+    style="width: auto"
+    :draggable="true"
+    width="60%"
+    hide-cancel
+    :ok-text="$t('form.save')"
+    @before-ok="handleSubmitSaveMember"
+    @cancel="handleCancel"
+  >
+    <template #title> {{ $t('team.add.user') }}</template>
+    <table-select-user-list
+      v-if="memberModalvisible"
+      v-model:userId="selectUser"
+    />
+  </a-modal>
 </template>
 
 <script lang="ts" setup>
@@ -151,7 +149,7 @@
   type Column = TableColumnData & { checked?: true };
   const memberModalvisible = ref(false);
 
-  const { loading, setLoading } = useLoading(true);
+  const { loading, setLoading } = useLoading(false);
   const { t } = useI18n();
   const renderData = ref<TeamDetailRecord[]>([]);
   const cloneColumns = ref<Column[]>([]);
@@ -294,7 +292,6 @@
   };
 
   const handleDeleteMemberModal = async (record: TeamDetailRecord) => {
-    console.log(record);
     try {
       await removeFile({
         team_id: teamId.value,
