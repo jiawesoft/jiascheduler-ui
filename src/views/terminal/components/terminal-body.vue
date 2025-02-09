@@ -209,8 +209,9 @@
   function initSocket() {
     if (props.ip) {
       // const namespace = route.query.namespace || 'default';
-      const currentEnv = import.meta.env.VITE_APP_ENV;
-      const wsProtocol = currentEnv === 'development' ? 'ws:' : 'wss:';
+      // const currentEnv = import.meta.env.VITE_APP_ENV;
+      const currentProtocol = window.location.protocol;
+      const wsProtocol = currentProtocol.includes('https') ? 'wss:' : 'ws:';
       // const socketUrl = `${wsProtocol}//${window.location.host}/terminal/webssh/${props.ip}?rows=${term?.rows}&cols=${term?.cols}`;
       const socketUrl = `${wsProtocol}//${window.location.host}/terminal/tunnel/${props.instanceId}?rows=${term?.rows}&cols=${term?.cols}`;
 

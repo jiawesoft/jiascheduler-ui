@@ -284,17 +284,6 @@
     });
   }
 
-  // const currentEnv = import.meta.env.VITE_APP_ENV;
-  // const wsProtocol = currentEnv === 'development' ? 'ws:' : 'wss:';
-  // const socketUrl = ref('')
-  // const getSocketUrl = (ip: string) => {
-  //   return `${wsProtocol}//${window.location.host}/terminal/webssh/${ip}`;
-  // }
-  // getSocketUrl(`${props.currentIp}`)
-
-  // const router = useRouter();
-  // router.replace('/terminal');
-
   const scrollBarRef = ref<HTMLElement | null>(null);
 
   const terminalBodyRefMap = ref({});
