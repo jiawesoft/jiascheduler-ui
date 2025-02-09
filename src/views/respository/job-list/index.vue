@@ -333,10 +333,10 @@
             <a-space direction="vertical" :style="{ width: '100%' }">
               <a-upload
                 action="/api/file/upload"
+                v-model="uploadFileList"
                 :limit="1"
                 :default-file-list="defaultFileList()"
                 :file-list="uploadFileList"
-                v-model="uploadFileList"
                 @before-remove="removeUploadfile"
                 @success="onUploadSuccess"
               />
@@ -431,7 +431,7 @@
   import 'ace-builds/src-noconflict/theme-chrome';
   import 'ace-builds/src-noconflict/theme-chaos';
   import { useRouter } from 'vue-router';
-
+  import { genVersionFromTime } from '@/utils/time';
   import SelectBundleScript from '../components/select-bundle-script.vue';
   import SelectExecutor from '../components/select-executor.vue';
   import SelectInstance from '../components/select-instance.vue';
@@ -739,6 +739,7 @@
     dispatchJobRef.value.clearValidate();
     dispatchJobForm.value = {
       ...record,
+      schedule_name: `${record.name}-${genVersionFromTime()}`,
       ip: [],
       action: 'exec',
       schedule_type: 'once',

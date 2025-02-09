@@ -334,7 +334,7 @@
   import { Message } from '@arco-design/web-vue';
 
   import { useRouter } from 'vue-router';
-
+  import { genVersionFromTime } from '@/utils/time';
   import SelectInstance from '../components/select-instance.vue';
   import SelectJobTimer from '../components/select-job-timer.vue';
   import SelectJob from '../components/select-job.vue';
@@ -513,7 +513,7 @@
           !value.month ||
           !value.year
         ) {
-          return cb(t('job.timerExpr.validation.error'));
+          cb(t('job.timerExpr.validation.error'));
         }
       },
     },
@@ -578,6 +578,7 @@
       ...record,
       ip: [],
       job_type: formModel.value.job_type,
+      schedule_name: `${record.name}-${genVersionFromTime()}`,
       action: 'start_timer',
       schedule_type: 'timer',
     };
