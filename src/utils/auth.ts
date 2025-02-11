@@ -19,11 +19,11 @@ const clearToken = () => {
 
 const getTeamId = () => {
   const teamId = localStorage.getItem(TEAM_ID_KEY);
-  return (teamId && parseInt(teamId, 36)) || undefined;
+  return (teamId && parseInt(teamId, 10)) || undefined;
 };
 
 const setTeamId = (teamId: string) => {
   localStorage.setItem(TEAM_ID_KEY, teamId);
 };
 
-export { isLogin, getToken, setToken, clearToken, getTeamId, setTeamId };
+export { clearToken, getTeamId, getToken, isLogin, setTeamId, setToken };
