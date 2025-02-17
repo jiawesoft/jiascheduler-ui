@@ -254,7 +254,7 @@
             </a-input-group>
           </a-form-item>
 
-          <a-form-item field="eid" :label="$t('job')">
+          <a-form-item field="eid" validate-trigger="blur" :label="$t('job')">
             <SelectJob
               v-if="jobTimerModalVisible"
               v-model:eid="jobTimerForm.eid"
@@ -499,6 +499,9 @@
 
   const jobTimerFormValidateRules = {
     name: {
+      required: true,
+    },
+    eid: {
       required: true,
     },
     timer_expr: {

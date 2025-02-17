@@ -201,7 +201,7 @@
             v-model="jobSupervisorForm.restart_interval"
           />
         </a-form-item>
-        <a-form-item field="eid" :label="$t('job')">
+        <a-form-item field="eid" validate-trigger="blur" :label="$t('job')">
           <select-job
             v-if="jobSupervisorModalVisible"
             v-model:eid="jobSupervisorForm.eid"
@@ -359,11 +359,6 @@
     pageSize: 20,
   };
 
-  const execuotrs: { [key: string]: string } = {
-    '1': 'bash',
-    '2': 'python',
-  };
-
   const pagination = reactive({
     ...basePagination,
   });
@@ -432,6 +427,9 @@
 
   const jobSupervisorFormValidateRules = {
     name: {
+      required: true,
+    },
+    eid: {
       required: true,
     },
   };
