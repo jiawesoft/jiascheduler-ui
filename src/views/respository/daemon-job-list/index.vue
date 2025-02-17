@@ -281,6 +281,7 @@
 
   import { useRouter } from 'vue-router';
 
+  import { genVersionFromTime } from '@/utils/time';
   import SelectInstance from '../components/select-instance.vue';
   import SelectJobSupervisor from '../components/select-job-supervisor.vue';
   import SelectJob from '../components/select-job.vue';
@@ -491,6 +492,7 @@
       ...record,
       ip: [],
       job_type: 'default',
+      schedule_name: `${record.name}-${genVersionFromTime()}`,
       action: 'start_supervising',
       schedule_type: 'daemon',
     };
