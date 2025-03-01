@@ -101,6 +101,7 @@
               <div
                 v-for="(item, index) in showColumns"
                 :key="item.dataIndex"
+                :dataIndex="item.dataIndex"
                 class="setting"
               >
                 <div style="margin-right: 4px; cursor: move">
@@ -116,7 +117,7 @@
                   </a-checkbox>
                 </div>
                 <div class="title">
-                  {{ item.title === '#' ? '序列号' : item.title }}
+                  {{ item.title === '#' ? t('columns.sn') : item.title }}
                 </div>
               </div>
             </div>
@@ -644,31 +645,7 @@
     column: Column,
     index: number
   ) => {
-    if (!checked) {
-      cloneColumns.value = showColumns.value.filter(
-        (item) => item.dataIndex !== column.dataIndex
-      );
-    } else {
-      cloneColumns.value.splice(index, 0, column);
-    }
-  };
-
-  const exchangeArray = <T extends Array<any>>(
-    array: T,
-    beforeIdx: number,
-    newIdx: number,
-    isDeep = false
-  ): T => {
-    const newArray = isDeep ? cloneDeep(array) : array;
-    if (beforeIdx > -1 && newIdx > -1) {
-      // 先替换后面的，然后拿到替换的结果替换前面的
-      newArray.splice(
-        beforeIdx,
-        1,
-        newArray.splice(newIdx, 1, newArray[beforeIdx]).pop()
-      );
-    }
-    return newArray;
+    cloneColumns.value = showColumns.value.filter((item) => item.checked);
   };
 
   const popupVisibleChange = (val: boolean) => {
@@ -678,8 +655,22 @@
         const sortable = new Sortable(el, {
           onEnd(e: any) {
             const { oldIndex, newIndex } = e;
-            exchangeArray(cloneColumns.value, oldIndex, newIndex);
-            exchangeArray(showColumns.value, oldIndex, newIndex);
+            if (oldIndex !== newIndex) {
+              const newList = e.from.children;
+              const newArrayList: string[] = [];
+              Array.from(newList).forEach((element: any) => {
+                const currentDataIndex: string =
+                  element.getAttribute('dataIndex') || '';
+                newArrayList.push(currentDataIndex);
+              });
+              const resultList: Column[] = newArrayList
+                .map((v) => {
+                  return showColumns.value.find((m) => m.dataIndex === v);
+                })
+                .filter((v) => v !== undefined);
+              showColumns.value = resultList;
+              cloneColumns.value = resultList.filter((v) => v?.checked);
+            }
           },
         });
       });
