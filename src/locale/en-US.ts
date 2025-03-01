@@ -97,6 +97,7 @@ const localeJob = {
     'The time expression is incorrect. Please verify the time expression carefully. For example: 0 * * * *',
 
   'job.daemon': 'Daemon Job',
+  'job.saveDaemon': 'Save Daemon Job',
   'job.daemon.name': 'Name',
   'job.daemon.name.placeholder': 'Place enter a name of daemon job',
   'job.daemon.info': 'Description',

@@ -170,7 +170,7 @@
       @before-ok="handleSubmitJobSupervisor"
       @cancel="handleCancel"
     >
-      <template #title> {{ $t('job.saveTimer') }}</template>
+      <template #title> {{ $t('job.saveDaemon') }}</template>
       <a-form
         ref="saveJobSupervisorRef"
         :rules="jobSupervisorFormValidateRules"

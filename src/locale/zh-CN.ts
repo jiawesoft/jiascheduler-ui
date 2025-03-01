@@ -96,6 +96,7 @@ const localeJob = {
     '时间表达式不正确，请确实检查时间表达式是否正确，例如: 0 * * * * *',
 
   'job.daemon': '常驻任务',
+  'job.saveDaemon': '保存常驻任务',
   'job.daemon.name': '名称',
   'job.daemon.name.placeholder': '请输入常驻任务名称',
   'job.daemon.info': '描述',
