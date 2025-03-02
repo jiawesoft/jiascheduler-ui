@@ -8,6 +8,7 @@
     allow-clear
     allow-search
     @search="handleSearchJob"
+    @change="changeJob"
   >
     <a-option v-for="item of jobOptions" :key="item.eid" :value="item.eid">{{
       item.name
@@ -25,7 +26,7 @@
     jobType: string;
   }>();
 
-  const emit = defineEmits(['update:eid']);
+  const emit = defineEmits(['update:eid', 'changeJob']);
 
   const eid = ref(props.eid);
   const loading = ref(false);
@@ -54,6 +55,12 @@
 
   const handleSearchJob = async (val: string) => {
     await fetchData({ name: val, job_type: props.jobType });
+  };
+
+  const changeJob = (val: any) => {
+    const currentName = jobOptions.value.find((item) => item.eid === val);
+    const jobName = currentName?.name || '';
+    emit('changeJob', jobName);
   };
 
   fetchData({ default_eid: props.eid, job_type: props.jobType });

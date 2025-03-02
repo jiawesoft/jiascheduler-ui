@@ -31,8 +31,8 @@
                 <a-form-item field="name" :label="$t('job.timer.name')">
                   <a-input
                     v-model="formModel.name"
-                    @press-enter="search"
                     :placeholder="$t('job.timer.name.placeholder')"
+                    @press-enter="search"
                   />
                 </a-form-item>
               </a-col>
@@ -260,6 +260,7 @@
               v-if="jobTimerModalVisible"
               v-model:eid="jobTimerForm.eid"
               v-model:job-type="formModel.job_type"
+              @change-job="changeJob"
             />
           </a-form-item>
         </a-form>
@@ -555,6 +556,12 @@
       // you can report use errorHandler or other
     } finally {
       setLoading(false);
+    }
+  };
+
+  const changeJob = (str: string) => {
+    if (str && !jobTimerForm.value.name) {
+      jobTimerForm.value.name = str;
     }
   };
 

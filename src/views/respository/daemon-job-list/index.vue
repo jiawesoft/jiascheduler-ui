@@ -17,8 +17,8 @@
                 <a-form-item field="name" :label="$t('job.daemon.name')">
                   <a-input
                     v-model="formModel.name"
-                    @press-enter="search"
                     :placeholder="$t('job.daemon.name.placeholder')"
+                    @press-enter="search"
                   />
                 </a-form-item>
               </a-col>
@@ -196,10 +196,10 @@
           :tooltip="$t('job.daemon.restartInterval.tips')"
         >
           <a-input-number
+            v-model="jobSupervisorForm.restart_interval"
             placeholder="Please Enter"
             mode="button"
             size="large"
-            v-model="jobSupervisorForm.restart_interval"
           />
         </a-form-item>
         <a-form-item field="eid" validate-trigger="blur" :label="$t('job')">
@@ -207,6 +207,7 @@
             v-if="jobSupervisorModalVisible"
             v-model:eid="jobSupervisorForm.eid"
             job-type="default"
+            @change-job="changeJob"
           />
         </a-form-item>
       </a-form>
@@ -467,6 +468,12 @@
       // you can report use errorHandler or other
     } finally {
       setLoading(false);
+    }
+  };
+
+  const changeJob = (str: string) => {
+    if (str && !jobSupervisorForm.value.name) {
+      jobSupervisorForm.value.name = str;
     }
   };
 
