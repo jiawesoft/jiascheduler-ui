@@ -74,7 +74,7 @@
       </a-row>
       <a-divider style="margin-top: 0" />
       <a-row style="margin-bottom: 16px">
-        <a-col :span="12">
+        <a-col :span="2">
           <a-space direction="horizontal" size="large">
             <a-button
               type="primary"
@@ -88,8 +88,15 @@
             </a-button>
           </a-space>
         </a-col>
+        <a-col :span="20">
+          <tag-item
+            :tag-list="tagList"
+            :controlled="true"
+            @query-tag-list="queryTagList"
+          ></tag-item>
+        </a-col>
         <a-col
-          :span="12"
+          :span="2"
           style="display: flex; align-items: center; justify-content: end"
         >
           <a-tooltip :content="$t('columns.actions.refresh')">
@@ -161,6 +168,15 @@
       >
         <template #index="{ rowIndex }">
           {{ rowIndex + 1 + (pagination.page - 1) * pagination.pageSize }}
+        </template>
+        <template #tags="{ record }">
+          <table-tag-item
+            :tag-list="record.tags"
+            :resource-id="record.id"
+            :resource-type="resourceType"
+            :controlled="true"
+            @refresh-page="refreshPage"
+          ></table-tag-item>
         </template>
 
         <template #operations="{ record }">
@@ -333,8 +349,8 @@
           >
             <a-space direction="vertical" :style="{ width: '100%' }">
               <a-upload
-                action="/api/file/upload"
                 v-model="uploadFileList"
+                action="/api/file/upload"
                 :limit="1"
                 :default-file-list="defaultFileList()"
                 :file-list="uploadFileList"
@@ -408,6 +424,7 @@
     saveJob,
     endpoint,
   } from '@/api/job';
+  import { queryCountResource, TagRecord } from '@/api/tag';
   import {
     ExecutorRecord,
     queryExecutorList,
@@ -433,6 +450,8 @@
   import 'ace-builds/src-noconflict/theme-chaos';
   import { useRouter } from 'vue-router';
   import { genVersionFromTime } from '@/utils/time';
+  import TagItem from '@/components/tag-item/index.vue';
+  import TableTagItem from '@/components/table-tag-item/index.vue';
   import SelectBundleScript from '../components/select-bundle-script.vue';
   import SelectExecutor from '../components/select-executor.vue';
   import SelectInstance from '../components/select-instance.vue';
@@ -598,8 +617,9 @@
       dataIndex: 'info',
     },
     {
-      title: t('job.type'),
-      dataIndex: 'job_type',
+      title: t('tag.name'),
+      dataIndex: 'tags',
+      slotName: 'tags',
     },
     {
       title: t('job.executor'),
@@ -652,11 +672,33 @@
     },
   ];
 
+  const tagList = ref<TagRecord[]>([]);
+  const resourceType = ref('job');
+
+  const initTagList = async () => {
+    try {
+      const { data } = await queryCountResource({
+        resource_type: resourceType.value,
+      });
+      tagList.value = data.list;
+    } catch (err) {
+      // you can report use errorHandler or other
+    }
+  };
+  initTagList();
+
+  const tagIds = ref<number[]>([]);
+  const queryTagList = (tag: number[]) => {
+    tagIds.value = tag;
+    fetchData();
+  };
+
   const fetchData = async (
     params: QueryJobReq = {
       page: basePagination.page,
       page_size: basePagination.pageSize,
       name: '',
+      tag_ids: tagIds.value,
       job_type: formModel.value.job_type,
     }
   ) => {
@@ -678,6 +720,12 @@
     } finally {
       setLoading(false);
     }
+  };
+
+  // 刷新
+  const refreshPage = () => {
+    initTagList();
+    fetchData();
   };
 
   const fetchJobOptions = async (

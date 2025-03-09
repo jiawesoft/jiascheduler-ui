@@ -64,9 +64,11 @@
   </a-row>
   <a-divider style="margin-top: 0" />
   <a-row style="margin-bottom: 16px">
-    <a-col :span="12"></a-col>
+    <a-col :span="22">
+      <tag-item :tag-list="tagList" @query-tag-list="queryTagList"></tag-item>
+    </a-col>
     <a-col
-      :span="12"
+      :span="2"
       style="display: flex; align-items: center; justify-content: right"
     >
       <a-tooltip :content="$t('columns.actions.refresh')">
@@ -138,6 +140,15 @@
   >
     <template #index="{ rowIndex }">
       {{ rowIndex + 1 + (pagination.page - 1) * pagination.pageSize }}
+    </template>
+
+    <template #tags="{ record }">
+      <table-tag-item
+        :tag-list="record.tags"
+        :resource-id="record.id"
+        :resource-type="resourceType"
+        @refresh-page="refreshPage"
+      ></table-tag-item>
     </template>
 
     <template #jobName="{ record }">
@@ -223,11 +234,14 @@
     queryScheduleList,
     redispatchJob,
   } from '@/api/job';
+  import { queryCountResource, TagRecord } from '@/api/tag';
   import useLoading from '@/hooks/loading';
   import { Pagination } from '@/types/global';
   import type { TableColumnData } from '@arco-design/web-vue/es/table/interface';
   import cloneDeep from 'lodash/cloneDeep';
   import Sortable from 'sortablejs';
+  import TagItem from '@/components/tag-item/index.vue';
+  import TableTagItem from '@/components/table-tag-item/index.vue';
   import { computed, nextTick, reactive, ref, toRefs, watch } from 'vue';
   import { useI18n } from 'vue-i18n';
 
@@ -329,6 +343,12 @@
       dataIndex: 'job_type',
     },
     {
+      title: t('tag.name'),
+      dataIndex: 'tags',
+      slotName: 'tags',
+      width: 150,
+    },
+    {
       title: t('job.name'),
       dataIndex: 'snapshot_data',
       slotName: 'jobName',
@@ -356,11 +376,28 @@
     },
   ]);
 
+  const tagList = ref<TagRecord[]>([]);
+  const resourceType = ref('job');
+  const tagIds = ref<number[]>([]);
+
+  const initTagList = async () => {
+    try {
+      const { data } = await queryCountResource({
+        resource_type: resourceType.value,
+      });
+      tagList.value = data.list;
+    } catch (err) {
+      // you can report use errorHandler or other
+    }
+  };
+  initTagList();
+
   const fetchData = async (
     params: QueryScheduleListReq = {
       page: 1,
       page_size: 20,
       job_type: formModel.value.job_type,
+      tag_ids: tagIds.value,
       schedule_type: formModel.value.schedule_type as ScheduleType,
     }
   ) => {
@@ -375,6 +412,17 @@
     } finally {
       setLoading(false);
     }
+  };
+
+  const queryTagList = (tag: number[]) => {
+    tagIds.value = tag;
+    fetchData();
+  };
+
+  // 刷新
+  const refreshPage = () => {
+    initTagList();
+    fetchData();
   };
 
   const handleViewScheduleDetailModal = (e: any, record: any) => {

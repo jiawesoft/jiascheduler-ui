@@ -39,6 +39,35 @@ export const stringColor = (str: string) => {
   return color;
 };
 
+export const generateRandomNumber = (str: string, maxRange: number) => {
+  let hash = 0;
+  for (let i = 0; i < str.length; i += 1) {
+    hash = str.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  const random = Math.abs(hash) % maxRange;
+  return random;
+};
+
+export const generateTagColor = (str: string) => {
+  const colors = [
+    'red',
+    'orangered',
+    'orange',
+    'gold',
+    'lime',
+    'green',
+    'cyan',
+    'blue',
+    'arcoblue',
+    'purple',
+    'pinkpurple',
+    'magenta',
+    'gray',
+  ];
+  const i = generateRandomNumber(str, colors.length);
+  return colors[i];
+};
+
 // 编辑器语言判断
 export const getCommand = (currentCommand: string) => {
   if (currentCommand.includes('bash')) {

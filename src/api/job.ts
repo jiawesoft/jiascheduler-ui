@@ -18,6 +18,7 @@ export interface JobRecord {
 
 export interface QueryJobReq extends Partial<JobRecord> {
   default_eid?: string;
+  tag_ids?: number[];
   page: number;
   page_size: number;
 }
@@ -113,6 +114,7 @@ export interface RunRecord {
 export interface QueryRunListReq extends Partial<RunRecord> {
   page: number;
   page_size: number;
+  tag_ids?: number[];
 }
 
 export interface QueryRunListResp {
@@ -148,6 +150,7 @@ export interface ScheduleRecord {
 export interface QueryScheduleListReq extends Partial<ScheduleRecord> {
   page: number;
   page_size: number;
+  tag_ids?: number[];
 }
 
 export interface QuryScheduleListResp {
@@ -195,6 +198,7 @@ export interface ExecRecord {
 export interface QueryExecListReq extends Partial<ExecRecord> {
   page: number;
   page_size: number;
+  tag_ids?: number[];
 }
 
 export interface QueryExecListRes {
@@ -346,6 +350,7 @@ export interface JobSupervisorRecord {
 export interface QueryJobSupervisorReq extends Partial<JobSupervisorRecord> {
   page: number;
   page_size: number;
+  tag_ids?: number[]
 }
 
 export interface QueryJobSupervisorListResp {
