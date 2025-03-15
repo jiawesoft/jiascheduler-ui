@@ -610,6 +610,7 @@
       page: basePagination.page,
       page_size: basePagination.pageSize,
       ...formModel.value,
+      tag_ids: tagIds.value,
     } as unknown as QueryJobReq);
   };
   const onPageChange = (current: number) => {
@@ -617,6 +618,7 @@
       page_size: pagination.pageSize,
       page: current,
       ...formModel.value,
+      tag_ids: tagIds.value,
     });
   };
 

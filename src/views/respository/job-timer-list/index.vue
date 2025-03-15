@@ -695,6 +695,7 @@
       page: basePagination.page,
       page_size: basePagination.pageSize,
       ...formModel.value,
+      tag_ids: tagIds.value,
       job_type: formModel.value.job_type,
     } as unknown as QueryJobReq);
   };
@@ -703,6 +704,7 @@
       page_size: pagination.pageSize,
       page: current,
       ...formModel.value,
+      tag_ids: tagIds.value,
     });
   };
 

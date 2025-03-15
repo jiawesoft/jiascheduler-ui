@@ -579,6 +579,7 @@
       ...formModel.value,
       job_type: formModel.value.job_type,
       schedule_type: 'timer',
+      tag_ids: tagIds.value,
     } as unknown as QueryJobReq);
   };
 
@@ -634,6 +635,7 @@
       page_size: pagination.pageSize,
       page: current,
       ...formModel.value,
+      tag_ids: tagIds.value,
     });
   };
 

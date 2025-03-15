@@ -671,6 +671,7 @@
       job_type: formModel.value.job_type,
       eid: props.eid,
       bind_ip: props.bindIp,
+      tag_ids: tagIds.value,
     } as unknown as QueryExecListReq);
   };
   const onPageChange = (current: number) => {
@@ -683,6 +684,7 @@
       eid: props.eid,
       job_type: formModel.value.job_type,
       bind_ip: props.bindIp,
+      tag_ids: tagIds.value,
     } as unknown as QueryExecListReq);
   };
 

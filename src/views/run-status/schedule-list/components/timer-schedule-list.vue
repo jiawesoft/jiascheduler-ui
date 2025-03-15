@@ -454,6 +454,7 @@
       ...formModel.value,
       scheduleType: formModel.value.schedule_type,
       job_type: formModel.value.job_type,
+      tag_ids: tagIds.value,
     } as unknown as QueryJobReq);
   };
   const onPageChange = (current: number) => {
@@ -461,6 +462,7 @@
       page_size: pagination.pageSize,
       page: current,
       ...formModel.value,
+      tag_ids: tagIds.value,
     });
   };
 

@@ -454,6 +454,7 @@
       page_zie: basePagination.pageSize,
       ...formModel.value,
       scheduleType: formModel.value.schedule_type,
+      tag_ids: tagIds.value,
       job_type: formModel.value.job_type,
     } as unknown as QueryJobReq);
   };
@@ -462,6 +463,7 @@
       page_size: pagination.pageSize,
       page: current,
       ...formModel.value,
+      tag_ids: tagIds.value,
     });
   };
 
