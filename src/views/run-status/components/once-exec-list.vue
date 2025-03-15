@@ -64,9 +64,11 @@
   </a-row>
   <a-divider v-if="!$props.disableSearch" style="margin-top: 0" />
   <a-row style="margin-bottom: 16px">
-    <a-col :span="12"> </a-col>
+    <a-col :span="22">
+      <tag-item :tag-list="tagList" @query-tag-list="queryTagList"></tag-item>
+    </a-col>
     <a-col
-      :span="12"
+      :span="2"
       style="display: flex; align-items: center; justify-content: end"
     >
       <a-tooltip :content="$t('columns.actions.refresh')">
@@ -144,6 +146,15 @@
       {{ rowIndex + 1 + (pagination.page - 1) * pagination.pageSize }}
     </template>
 
+    <template #tags="{ record }">
+      <table-tag-item
+        :tag-list="record.tags"
+        :resource-id="record.id"
+        :resource-type="resourceType"
+        @refresh-page="refreshPage"
+      ></table-tag-item>
+    </template>
+
     <template #validate="{ column, record }">
       <a-tag
         v-if="
@@ -180,6 +191,15 @@
   >
     <template #index="{ rowIndex }">
       {{ rowIndex + 1 + (pagination.page - 1) * pagination.pageSize }}
+    </template>
+
+    <template #tags="{ record }">
+      <table-tag-item
+        :tag-list="record.tags"
+        :resource-id="record.id"
+        :resource-type="resourceType"
+        @refresh-page="refreshPage"
+      ></table-tag-item>
     </template>
 
     <template #operations="{ record }">
@@ -277,6 +297,7 @@
 </template>
 
 <script lang="ts" setup>
+  import { queryCountResource, TagRecord } from '@/api/tag';
   import { computed, ref, reactive, watch, nextTick, toRefs } from 'vue';
   import { useI18n } from 'vue-i18n';
   import useLoading from '@/hooks/loading';
@@ -287,6 +308,8 @@
   import Sortable from 'sortablejs';
   import { useAppStore } from '@/store';
   import { VAceEditor } from 'vue3-ace-editor';
+  import TagItem from '@/components/tag-item/index.vue';
+  import TableTagItem from '@/components/table-tag-item/index.vue';
   import 'ace-builds/src-noconflict/mode-text';
   import 'ace-builds/src-noconflict/theme-chrome';
   import 'ace-builds/src-noconflict/theme-chaos';
@@ -471,6 +494,12 @@
         dataIndex: 'job_type',
       },
       {
+        title: t('tag.name'),
+        dataIndex: 'tags',
+        slotName: 'tags',
+        width: 150,
+      },
+      {
         title: t('job.scheduleName'),
         dataIndex: 'schedule_name',
       },
@@ -566,6 +595,22 @@
     },
   ]);
 
+  const tagList = ref<TagRecord[]>([]);
+  const resourceType = ref('job');
+  const tagIds = ref<number[]>([]);
+
+  const initTagList = async () => {
+    try {
+      const { data } = await queryCountResource({
+        resource_type: resourceType.value,
+      });
+      tagList.value = data.list;
+    } catch (err) {
+      // you can report use errorHandler or other
+    }
+  };
+  initTagList();
+
   const fetchData = async (
     params: QueryExecListReq = {
       page: 1,
@@ -574,6 +619,7 @@
       schedule_type: formModel.value.schedule_type,
       eid: props.eid,
       job_type: formModel.value.job_type,
+      tag_ids: tagIds.value,
       bind_ip: props.bindIp,
       bind_namespace: props.bindNamespace,
     }
@@ -589,6 +635,17 @@
     } finally {
       setLoading(false);
     }
+  };
+
+  const queryTagList = (tag: number[]) => {
+    tagIds.value = tag;
+    fetchData();
+  };
+
+  // 刷新
+  const refreshPage = () => {
+    initTagList();
+    fetchData();
   };
 
   const handleViewExecDetailModal = (e: any, record: any) => {
@@ -613,6 +670,7 @@
       job_type: formModel.value.job_type,
       eid: props.eid,
       bind_ip: props.bindIp,
+      tag_ids: tagIds.value,
     } as unknown as QueryExecListReq);
   };
   const onPageChange = (current: number) => {
@@ -625,6 +683,7 @@
       eid: props.eid,
       job_type: formModel.value.job_type,
       bind_ip: props.bindIp,
+      tag_ids: tagIds.value,
     } as unknown as QueryExecListReq);
   };
 

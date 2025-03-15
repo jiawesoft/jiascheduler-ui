@@ -280,6 +280,10 @@ const localeTeam = {
   'team.member.isAdmin': 'type',
 };
 
+const localeTag = {
+  'tag.name': 'Tag',
+};
+
 export default {
   'app.name': 'Jiascheduler Scheduling Platform',
 
@@ -380,4 +384,5 @@ export default {
   ...localeUserSetting,
   ...localeTerminal,
   ...localeTeam,
+  ...localeTag,
 };

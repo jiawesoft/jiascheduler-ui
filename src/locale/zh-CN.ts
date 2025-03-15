@@ -275,6 +275,10 @@ const localeTeam = {
   'team.member.isAdmin': '类型',
 };
 
+const localeTag = {
+  'tag.name': '标签',
+};
+
 export default {
   'app.name': 'Jiascheduler 调度平台',
 
@@ -375,4 +379,5 @@ export default {
   ...localeUserSetting,
   ...localeTerminal,
   ...localeTeam,
+  ...localeTag,
 };
