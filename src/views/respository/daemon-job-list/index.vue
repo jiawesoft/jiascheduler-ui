@@ -597,7 +597,12 @@
 
     Message.success(t('form.submit.success'));
 
-    router.push('/run-status/run-list');
+    router.push({
+      path: '/run-status/run-list',
+      query: {
+        scheduleType: 'daemon',
+      },
+    });
     return true;
   };
 

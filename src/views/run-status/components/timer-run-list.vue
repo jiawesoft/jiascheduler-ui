@@ -293,7 +293,15 @@
   import { queryCountResource, TagRecord } from '@/api/tag';
   import useLoading from '@/hooks/loading';
   import { Pagination } from '@/types/global';
-  import { computed, nextTick, reactive, ref, toRefs, watch } from 'vue';
+  import {
+    computed,
+    nextTick,
+    reactive,
+    ref,
+    toRefs,
+    watch,
+    defineProps,
+  } from 'vue';
   import { useI18n } from 'vue-i18n';
 
   import { Message } from '@arco-design/web-vue';
@@ -310,6 +318,13 @@
   const runModalVisible = ref(false);
   const viewType = ref('execHistory');
   const runDetailModalVisible = ref(false);
+
+  const props = defineProps({
+    jobType: {
+      type: String,
+      default: 'default',
+    },
+  });
 
   const state = reactive({
     jobForm: {
@@ -359,7 +374,7 @@
   const generateFormModel = () => {
     return {
       schedule_name: '',
-      job_type: 'default',
+      job_type: props.jobType,
       schedule_type: 'timer',
       bind_ip: '',
     };
