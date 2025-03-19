@@ -414,25 +414,26 @@
 
 <script lang="ts" setup>
   import {
-    JobAction,
-    JobRecord,
-    QueryJobReq,
-    JobBundleScriptRecord,
-    ScheduleType,
-    dispatchJob,
-    queryJobList,
-    saveJob,
-    endpoint,
-  } from '@/api/job';
-  import { queryCountResource, TagRecord } from '@/api/tag';
-  import {
     ExecutorRecord,
     queryExecutorList,
     QueryExecutorReq,
   } from '@/api/executor';
-  import { getCommand } from '@/utils';
+  import {
+    dispatchJob,
+    endpoint,
+    JobAction,
+    JobBundleScriptRecord,
+    JobRecord,
+    queryJobList,
+    QueryJobReq,
+    saveJob,
+    ScheduleType,
+  } from '@/api/job';
+  import { queryCountResource, TagRecord } from '@/api/tag';
   import useLoading from '@/hooks/loading';
+  import { useAppStore } from '@/store';
   import { Pagination } from '@/types/global';
+  import { getCommand } from '@/utils';
   import type { SelectOptionData } from '@arco-design/web-vue/es/select/interface';
   import type { TableColumnData } from '@arco-design/web-vue/es/table/interface';
   import cloneDeep from 'lodash/cloneDeep';
@@ -440,18 +441,17 @@
   import { computed, nextTick, reactive, ref, toRefs, watch } from 'vue';
   import { useI18n } from 'vue-i18n';
   import { VAceEditor } from 'vue3-ace-editor';
-  import { useAppStore } from '@/store';
   // import 'ace-builds/src-noconflict/mode-json'; // Load the language definition file used below
+  import TableTagItem from '@/components/table-tag-item/index.vue';
+  import TagItem from '@/components/tag-item/index.vue';
+  import { genVersionFromTime } from '@/utils/time';
   import { FileItem, Message } from '@arco-design/web-vue';
+  import 'ace-builds/src-noconflict/mode-powershell';
   import 'ace-builds/src-noconflict/mode-python';
   import 'ace-builds/src-noconflict/mode-sh';
-  import 'ace-builds/src-noconflict/mode-powershell';
-  import 'ace-builds/src-noconflict/theme-chrome';
   import 'ace-builds/src-noconflict/theme-chaos';
+  import 'ace-builds/src-noconflict/theme-chrome';
   import { useRouter } from 'vue-router';
-  import { genVersionFromTime } from '@/utils/time';
-  import TagItem from '@/components/tag-item/index.vue';
-  import TableTagItem from '@/components/table-tag-item/index.vue';
   import SelectBundleScript from '../components/select-bundle-script.vue';
   import SelectExecutor from '../components/select-executor.vue';
   import SelectInstance from '../components/select-instance.vue';
@@ -841,13 +841,16 @@
     }
     Message.success(t('form.submit.success'));
 
-    router.push({
-      path: '/run-status/run-list',
-      query: {
-        scheduleType: 'once',
-        jobType: formModel.value.job_type,
-      },
-    });
+    setTimeout(() => {
+      router.push({
+        path: '/run-status/run-list',
+        query: {
+          scheduleType: 'once',
+          jobType: formModel.value.job_type,
+        },
+      });
+    }, 200);
+
     return true;
   };
 

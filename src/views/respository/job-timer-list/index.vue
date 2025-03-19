@@ -350,10 +350,10 @@
 
   import { Message } from '@arco-design/web-vue';
 
-  import { useRouter } from 'vue-router';
-  import { genVersionFromTime } from '@/utils/time';
-  import TagItem from '@/components/tag-item/index.vue';
   import TableTagItem from '@/components/table-tag-item/index.vue';
+  import TagItem from '@/components/tag-item/index.vue';
+  import { genVersionFromTime } from '@/utils/time';
+  import { useRouter } from 'vue-router';
   import SelectInstance from '../components/select-instance.vue';
   import SelectJobTimer from '../components/select-job-timer.vue';
   import SelectJob from '../components/select-job.vue';
@@ -681,14 +681,15 @@
     }
 
     Message.success(t('form.submit.success'));
-
-    router.push({
-      path: '/run-status/run-list',
-      query: {
-        scheduleType: 'timer',
-        jobType: formModel.value.job_type,
-      },
-    });
+    setTimeout(() => {
+      router.push({
+        path: '/run-status/run-list',
+        query: {
+          scheduleType: 'timer',
+          jobType: formModel.value.job_type,
+        },
+      });
+    }, 200);
     return true;
   };
 
