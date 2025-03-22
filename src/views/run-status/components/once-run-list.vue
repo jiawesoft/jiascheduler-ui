@@ -596,13 +596,25 @@
   };
 
   const handleAction = async (e: any, record: any, action: JobAction) => {
-    await jobAction({
-      action,
-      instance_id: record.instance_id,
-      schedule_id: record.schedule_id,
-    });
-    Message.success(t('form.submit.success'));
-    search();
+    try {
+      await jobAction({
+        action,
+        instance_id: record.instance_id,
+        schedule_id: record.schedule_id,
+      });
+    } catch (err) {
+      setTimeout(() => {
+        search();
+      }, 200);
+
+      return false;
+    }
+
+    setTimeout(() => {
+      Message.success(t('form.submit.success'));
+      search();
+    }, 200);
+
     return true;
   };
 
