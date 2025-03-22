@@ -236,6 +236,8 @@ const localeInstall = {
   'install.initDatabase': 'Connect to Database',
   'install.initData': 'Initialize Data',
   'install.initAdminUser': 'Set Admin Account',
+  'install.defaultDockerAddr':
+    'If the default container deployment is used, the following configuration address can be directly utilized',
 
   'install.httpServer.bindAddr': 'Http Server Address',
   'install.httpServer.tips.bindAddr':
@@ -253,7 +255,7 @@ const localeInstall = {
   'install.admin.password': 'Password',
   'install.cometSecret': 'Comet Secret',
   'install.cometSecret.tips':
-    'Comet key, used for Comet communication authentication',
+    'Comet key, used for Comet communication authentication. A default value has been automatically configured in the form. If modification is needed, please ensure that both Comet and Agent use the same key.',
 
   'install.success.title': 'Installation Successful',
   'install.success.subTitle': 'Form submission successful!',

@@ -233,6 +233,7 @@ const localeInstall = {
   'install.initDatabase': '连接数据库',
   'install.initData': '初始化数据',
   'install.initAdminUser': '设置管理员账号',
+  'install.defaultDockerAddr': '如果采用默认容器部署，可直接使用如下配置地址',
 
   'install.httpServer.bindAddr': 'Http服务地址',
   'install.httpServer.tips.bindAddr': '控制台访问地址，eg: "0.0.0.0:9090"',
@@ -248,7 +249,8 @@ const localeInstall = {
   'install.admin.username': '管理员',
   'install.admin.password': '密码',
   'install.cometSecret': 'comet密钥',
-  'install.cometSecret.tips': 'comet密钥，用于comet通信认证',
+  'install.cometSecret.tips':
+    'comet密钥，用于comet通信认证,表单中已自动配置默认值，如果需要修改请保证comet与agent采用相同的密钥',
 
   'install.success.title': '提交成功',
   'install.success.subTitle': '表单提交成功！',
