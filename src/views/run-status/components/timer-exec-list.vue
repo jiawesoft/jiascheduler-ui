@@ -411,17 +411,24 @@
           fixed: 'left',
           slotName: 'index',
         },
-        {
-          title: t('job.scheduleId'),
-          dataIndex: 'schedule_id',
-          ellipsis: true,
-          fixed: 'left',
-          width: 130,
-          tooltip: true,
-        },
+        // {
+        //   title: t('job.scheduleId'),
+        //   dataIndex: 'schedule_id',
+        //   ellipsis: true,
+        //   fixed: 'left',
+        //   width: 130,
+        //   tooltip: true,
+        // },
         {
           title: t('job.scheduleName'),
           dataIndex: 'schedule_name',
+          fixed: 'left',
+          ellipsis: true,
+          width: 100,
+        },
+        {
+          title: t('job.name'),
+          dataIndex: 'job_name',
           fixed: 'left',
           ellipsis: true,
           width: 100,
@@ -485,29 +492,38 @@
         dataIndex: 'index',
         width: 30,
         slotName: 'index',
+        fixed: 'left',
+      },
+
+      {
+        title: t('job.scheduleName'),
+        dataIndex: 'schedule_name',
+        ellipsis: true,
+        width: 100,
+        tooltip: true,
       },
       {
-        title: t('job.scheduleId'),
-        dataIndex: 'schedule_id',
+        title: t('job.name'),
+        dataIndex: 'job_name',
+        ellipsis: true,
+        width: 100,
+        tooltip: true,
       },
+
       {
-        title: t('job.type'),
-        dataIndex: 'job_type',
+        title: t('job.bindIp'),
+        dataIndex: 'bind_ip',
+        ellipsis: true,
+        width: 150,
       },
+
       {
         title: t('tag.name'),
         dataIndex: 'tags',
         slotName: 'tags',
         width: 150,
       },
-      {
-        title: t('job.scheduleName'),
-        dataIndex: 'schedule_name',
-      },
-      {
-        title: t('job.bindIp'),
-        dataIndex: 'bind_ip',
-      },
+
       {
         title: t('job.exitStatus'),
         dataIndex: 'exit_status',
@@ -518,12 +534,14 @@
       {
         title: t('job.startTime'),
         dataIndex: 'start_time',
-        width: 170,
+        ellipsis: true,
+        width: 120,
       },
       {
         title: t('job.endTime'),
         dataIndex: 'end_time',
-        width: 170,
+        ellipsis: true,
+        width: 120,
       },
       {
         title: t('team.name'),

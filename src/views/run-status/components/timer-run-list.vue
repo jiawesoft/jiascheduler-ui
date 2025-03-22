@@ -423,100 +423,32 @@
       width: 30,
     },
     {
-      title: t('instance.namespace'),
-      dataIndex: 'bind_namespace',
-      fixed: 'left',
-      width: 130,
-    },
-    {
       title: t('job.bindIp'),
       dataIndex: 'bind_ip',
       fixed: 'left',
       width: 130,
     },
     {
-      title: t('job.scheduleName'),
-      dataIndex: 'schedule_name',
-      ellipsis: true,
-      tooltip: true,
-      fixed: 'left',
-      width: 120,
-    },
-    {
       title: t('job.name'),
       dataIndex: 'job_name',
       slotName: 'jobName',
+      fixed: 'left',
       tooltip: true,
       ellipsis: true,
       width: 120,
-    },
-    {
-      title: t('executor'),
-      dataIndex: 'executor_name',
-      width: 120,
-    },
-    {
-      title: t('job.timerExpr'),
-      slotName: 'timerExpr',
-      width: 120,
-    },
-
-    {
-      title: t('job.type'),
-      dataIndex: 'job_type',
-      width: 120,
-    },
-    {
-      title: t('tag.name'),
-      dataIndex: 'tags',
-      slotName: 'tags',
-      width: 150,
     },
     {
       title: t('job.scheduleStatus'),
       dataIndex: 'schedule_status',
       slotName: 'scheduleStatus',
+      fixed: 'left',
       width: 120,
     },
     {
       title: t('job.runStatus'),
       dataIndex: 'run_status',
       slotName: 'runStatus',
-      width: 120,
-    },
-    {
-      title: t('job.lastExitStatus'),
-      dataIndex: 'exit_status',
-      ellipsis: true,
-      slotName: 'exitStatus',
-      width: 120,
-    },
-    {
-      title: t('job.scheduleId'),
-      dataIndex: 'schedule_id',
-      ellipsis: true,
-      tooltip: true,
-      width: 120,
-    },
-    {
-      title: t('job.startTime'),
-      dataIndex: 'start_time',
-      width: 170,
-    },
-    {
-      title: t('job.endTime'),
-      dataIndex: 'end_time',
-      width: 170,
-    },
-    {
-      title: t('team.name'),
-      dataIndex: 'team_name',
-      width: 120,
-    },
-    {
-      title: t('columns.updatedUser'),
-      dataIndex: 'updated_user',
-      ellipsis: true,
+      fixed: 'left',
       width: 120,
     },
     {
@@ -528,6 +460,79 @@
       title: t('job.nextTime'),
       dataIndex: 'next_time',
       width: 170,
+    },
+    {
+      title: t('job.lastExitStatus'),
+      dataIndex: 'exit_status',
+      ellipsis: true,
+      slotName: 'exitStatus',
+      width: 120,
+      tooltip: true,
+    },
+    {
+      title: t('tag.name'),
+      dataIndex: 'tags',
+      slotName: 'tags',
+      width: 150,
+    },
+    {
+      title: t('job.timerExpr'),
+      slotName: 'timerExpr',
+      width: 120,
+    },
+    {
+      title: t('job.scheduleName'),
+      dataIndex: 'schedule_name',
+      ellipsis: true,
+      tooltip: true,
+      width: 120,
+    },
+    {
+      title: t('job.startTime'),
+      dataIndex: 'start_time',
+      width: 170,
+    },
+
+    {
+      title: t('job.endTime'),
+      dataIndex: 'end_time',
+      width: 170,
+    },
+    {
+      title: t('instance.namespace'),
+      dataIndex: 'bind_namespace',
+      width: 130,
+    },
+    {
+      title: t('executor'),
+      dataIndex: 'executor_name',
+      width: 120,
+    },
+
+    // {
+    //   title: t('job.type'),
+    //   dataIndex: 'job_type',
+    //   width: 120,
+    // },
+
+    {
+      title: t('job.scheduleId'),
+      dataIndex: 'schedule_id',
+      ellipsis: true,
+      tooltip: true,
+      width: 120,
+    },
+    {
+      title: t('team.name'),
+      dataIndex: 'team_name',
+      width: 120,
+    },
+
+    {
+      title: t('columns.updatedUser'),
+      dataIndex: 'updated_user',
+      ellipsis: true,
+      width: 120,
     },
     {
       title: t('operations'),

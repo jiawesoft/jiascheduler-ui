@@ -186,7 +186,7 @@
     v-model:visible="scheduleDetailVisible"
     title-align="start"
     :draggable="true"
-    width="70%"
+    width="80%"
     hide-cancel
     @cancel="handleCancel"
   >
@@ -316,6 +316,7 @@
     {
       title: t('columns.index'),
       dataIndex: 'index',
+      width: 30,
       slotName: 'index',
     },
     {
@@ -325,10 +326,18 @@
     {
       title: t('job.scheduleName'),
       dataIndex: 'name',
+      width: 100,
+      ellipsis: true,
+      tooltip: true,
     },
+
     {
-      title: t('job.type'),
-      dataIndex: 'job_type',
+      title: t('job.name'),
+      dataIndex: 'snapshot_data',
+      slotName: 'jobName',
+      width: 100,
+      ellipsis: true,
+      tooltip: true,
     },
     {
       title: t('tag.name'),
@@ -336,11 +345,7 @@
       slotName: 'tags',
       width: 150,
     },
-    {
-      title: t('job.name'),
-      dataIndex: 'snapshot_data',
-      slotName: 'jobName',
-    },
+
     {
       title: t('job.action'),
       dataIndex: 'action',
