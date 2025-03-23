@@ -60,8 +60,8 @@ const localeJob = {
   'job.detail': 'Job Details',
   'job.runHistory': 'Execution History',
   'job.type': 'Job Type',
-  'job.type.default': 'Default',
-  'job.type.bundle': 'Job Bundle',
+  'job.type.default': 'Single',
+  'job.type.bundle': 'Bundle',
   'job.scheduleType': 'Schedule Type',
   'job.scheduleType.once': 'Once',
   'job.scheduleType.timer': 'Timer',
@@ -91,8 +91,10 @@ const localeJob = {
   'job.completedCallback.header': 'Please enter header: format ',
   'job.completedCallback.triggerOn': 'Trigger Method',
   'job.completedCallback.triggerOn.all': 'All triggered',
-  'job.completedCallback.triggerOn.error': 'Trigger only upon execution failure',
-  'job.completedCallback.header.error': 'Please fill in the data in JSON format',
+  'job.completedCallback.triggerOn.error':
+    'Trigger only upon execution failure',
+  'job.completedCallback.header.error':
+    'Please fill in the data in JSON format',
 
   'job.timer': 'Timer',
   'job.saveTimer': 'Save Timer',
