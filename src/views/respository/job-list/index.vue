@@ -370,7 +370,11 @@
             <a-form-item :label="$t('job.completedCallback')">
               <a-switch v-model="jobForm.completed_callback.enable" />
             </a-form-item>
-            <a-form-item>
+            <a-form-item
+              field="completed_callback.url"
+              :rules="validateCallbackUrlRules"
+              validate-trigger="blur"
+            >
               <a-input
                 v-model="jobForm.completed_callback.url"
                 :placeholder="$t('job.completedCallback.url.placeholder')"
@@ -741,13 +745,24 @@
     {
       validator(value: any, callback: (error?: string | undefined) => void) {
         try {
-          if (JSON.parse(value) && /^\{/.test(value)) {
-            callback();
-          } else {
+          const isJson = /^\{/.test(value);
+          if (value && !(JSON.parse(value) && isJson)) {
             callback(t('job.completedCallback.header.error'));
           }
         } catch (error) {
-          callback(t('job.completedCallback.header.error'));
+          if (value) {
+            callback(t('job.completedCallback.header.error'));
+          }
+        }
+      },
+    },
+  ];
+  const validateCallbackUrlRules = [
+    {
+      validator(value: any, callback: (error?: string | undefined) => void) {
+        const urlRegex = /^(https?:\/\/.+)/;
+        if (!urlRegex.test(value)) {
+          callback(t('job.completedCallback.url.error'));
         }
       },
     },
@@ -899,13 +914,18 @@
       return false;
     }
     try {
+      const headerContent = jobForm.value.completed_callback.header;
+      const callbackParams =
+        formModel.value.job_type === 'default'
+          ? {
+              ...jobForm.value.completed_callback,
+              header: headerContent ? JSON.parse(headerContent) : {},
+            }
+          : undefined;
       const data = {
         ...jobForm.value,
         job_type: formModel.value.job_type,
-        completed_callback: {
-          ...jobForm.value.completed_callback,
-          header: JSON.parse(jobForm.value.completed_callback.header),
-        },
+        completed_callback: callbackParams,
       };
       if (formModel.value.job_type === 'default') {
         data.bundle_script = undefined;

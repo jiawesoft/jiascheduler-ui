@@ -186,6 +186,16 @@
                 </a-button>
               </a-popconfirm>
             </a-doption>
+            <a-doption>
+              <a-popconfirm
+                :content="$t('job.action.confirm.clear.records')"
+                @before-ok="handleDelete($event, record)"
+              >
+                <a-button type="dashed" size="mini" status="danger">
+                  {{ $t('job.clear.records') }}
+                </a-button>
+              </a-popconfirm>
+            </a-doption>
           </template>
         </a-dropdown-button>
       </a-space>
@@ -233,6 +243,7 @@
     ScheduleType,
     queryScheduleList,
     redispatchJob,
+    deleteExeHistory,
   } from '@/api/job';
   import { queryCountResource, TagRecord } from '@/api/tag';
   import useLoading from '@/hooks/loading';
@@ -528,6 +539,15 @@
     await redispatchJob({
       schedule_id: record.schedule_id,
       action,
+    });
+
+    search();
+    return true;
+  };
+
+  const handleDelete = async (e: any, record: any) => {
+    await deleteExeHistory({
+      schedule_id: record.schedule_id,
     });
 
     search();

@@ -92,6 +92,7 @@ const localeJob = {
   'job.completedCallback.triggerOn.all': '全部触发',
   'job.completedCallback.triggerOn.error': '仅在执行失败时触发',
   'job.completedCallback.header.error': '请填写JSON格式数据',
+  'job.completedCallback.url.error': '请填写正确的url地址',
 
   'job.timer': '定时器',
   'job.saveTimer': '保存定时器',
@@ -144,6 +145,9 @@ const localeJob = {
 
   'job.prevTime': '上次执行',
   'job.nextTime': '下次执行',
+
+  'job.clear.records': '清空执行记录',
+  'job.action.confirm.clear.records': '确认要清空执行记录么？',
 
   'job.action.confirm.start': '确认要启动么？',
   'job.action.confirm.startTimer': '确认要启动定时器么？',

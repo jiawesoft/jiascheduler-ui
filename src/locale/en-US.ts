@@ -95,6 +95,7 @@ const localeJob = {
     'Trigger only upon execution failure',
   'job.completedCallback.header.error':
     'Please fill in the data in JSON format',
+  'job.completedCallback.url.error': 'Please enter a valid URL address',
 
   'job.timer': 'Timer',
   'job.saveTimer': 'Save Timer',
@@ -148,6 +149,9 @@ const localeJob = {
 
   'job.prevTime': 'Last Executed',
   'job.nextTime': 'Next Execution',
+
+  'job.clear.records': 'Clear execution records',
+  'job.action.confirm.clear.records': 'Are you sure you want to clear the execution records?',
 
   'job.action.confirm.start': 'Are you sure you want to start?',
   'job.action.confirm.startTimer': 'Are you sure you want to start the timer?',
