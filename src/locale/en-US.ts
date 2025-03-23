@@ -60,8 +60,8 @@ const localeJob = {
   'job.detail': 'Job Details',
   'job.runHistory': 'Execution History',
   'job.type': 'Job Type',
-  'job.type.default': 'Default',
-  'job.type.bundle': 'Job Bundle',
+  'job.type.default': 'Single',
+  'job.type.bundle': 'Bundle',
   'job.scheduleType': 'Schedule Type',
   'job.scheduleType.once': 'Once',
   'job.scheduleType.timer': 'Timer',
@@ -84,6 +84,18 @@ const localeJob = {
   'job.timeout.tips':
     'The script process will be automatically killed after the timeout, in seconds',
   'job.displayOnDashboard': 'Display on the dashboard',
+  'job.tab.basic': 'Basic',
+  'job.tab.advance': 'Advance',
+  'job.completedCallback': 'Completed callback',
+  'job.completedCallback.url.placeholder': 'Please enter url',
+  'job.completedCallback.header': 'Please enter header: format ',
+  'job.completedCallback.triggerOn': 'Trigger Method',
+  'job.completedCallback.triggerOn.all': 'All triggered',
+  'job.completedCallback.triggerOn.error':
+    'Trigger only upon execution failure',
+  'job.completedCallback.header.error':
+    'Please fill in the data in JSON format',
+  'job.completedCallback.url.error': 'Please enter a valid URL address',
 
   'job.timer': 'Timer',
   'job.saveTimer': 'Save Timer',
@@ -137,6 +149,9 @@ const localeJob = {
 
   'job.prevTime': 'Last Executed',
   'job.nextTime': 'Next Execution',
+
+  'job.clear.records': 'Clear execution records',
+  'job.action.confirm.clear.records': 'Are you sure you want to clear the execution records?',
 
   'job.action.confirm.start': 'Are you sure you want to start?',
   'job.action.confirm.startTimer': 'Are you sure you want to start the timer?',
@@ -236,6 +251,8 @@ const localeInstall = {
   'install.initDatabase': 'Connect to Database',
   'install.initData': 'Initialize Data',
   'install.initAdminUser': 'Set Admin Account',
+  'install.defaultDockerAddr':
+    'If the default container deployment is used, the following configuration address can be directly utilized',
 
   'install.httpServer.bindAddr': 'Http Server Address',
   'install.httpServer.tips.bindAddr':
@@ -253,7 +270,7 @@ const localeInstall = {
   'install.admin.password': 'Password',
   'install.cometSecret': 'Comet Secret',
   'install.cometSecret.tips':
-    'Comet key, used for Comet communication authentication',
+    'Comet key, used for Comet communication authentication. A default value has been automatically configured in the form. If modification is needed, please ensure that both Comet and Agent use the same key.',
 
   'install.success.title': 'Installation Successful',
   'install.success.subTitle': 'Form submission successful!',

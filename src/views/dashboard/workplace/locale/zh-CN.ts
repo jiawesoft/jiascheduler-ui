@@ -36,7 +36,7 @@ export default {
   'workplace.pecs': '个',
   'workplace.jobList': '作业列表',
   'workplace.server': '服务器',
-  'workplace.jobBundle': '批任务',
+  'workplace.jobBundle': '脚本',
   'workplace.runList': '运行列表',
   'workplace.execHistory': '执行记录',
   'workplace.jobTotal': '作业总数',

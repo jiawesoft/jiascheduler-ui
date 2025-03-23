@@ -176,6 +176,16 @@
                 </a-button>
               </a-popconfirm>
             </a-doption>
+            <a-doption>
+              <a-popconfirm
+                :content="$t('job.action.confirm.clear.records')"
+                @before-ok="handleDelete($event, record)"
+              >
+                <a-button type="dashed" size="mini" status="danger">
+                  {{ $t('job.clear.records') }}
+                </a-button>
+              </a-popconfirm>
+            </a-doption>
           </template>
         </a-dropdown-button>
       </a-space>
@@ -186,7 +196,7 @@
     v-model:visible="scheduleDetailVisible"
     title-align="start"
     :draggable="true"
-    width="70%"
+    width="80%"
     hide-cancel
     @cancel="handleCancel"
   >
@@ -221,6 +231,7 @@
     ScheduleType,
     queryScheduleList,
     redispatchJob,
+    deleteExeHistory,
   } from '@/api/job';
   import { queryCountResource, TagRecord } from '@/api/tag';
   import useLoading from '@/hooks/loading';
@@ -316,6 +327,7 @@
     {
       title: t('columns.index'),
       dataIndex: 'index',
+      width: 30,
       slotName: 'index',
     },
     {
@@ -325,10 +337,18 @@
     {
       title: t('job.scheduleName'),
       dataIndex: 'name',
+      width: 100,
+      ellipsis: true,
+      tooltip: true,
     },
+
     {
-      title: t('job.type'),
-      dataIndex: 'job_type',
+      title: t('job.name'),
+      dataIndex: 'snapshot_data',
+      slotName: 'jobName',
+      width: 100,
+      ellipsis: true,
+      tooltip: true,
     },
     {
       title: t('tag.name'),
@@ -336,11 +356,7 @@
       slotName: 'tags',
       width: 150,
     },
-    {
-      title: t('job.name'),
-      dataIndex: 'snapshot_data',
-      slotName: 'jobName',
-    },
+
     {
       title: t('job.action'),
       dataIndex: 'action',
@@ -507,6 +523,15 @@
     await redispatchJob({
       schedule_id: record.schedule_id,
       action,
+    });
+
+    search();
+    return true;
+  };
+
+  const handleDelete = async (e: any, record: any) => {
+    await deleteExeHistory({
+      schedule_id: record.schedule_id,
     });
 
     search();

@@ -24,6 +24,7 @@
     <a-form-item
       field="database_url"
       :label="$t('install.database.address')"
+      :tooltip="$t('install.database.tips.address') + mysqlExample"
       :rules="[
         {
           required: true,
@@ -32,13 +33,15 @@
     >
       <a-input v-model="formData.database_url" />
       <template #help>
-        <span>{{ $t('install.database.tips.address') }}{{ mysqlExample }}</span>
+        {{ $t('install.defaultDockerAddr') }}:
+        {{ defaultDockerDatabaseUrl }}
       </template>
     </a-form-item>
 
     <a-form-item
       field="redis_url"
       :label="$t('install.redis.address')"
+      :tooltip="$t('install.redis.tips.address') + redisExample"
       :rules="[
         {
           required: true,
@@ -47,7 +50,8 @@
     >
       <a-input v-model="formData.redis_url" />
       <template #help>
-        {{ $t('install.redis.tips.address') }}{{ redisExample }}
+        {{ $t('install.defaultDockerAddr') }}:
+        {{ defaultDockerRedisUrl }}
       </template>
     </a-form-item>
 
@@ -62,7 +66,7 @@
     >
       <a-input
         v-model="formData.bind_addr"
-        :default-value="appStore.bindAddr"
+        :default-value="formData.bind_addr"
       />
       <template #help>
         <span>{{ $t('install.httpServer.tips.bindAddr') }}</span>
@@ -78,11 +82,8 @@
 </template>
 
 <script lang="ts" setup>
-  import { useAppStore } from '@/store';
   import { FormInstance } from '@arco-design/web-vue/es/form';
   import { ref } from 'vue';
-
-  const appStore = useAppStore();
 
   const emits = defineEmits(['changeStep']);
   const formRef = ref<FormInstance>();
@@ -90,8 +91,12 @@
     redis_url: '',
     database_url: '',
     database_type: 'mysql',
-    bind_addr: appStore.bindAddr,
+    bind_addr: '0.0.0.0:9090',
   });
+
+  const defaultDockerRedisUrl = 'redis://default:3DGiuazc7wkAppV3@redis:6379';
+  const defaultDockerDatabaseUrl =
+    'mysql://root:kytHmeBR4Vg@mysql:3306/jiascheduler';
 
   const mysqlExample =
     '"mysql://<user>:<password>@localhost:3306/jiascheduler"';

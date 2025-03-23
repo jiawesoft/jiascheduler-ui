@@ -406,71 +406,35 @@
       width: 30,
     },
     {
-      title: t('instance.namespace'),
-      dataIndex: 'bind_namespace',
-      fixed: 'left',
-      width: 130,
-    },
-    {
       title: t('job.bindIp'),
       dataIndex: 'bind_ip',
       fixed: 'left',
       width: 130,
     },
     {
-      title: t('job.scheduleName'),
-      dataIndex: 'schedule_name',
-      ellipsis: true,
-      tooltip: true,
-      fixed: 'left',
-      width: 120,
-    },
-    {
       title: t('job.name'),
       dataIndex: 'job_name',
       slotName: 'jobName',
+      fixed: 'left',
       tooltip: true,
       ellipsis: true,
       width: 120,
-    },
-    {
-      title: t('executor'),
-      dataIndex: 'executor_name',
-      width: 120,
-    },
-
-    {
-      title: t('job.type'),
-      dataIndex: 'job_type',
-      width: 120,
-    },
-    {
-      title: t('tag.name'),
-      dataIndex: 'tags',
-      slotName: 'tags',
-      width: 150,
     },
     {
       title: t('job.runStatus'),
       dataIndex: 'run_status',
       slotName: 'runStatus',
+      fixed: 'left',
       width: 120,
     },
     {
       title: t('job.lastExitStatus'),
       dataIndex: 'exit_status',
+      fixed: 'left',
       ellipsis: true,
       slotName: 'exitStatus',
       width: 120,
     },
-    {
-      title: t('job.scheduleId'),
-      dataIndex: 'schedule_id',
-      ellipsis: true,
-      tooltip: true,
-      width: 120,
-    },
-
     {
       title: t('job.startTime'),
       dataIndex: 'start_time',
@@ -481,6 +445,43 @@
       dataIndex: 'end_time',
       width: 170,
     },
+    {
+      title: t('tag.name'),
+      dataIndex: 'tags',
+      slotName: 'tags',
+      width: 150,
+    },
+    {
+      title: t('instance.namespace'),
+      dataIndex: 'bind_namespace',
+      width: 130,
+    },
+    {
+      title: t('job.scheduleName'),
+      dataIndex: 'schedule_name',
+      ellipsis: true,
+      tooltip: true,
+      width: 120,
+    },
+    {
+      title: t('executor'),
+      dataIndex: 'executor_name',
+      width: 120,
+    },
+    // {
+    //   title: t('job.type'),
+    //   dataIndex: 'job_type',
+    //   width: 120,
+    // },
+
+    {
+      title: t('job.scheduleId'),
+      dataIndex: 'schedule_id',
+      ellipsis: true,
+      tooltip: true,
+      width: 120,
+    },
+
     {
       title: t('team.name'),
       dataIndex: 'team_name',
@@ -595,13 +596,25 @@
   };
 
   const handleAction = async (e: any, record: any, action: JobAction) => {
-    await jobAction({
-      action,
-      instance_id: record.instance_id,
-      schedule_id: record.schedule_id,
-    });
-    Message.success(t('form.submit.success'));
-    search();
+    try {
+      await jobAction({
+        action,
+        instance_id: record.instance_id,
+        schedule_id: record.schedule_id,
+      });
+    } catch (err) {
+      setTimeout(() => {
+        search();
+      }, 200);
+
+      return false;
+    }
+
+    setTimeout(() => {
+      Message.success(t('form.submit.success'));
+      search();
+    }, 200);
+
     return true;
   };
 

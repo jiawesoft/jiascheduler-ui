@@ -411,16 +411,15 @@
           slotName: 'index',
         },
         {
-          title: t('job.scheduleId'),
-          dataIndex: 'schedule_id',
-          ellipsis: true,
-          fixed: 'left',
-          width: 130,
-          tooltip: true,
-        },
-        {
           title: t('job.scheduleName'),
           dataIndex: 'schedule_name',
+          fixed: 'left',
+          ellipsis: true,
+          width: 100,
+        },
+        {
+          title: t('job.name'),
+          dataIndex: 'job_name',
           fixed: 'left',
           ellipsis: true,
           width: 100,
@@ -429,7 +428,6 @@
           title: t('job.bindIp'),
           fixed: 'left',
           dataIndex: 'bind_ip',
-          width: 100,
         },
         {
           title: t('team.name'),
@@ -486,12 +484,22 @@
         slotName: 'index',
       },
       {
-        title: t('job.scheduleId'),
-        dataIndex: 'schedule_id',
+        title: t('job.scheduleName'),
+        dataIndex: 'schedule_name',
+        ellipsis: true,
+        width: 100,
+        tooltip: true,
       },
       {
-        title: t('job.type'),
-        dataIndex: 'job_type',
+        title: t('job.name'),
+        dataIndex: 'job_name',
+        ellipsis: true,
+        width: 100,
+        tooltip: true,
+      },
+      {
+        title: t('job.bindIp'),
+        dataIndex: 'bind_ip',
       },
       {
         title: t('tag.name'),
@@ -500,29 +508,18 @@
         width: 150,
       },
       {
-        title: t('job.scheduleName'),
-        dataIndex: 'schedule_name',
-      },
-      {
-        title: t('job.bindIp'),
-        dataIndex: 'bind_ip',
-      },
-      {
         title: t('job.exitStatus'),
         dataIndex: 'exit_status',
         ellipsis: true,
         slotName: 'exitStatus',
-        width: 120,
       },
       {
         title: t('job.startTime'),
         dataIndex: 'start_time',
-        width: 170,
       },
       {
         title: t('job.endTime'),
         dataIndex: 'end_time',
-        width: 170,
       },
       {
         title: t('team.name'),
@@ -554,7 +551,7 @@
       slotName: 'index',
     },
     {
-      title: '名称',
+      title: 'name',
       dataIndex: 'name',
       ellipsis: true,
       tooltip: true,
@@ -567,7 +564,7 @@
       tooltip: true,
     },
     {
-      title: '校验结果',
+      title: 'check result',
       dataIndex: 'result',
       slotName: 'checkResult',
     },
@@ -588,7 +585,7 @@
       tooltip: true,
     },
     {
-      title: '校验异常',
+      title: 'error',
       dataIndex: 'eval_err',
       ellipsis: true,
       tooltip: true,

@@ -71,7 +71,7 @@
   const formData = ref<DataModel>({
     username: '',
     password: '',
-    comet_secret: '',
+    comet_secret: 'rYzBYE+cXbtdMg==',
   });
 
   const onNextClick = async () => {

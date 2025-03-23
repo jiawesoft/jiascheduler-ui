@@ -45,7 +45,7 @@ const localeExecutor = {
 const localeJob = {
   'menu.repository.jobList': '作业',
   'menu.repository.jobTimer': '定时器',
-  'menu.repository.jobBundleScript': '批任务',
+  'menu.repository.jobBundleScript': '脚本',
   'menu.repository.daemonJob': '常驻任务',
   'menu.runStatus.runList': '运行列表',
   'menu.runStatus.scheduleList': '调度记录',
@@ -61,8 +61,8 @@ const localeJob = {
   'job.detail': '作业详情',
   'job.runHistory': '执行记录',
   'job.type': '作业类型',
-  'job.type.default': '默认',
-  'job.type.bundle': '批任务',
+  'job.type.default': '单一',
+  'job.type.bundle': '批量',
   'job.scheduleType': '调度类型',
   'job.scheduleType.once': '单次',
   'job.scheduleType.timer': '定时',
@@ -83,6 +83,16 @@ const localeJob = {
   'job.timeout': '执行超时',
   'job.timeout.tips': '脚本执行超时后自动kill进程, 单位秒',
   'job.displayOnDashboard': '大盘显示',
+  'job.tab.basic': '基本',
+  'job.tab.advance': '高级',
+  'job.completedCallback': '回调通知',
+  'job.completedCallback.url.placeholder': '请输入url',
+  'job.completedCallback.header': '请输入header头: 格式 ',
+  'job.completedCallback.triggerOn': '触发方式',
+  'job.completedCallback.triggerOn.all': '全部触发',
+  'job.completedCallback.triggerOn.error': '仅在执行失败时触发',
+  'job.completedCallback.header.error': '请填写JSON格式数据',
+  'job.completedCallback.url.error': '请填写正确的url地址',
 
   'job.timer': '定时器',
   'job.saveTimer': '保存定时器',
@@ -106,13 +116,13 @@ const localeJob = {
   'job.daemon.restartInterval.tips': '失败后重启间隔, 单位秒',
 
   'jobBundleScript.name': '名称',
-  'jobBundleScript.validator.eid.required': '请选择批任务',
+  'jobBundleScript.validator.eid.required': '请选择脚本',
   'jobBundleScript.validator.condExpr.required': '请填写计算表达式',
-  'jobBundleScript.info': '任务描述',
+  'jobBundleScript.info': '脚本描述',
   'jobBundleScript.code': '代码',
-  'jobBundleScript.saveBundleScript': '保存批任务',
+  'jobBundleScript.saveBundleScript': '保存脚本',
   'jobBundleScript.condExpr.tooltips':
-    '运算表达式, 支持形如 $v > 10 or $v < 5 的运算逻辑，$v代指批任务的处理结果',
+    '运算表达式, 支持形如 $v > 10 or $v < 5 的运算逻辑，$v代指脚本的处理结果',
 
   'job.quickStart': '快速启动',
   'job.schedule.name.placeholder': '请输入调度名称',
@@ -135,6 +145,9 @@ const localeJob = {
 
   'job.prevTime': '上次执行',
   'job.nextTime': '下次执行',
+
+  'job.clear.records': '清空执行记录',
+  'job.action.confirm.clear.records': '确认要清空执行记录么？',
 
   'job.action.confirm.start': '确认要启动么？',
   'job.action.confirm.startTimer': '确认要启动定时器么？',
@@ -233,6 +246,7 @@ const localeInstall = {
   'install.initDatabase': '连接数据库',
   'install.initData': '初始化数据',
   'install.initAdminUser': '设置管理员账号',
+  'install.defaultDockerAddr': '如果采用默认容器部署，可直接使用如下配置地址',
 
   'install.httpServer.bindAddr': 'Http服务地址',
   'install.httpServer.tips.bindAddr': '控制台访问地址，eg: "0.0.0.0:9090"',
@@ -248,7 +262,8 @@ const localeInstall = {
   'install.admin.username': '管理员',
   'install.admin.password': '密码',
   'install.cometSecret': 'comet密钥',
-  'install.cometSecret.tips': 'comet密钥，用于comet通信认证',
+  'install.cometSecret.tips':
+    'comet密钥，用于comet通信认证,表单中已自动配置默认值，如果需要修改请保证comet与agent采用相同的密钥',
 
   'install.success.title': '提交成功',
   'install.success.subTitle': '表单提交成功！',
@@ -340,8 +355,8 @@ export default {
   'operations.stop': '停止',
   'operations.startTimer': '启动定时器',
   'operations.stopTimer': '停止定时器',
-  'operations.startSupervising': '开始守护',
-  'operations.stopSupervising': '停止守护',
+  'operations.startSupervising': '启动',
+  'operations.stopSupervising': '停止',
   'operations.update': '修改',
   'operations.granted': '授权',
   'operations.delete': '删除',

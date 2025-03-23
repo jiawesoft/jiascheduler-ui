@@ -385,3 +385,10 @@ export function saveJobSupervisor(data: SaveSupervisorReq) {
   }
   return axios.post<SaveSupervisorReq>('/api/job/save-supervisor', data);
 }
+
+export interface DeleteExeHistoryReq {
+  schedule_id: string
+}
+export function deleteExeHistory(data: DeleteExeHistoryReq) {
+  return axios.post<DeleteExeHistoryReq>('/api/job/delete-exec-history', data);
+}

@@ -360,147 +360,83 @@
       value: 'large',
     },
   ]);
-  const columns = computed<TableColumnData[]>(() => {
-    if (formModel.value.job_type === 'bundle' && props.scheduleId) {
-      const cols: TableColumnData[] = [
-        {
-          title: t('columns.index'),
-          dataIndex: 'index',
-          width: 30,
-          fixed: 'left',
-          slotName: 'index',
-        },
-        {
-          title: t('job.scheduleId'),
-          dataIndex: 'schedule_id',
-          ellipsis: true,
-          fixed: 'left',
-          width: 130,
-          tooltip: true,
-        },
-        {
-          title: t('job.scheduleName'),
-          dataIndex: 'schedule_name',
-          fixed: 'left',
-          ellipsis: true,
-          width: 100,
-        },
-        {
-          title: t('job.bindIp'),
-          fixed: 'left',
-          dataIndex: 'bind_ip',
-          width: 100,
-        },
-        {
-          title: t('team.name'),
-          dataIndex: 'team_name',
-        },
-      ];
-
-      if (
-        renderData.value.length > 0 &&
-        renderData.value[0].job_type === 'bundle'
-      ) {
-        renderData.value[0].bundle_script_result.forEach((val, i) => {
-          if (cols.length > 10) {
-            scroll.value.x = 2000;
-          } else {
-            scroll.value.x = 1000;
-          }
-
-          cols.push({
-            title: val.name,
-            ellipsis: true,
-            tooltip: true,
-            children: [
-              {
-                title: '输出',
-                dataIndex: `bundle_script_result[${i}].stdout`,
-              },
-              {
-                title: '校验',
-                slotName: `validate`,
-                dataIndex: `bundle_script_result[${i}].result`,
-              },
-            ],
-          });
-        });
-      }
-
-      cols.push({
-        title: t('operations'),
-        dataIndex: 'operations',
-        fixed: 'right',
-        width: 100,
-        slotName: 'operations',
-      });
-
-      return cols;
-    }
-
-    return [
-      {
-        title: t('columns.index'),
-        dataIndex: 'index',
-        width: 30,
-        slotName: 'index',
-      },
-      {
-        title: t('job.scheduleId'),
-        dataIndex: 'schedule_id',
-      },
-      {
-        title: t('job.type'),
-        dataIndex: 'job_type',
-      },
-      {
-        title: t('tag.name'),
-        dataIndex: 'tags',
-        slotName: 'tags',
-        width: 150,
-      },
-      {
-        title: t('job.scheduleName'),
-        dataIndex: 'schedule_name',
-      },
-      {
-        title: t('job.bindIp'),
-        dataIndex: 'bind_ip',
-      },
-      {
-        title: t('job.exitStatus'),
-        dataIndex: 'exit_status',
-        ellipsis: true,
-        slotName: 'exitStatus',
-        width: 120,
-      },
-      {
-        title: t('job.startTime'),
-        dataIndex: 'start_time',
-        width: 170,
-      },
-      {
-        title: t('job.endTime'),
-        dataIndex: 'end_time',
-        width: 170,
-      },
-      {
-        title: t('team.name'),
-        dataIndex: 'team_name',
-        ellipsis: true,
-        width: 120,
-      },
-      {
-        title: t('columns.createdUser'),
-        dataIndex: 'created_user',
-      },
-      {
-        title: t('operations'),
-        dataIndex: 'operations',
-        slotName: 'operations',
-      },
-    ];
-  });
+  const columns = computed<TableColumnData[]>(() => [
+    {
+      title: t('columns.index'),
+      dataIndex: 'index',
+      width: 30,
+      slotName: 'index',
+    },
+    {
+      title: t('job.scheduleName'),
+      dataIndex: 'schedule_name',
+      ellipsis: true,
+      width: 100,
+      tooltip: true,
+    },
+    {
+      title: t('job.name'),
+      dataIndex: 'job_name',
+      ellipsis: true,
+      width: 100,
+      tooltip: true,
+    },
+    {
+      title: t('job.bindIp'),
+      dataIndex: 'bind_ip',
+    },
+    // {
+    //   title: t('job.scheduleId'),
+    //   dataIndex: 'schedule_id',
+    // },
+    // {
+    //   title: t('job.type'),
+    //   dataIndex: 'job_type',
+    // },
+    {
+      title: t('job.exitStatus'),
+      dataIndex: 'exit_status',
+      ellipsis: true,
+      slotName: 'exitStatus',
+      width: 120,
+      tooltip: true,
+    },
+    {
+      title: t('tag.name'),
+      dataIndex: 'tags',
+      slotName: 'tags',
+      width: 150,
+    },
+    {
+      title: t('job.startTime'),
+      dataIndex: 'start_time',
+      ellipsis: true,
+      width: 100,
+      tooltip: true,
+    },
+    {
+      title: t('job.endTime'),
+      dataIndex: 'end_time',
+      ellipsis: true,
+      width: 100,
+      tooltip: true,
+    },
+    {
+      title: t('team.name'),
+      dataIndex: 'team_name',
+      ellipsis: true,
+      width: 120,
+    },
+    {
+      title: t('columns.createdUser'),
+      dataIndex: 'created_user',
+    },
+    {
+      title: t('operations'),
+      dataIndex: 'operations',
+      slotName: 'operations',
+    },
+  ]);
 
   const getBundleScriptIndex = (dataIndex: string): number => {
     return Number(
