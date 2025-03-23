@@ -84,6 +84,15 @@ const localeJob = {
   'job.timeout.tips':
     'The script process will be automatically killed after the timeout, in seconds',
   'job.displayOnDashboard': 'Display on the dashboard',
+  'job.tab.basic': 'Basic',
+  'job.tab.advance': 'Advance',
+  'job.completedCallback': 'Completed callback',
+  'job.completedCallback.url.placeholder': 'Please enter url',
+  'job.completedCallback.header': 'Please enter header: format ',
+  'job.completedCallback.triggerOn': 'Trigger Method',
+  'job.completedCallback.triggerOn.all': 'All triggered',
+  'job.completedCallback.triggerOn.error': 'Trigger only upon execution failure',
+  'job.completedCallback.header.error': 'Please fill in the data in JSON format',
 
   'job.timer': 'Timer',
   'job.saveTimer': 'Save Timer',

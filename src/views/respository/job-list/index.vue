@@ -218,148 +218,191 @@
         :model="jobForm"
         :auto-label-width="true"
       >
-        <a-form-item field="job_type" :label="$t('job.type')">
-          <a-radio-group
-            v-model="formModel.job_type"
-            type="button"
-            :disabled="jobForm.id != 0"
-            @change="search"
-          >
-            <a-radio value="default">{{ $t('job.type.default') }}</a-radio>
-            <a-radio value="bundle">{{ $t('job.type.bundle') }}</a-radio>
-          </a-radio-group>
-        </a-form-item>
-        <a-form-item
-          field="name"
-          required
-          validate-trigger="blur"
-          :label="$t('job.name')"
-        >
-          <a-input v-model="jobForm.name" />
-        </a-form-item>
-        <a-form-item field="info" :label="$t('job.info')">
-          <a-textarea v-model="jobForm.info" />
-        </a-form-item>
-        <a-row :gutter="16">
-          <a-col :span="8">
-            <a-form-item
-              field="work_user"
-              validate-trigger="blur"
-              :label="$t('job.workUser')"
-            >
-              <a-input v-model="jobForm.work_user" />
-            </a-form-item>
-          </a-col>
-          <a-col :span="8">
-            <a-form-item
-              field="work_dir"
-              validate-trigger="blur"
-              :label="$t('job.workDir')"
-            >
-              <a-input v-model="jobForm.work_dir" />
-            </a-form-item>
-          </a-col>
-          <a-col :span="8">
-            <a-form-item
-              field="timeout"
-              :tooltip="$t('job.timeout.tips')"
-              validate-trigger="blur"
-              :label="$t('job.timeout')"
-            >
-              <a-input-number v-model="jobForm.timeout" />
-            </a-form-item>
-          </a-col>
-        </a-row>
-
-        <template v-if="formModel.job_type === 'bundle'">
-          <a-row :gutter="16">
-            <a-col :span="8">
-              <a-form-item
-                field="display_on_dashboard"
-                :label="$t('job.displayOnDashboard')"
+        <a-tabs default-active-key="basic" type="rounded">
+          <a-tab-pane key="basic" :title="$t('job.tab.basic')">
+            <a-form-item field="job_type" :label="$t('job.type')">
+              <a-radio-group
+                v-model="formModel.job_type"
+                type="button"
+                :disabled="jobForm.id != 0"
+                @change="search"
               >
-                <a-switch v-model="jobForm.display_on_dashboard" />
+                <a-radio value="default">{{ $t('job.type.default') }}</a-radio>
+                <a-radio value="bundle">{{ $t('job.type.bundle') }}</a-radio>
+              </a-radio-group>
+            </a-form-item>
+            <a-form-item
+              field="name"
+              required
+              validate-trigger="blur"
+              :label="$t('job.name')"
+            >
+              <a-input v-model="jobForm.name" />
+            </a-form-item>
+            <a-form-item field="info" :label="$t('job.info')">
+              <a-textarea v-model="jobForm.info" />
+            </a-form-item>
+            <a-row :gutter="16">
+              <a-col :span="8">
+                <a-form-item
+                  field="work_user"
+                  validate-trigger="blur"
+                  :label="$t('job.workUser')"
+                >
+                  <a-input v-model="jobForm.work_user" />
+                </a-form-item>
+              </a-col>
+              <a-col :span="8">
+                <a-form-item
+                  field="work_dir"
+                  validate-trigger="blur"
+                  :label="$t('job.workDir')"
+                >
+                  <a-input v-model="jobForm.work_dir" />
+                </a-form-item>
+              </a-col>
+              <a-col :span="8">
+                <a-form-item
+                  field="timeout"
+                  :tooltip="$t('job.timeout.tips')"
+                  validate-trigger="blur"
+                  :label="$t('job.timeout')"
+                >
+                  <a-input-number v-model="jobForm.timeout" />
+                </a-form-item>
+              </a-col>
+            </a-row>
+
+            <template v-if="formModel.job_type === 'bundle'">
+              <a-row :gutter="16">
+                <a-col :span="8">
+                  <a-form-item
+                    field="display_on_dashboard"
+                    :label="$t('job.displayOnDashboard')"
+                  >
+                    <a-switch v-model="jobForm.display_on_dashboard" />
+                  </a-form-item>
+                </a-col>
+              </a-row>
+              <a-form-item
+                v-for="(val, index) in jobForm.bundle_script"
+                :key="index"
+                :field="`bundle_script[${index}]`"
+                :label="$t('job.task') + '-' + (index + 1)"
+                validate-trigger="blur"
+                :rules="bundleScriptValidateRules"
+                :tooltip="$t('jobBundleScript.condExpr.tooltips')"
+              >
+                <a-space direction="horizontal">
+                  <SelectBundleScript v-model="jobForm.bundle_script![index]" />
+                  <a-input
+                    v-model="jobForm.bundle_script![index].cond_expr"
+                    default-value="$v > 0"
+                    allow-clear
+                  />
+                  <a-button
+                    :style="{ marginLeft: '10px' }"
+                    @click="handleDeleteBundleScript(index)"
+                    >Delete</a-button
+                  >
+                </a-space>
               </a-form-item>
-            </a-col>
-          </a-row>
-          <a-form-item
-            v-for="(val, index) in jobForm.bundle_script"
-            :key="index"
-            :field="`bundle_script[${index}]`"
-            :label="$t('job.task') + '-' + (index + 1)"
-            validate-trigger="blur"
-            :rules="bundleScriptValidateRules"
-            :tooltip="$t('jobBundleScript.condExpr.tooltips')"
+
+              <a-form-item>
+                <a-button @click="handleAddBundleScript">
+                  {{ $t('form.add') }}
+                </a-button>
+              </a-form-item>
+            </template>
+
+            <template v-else-if="formModel.job_type === 'default'">
+              <a-row :gutter="16">
+                <a-col :span="8">
+                  <a-form-item field="executor_id" :label="$t('job.executor')">
+                    <SelectExecutor v-model="jobForm.executor_id" />
+                  </a-form-item>
+                </a-col>
+
+                <a-col :span="8">
+                  <a-form-item
+                    field="display_on_dashboard"
+                    :label="$t('job.displayOnDashboard')"
+                  >
+                    <a-switch v-model="jobForm.display_on_dashboard" />
+                  </a-form-item>
+                </a-col>
+              </a-row>
+              <a-form-item field="code" :label="$t('job.code')">
+                <v-ace-editor
+                  v-if="jobModalVisible"
+                  :key="jobForm.executor_id"
+                  v-model:value="jobForm.code"
+                  :style="{ height: '300px', width: '100%' }"
+                  :lang="getEditorLang"
+                  :print-margin="false"
+                  :theme="theme === 'dark' ? 'chaos' : 'chrome'"
+                />
+              </a-form-item>
+              <a-form-item
+                field="upload_file"
+                :label="$t('job.upload_file')"
+                :tooltip="$t('job.upload_file.tooltip')"
+              >
+                <a-space direction="vertical" :style="{ width: '100%' }">
+                  <a-upload
+                    v-model="uploadFileList"
+                    action="/api/file/upload"
+                    :limit="1"
+                    :default-file-list="defaultFileList()"
+                    :file-list="uploadFileList"
+                    @before-remove="removeUploadfile"
+                    @success="onUploadSuccess"
+                  />
+                </a-space>
+              </a-form-item>
+            </template>
+          </a-tab-pane>
+          <a-tab-pane
+            key="advance"
+            :title="$t('job.tab.advance')"
+            :disabled="formModel.job_type === 'bundle'"
           >
-            <a-space direction="horizontal">
-              <SelectBundleScript v-model="jobForm.bundle_script![index]" />
+            <a-form-item :label="$t('job.completedCallback')">
+              <a-switch v-model="jobForm.completed_callback.enable" />
+            </a-form-item>
+            <a-form-item>
               <a-input
-                v-model="jobForm.bundle_script![index].cond_expr"
-                default-value="$v > 0"
-                allow-clear
+                v-model="jobForm.completed_callback.url"
+                :placeholder="$t('job.completedCallback.url.placeholder')"
               />
-              <a-button
-                :style="{ marginLeft: '10px' }"
-                @click="handleDeleteBundleScript(index)"
-                >Delete</a-button
-              >
-            </a-space>
-          </a-form-item>
-
-          <a-form-item>
-            <a-button @click="handleAddBundleScript">
-              {{ $t('form.add') }}
-            </a-button>
-          </a-form-item>
-        </template>
-
-        <template v-else-if="formModel.job_type === 'default'">
-          <a-row :gutter="16">
-            <a-col :span="8">
-              <a-form-item field="executor_id" :label="$t('job.executor')">
-                <SelectExecutor v-model="jobForm.executor_id" />
-              </a-form-item>
-            </a-col>
-
-            <a-col :span="8">
-              <a-form-item
-                field="display_on_dashboard"
-                :label="$t('job.displayOnDashboard')"
-              >
-                <a-switch v-model="jobForm.display_on_dashboard" />
-              </a-form-item>
-            </a-col>
-          </a-row>
-
-          <a-form-item field="code" :label="$t('job.code')">
-            <v-ace-editor
-              v-if="jobModalVisible"
-              :key="jobForm.executor_id"
-              v-model:value="jobForm.code"
-              :style="{ height: '300px', width: '100%' }"
-              :lang="getEditorLang"
-              :print-margin="false"
-              :theme="theme === 'dark' ? 'chaos' : 'chrome'"
-            />
-          </a-form-item>
-          <a-form-item
-            field="upload_file"
-            :label="$t('job.upload_file')"
-            :tooltip="$t('job.upload_file.tooltip')"
-          >
-            <a-space direction="vertical" :style="{ width: '100%' }">
-              <a-upload
-                v-model="uploadFileList"
-                action="/api/file/upload"
-                :limit="1"
-                :default-file-list="defaultFileList()"
-                :file-list="uploadFileList"
-                @before-remove="removeUploadfile"
-                @success="onUploadSuccess"
+            </a-form-item>
+            <a-form-item
+              field="completed_callback.header"
+              :rules="validateCallbackHeaderRules"
+              validate-trigger="blur"
+            >
+              <a-textarea
+                v-model="jobForm.completed_callback.header"
+                :placeholder="
+                  $t('job.completedCallback.header') + headerPlaceholder
+                "
               />
-            </a-space>
-          </a-form-item>
-        </template>
+            </a-form-item>
+            <a-form-item>
+              <a-select
+                v-model="jobForm.completed_callback.trigger_on"
+                :placeholder="$t('job.completedCallback.triggerOn')"
+              >
+                <a-option value="all">{{
+                  $t('job.completedCallback.triggerOn.all')
+                }}</a-option>
+                <a-option value="error">{{
+                  $t('job.completedCallback.triggerOn.error')
+                }}</a-option>
+              </a-select>
+            </a-form-item>
+          </a-tab-pane>
+        </a-tabs>
       </a-form>
     </a-modal>
 
@@ -471,6 +514,13 @@
     cond_expr: '$v > 20',
   };
 
+  interface CompletedCallback {
+    trigger_on: string;
+    url: string;
+    header: string;
+    enable: boolean;
+  }
+
   interface JobForm {
     id: number;
     job_type: string;
@@ -485,6 +535,7 @@
     args: any;
     bundle_script?: (typeof defaultBundleScript)[];
     info: string;
+    completed_callback: CompletedCallback;
   }
 
   interface DispatchJobForm {
@@ -502,6 +553,12 @@
       name: '',
       job_type: 'default',
       updated_time_range: [],
+      completed_callback: {
+        trigger_on: false,
+        url: '',
+        header: null,
+        enable: false,
+      },
     };
   };
   const { loading, setLoading } = useLoading(true);
@@ -514,6 +571,8 @@
   const jobOptions = ref<SelectOptionData[]>([]);
 
   const size = ref<SizeProps>('medium');
+
+  const headerPlaceholder = '{"key": "value"}';
 
   const theme = computed(() => {
     return useAppStore().theme;
@@ -537,6 +596,12 @@
       args: {},
       bundle_script: [],
       info: '',
+      completed_callback: {
+        trigger_on: 'all',
+        url: '',
+        header: '',
+        enable: false,
+      },
     },
     dispatchJobForm: {
       eid: '',
@@ -672,6 +737,22 @@
     },
   ];
 
+  const validateCallbackHeaderRules = [
+    {
+      validator(value: any, callback: (error?: string | undefined) => void) {
+        try {
+          if (JSON.parse(value) && /^\{/.test(value)) {
+            callback();
+          } else {
+            callback(t('job.completedCallback.header.error'));
+          }
+        } catch (error) {
+          callback(t('job.completedCallback.header.error'));
+        }
+      },
+    },
+  ];
+
   const tagList = ref<TagRecord[]>([]);
   const resourceType = ref('job');
 
@@ -750,7 +831,17 @@
   const handleOpenJobModal = (e: any, record: any) => {
     saveJobRef.value?.clearValidate();
     if (record) {
-      jobForm.value = { ...record };
+      jobForm.value = {
+        ...record,
+        completed_callback: {
+          trigger_on: record.completed_callback?.trigger_on || 'all',
+          url: record.completed_callback?.url || '',
+          header: record.completed_callback?.header
+            ? JSON.stringify(record.completed_callback?.header)
+            : '',
+          enable: record.completed_callback?.enable,
+        },
+      };
       // jobType.value = record.job_type;
     } else {
       jobForm.value = {
@@ -767,6 +858,12 @@
         args: {},
         bundle_script: [{ ...defaultBundleScript }],
         info: '',
+        completed_callback: {
+          trigger_on: 'all',
+          url: '',
+          header: '',
+          enable: false,
+        },
       };
     }
     fetchExecutorData({ default_id: jobForm.value.executor_id });
@@ -805,6 +902,10 @@
       const data = {
         ...jobForm.value,
         job_type: formModel.value.job_type,
+        completed_callback: {
+          ...jobForm.value.completed_callback,
+          header: JSON.parse(jobForm.value.completed_callback.header),
+        },
       };
       if (formModel.value.job_type === 'default') {
         data.bundle_script = undefined;
