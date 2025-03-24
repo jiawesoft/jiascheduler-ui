@@ -496,17 +496,26 @@
       },
 
       {
-        title: t('job.scheduleName'),
-        dataIndex: 'schedule_name',
-        ellipsis: true,
-        width: 100,
-        tooltip: true,
-      },
-      {
         title: t('job.name'),
         dataIndex: 'job_name',
         ellipsis: true,
-        width: 100,
+        width: 150,
+        tooltip: true,
+        fixed: 'left',
+      },
+      {
+        title: t('job.exitStatus'),
+        dataIndex: 'exit_status',
+        ellipsis: true,
+        slotName: 'exitStatus',
+        width: 120,
+        fixed: 'left',
+      },
+      {
+        title: t('job.scheduleName'),
+        dataIndex: 'schedule_name',
+        ellipsis: true,
+        width: 150,
         tooltip: true,
       },
 
@@ -525,36 +534,33 @@
       },
 
       {
-        title: t('job.exitStatus'),
-        dataIndex: 'exit_status',
-        ellipsis: true,
-        slotName: 'exitStatus',
-        width: 120,
-      },
-      {
         title: t('job.startTime'),
         dataIndex: 'start_time',
         ellipsis: true,
-        width: 120,
+        width: 170,
       },
       {
         title: t('job.endTime'),
         dataIndex: 'end_time',
         ellipsis: true,
-        width: 120,
+        width: 170,
       },
       {
         title: t('team.name'),
         dataIndex: 'team_name',
+        width: 120,
       },
       {
         title: t('columns.createdUser'),
         dataIndex: 'created_user',
+        width: 120,
       },
       {
         title: t('operations'),
         dataIndex: 'operations',
         slotName: 'operations',
+        width: 120,
+        fixed: 'right',
       },
     ];
   });
@@ -577,6 +583,7 @@
       dataIndex: 'name',
       ellipsis: true,
       tooltip: true,
+      width: 150,
     },
 
     {
@@ -584,33 +591,39 @@
       dataIndex: 'stdout',
       ellipsis: true,
       tooltip: true,
+      width: 150,
     },
     {
       title: '校验结果',
       dataIndex: 'result',
       slotName: 'checkResult',
+      width: 120,
     },
     {
       title: 'exit code',
       dataIndex: 'exit_code',
+      width: 120,
     },
     {
       title: 'exit status',
       dataIndex: 'exit_status',
       ellipsis: true,
       tooltip: true,
+      width: 150,
     },
     {
       title: 'stderr',
       dataIndex: 'stderr',
       ellipsis: true,
       tooltip: true,
+      width: 150,
     },
     {
       title: '校验异常',
       dataIndex: 'eval_err',
       ellipsis: true,
       tooltip: true,
+      width: 150,
     },
   ]);
 

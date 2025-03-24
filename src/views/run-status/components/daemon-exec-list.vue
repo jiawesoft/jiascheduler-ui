@@ -366,24 +366,37 @@
       dataIndex: 'index',
       width: 30,
       slotName: 'index',
+      fixed: 'left',
+    },
+
+    {
+      title: t('job.name'),
+      dataIndex: 'job_name',
+      ellipsis: true,
+      width: 150,
+      tooltip: true,
+      fixed: 'left',
+    },
+    {
+      title: t('job.exitStatus'),
+      dataIndex: 'exit_status',
+      ellipsis: true,
+      slotName: 'exitStatus',
+      width: 120,
+      tooltip: true,
+      fixed: 'left',
     },
     {
       title: t('job.scheduleName'),
       dataIndex: 'schedule_name',
       ellipsis: true,
-      width: 100,
-      tooltip: true,
-    },
-    {
-      title: t('job.name'),
-      dataIndex: 'job_name',
-      ellipsis: true,
-      width: 100,
+      width: 150,
       tooltip: true,
     },
     {
       title: t('job.bindIp'),
       dataIndex: 'bind_ip',
+      width: 150,
     },
     // {
     //   title: t('job.scheduleId'),
@@ -393,32 +406,25 @@
     //   title: t('job.type'),
     //   dataIndex: 'job_type',
     // },
-    {
-      title: t('job.exitStatus'),
-      dataIndex: 'exit_status',
-      ellipsis: true,
-      slotName: 'exitStatus',
-      width: 120,
-      tooltip: true,
-    },
+
     {
       title: t('tag.name'),
       dataIndex: 'tags',
       slotName: 'tags',
-      width: 150,
+      width: 180,
     },
     {
       title: t('job.startTime'),
       dataIndex: 'start_time',
       ellipsis: true,
-      width: 100,
+      width: 170,
       tooltip: true,
     },
     {
       title: t('job.endTime'),
       dataIndex: 'end_time',
       ellipsis: true,
-      width: 100,
+      width: 170,
       tooltip: true,
     },
     {
@@ -430,11 +436,14 @@
     {
       title: t('columns.createdUser'),
       dataIndex: 'created_user',
+      width: 120,
     },
     {
       title: t('operations'),
       dataIndex: 'operations',
       slotName: 'operations',
+      width: 120,
+      fixed: 'right',
     },
   ]);
 

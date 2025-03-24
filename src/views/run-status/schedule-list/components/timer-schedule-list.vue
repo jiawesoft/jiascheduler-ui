@@ -341,25 +341,24 @@
       dataIndex: 'index',
       slotName: 'index',
       width: 30,
+      fixed: 'left',
     },
-    {
-      title: t('job.scheduleId'),
-      dataIndex: 'schedule_id',
-    },
+    // {
+    //   title: t('job.scheduleId'),
+    //   dataIndex: 'schedule_id',
+    //   width: 150,
+    // },
     {
       title: t('job.scheduleName'),
       dataIndex: 'name',
-      width: 100,
-      ellipsis: true,
-      tooltip: true,
+      width: 150,
+      fixed: 'left',
     },
     {
       title: t('job.name'),
       dataIndex: 'snapshot_data',
       slotName: 'jobName',
-      width: 100,
-      ellipsis: true,
-      tooltip: true,
+      width: 150,
     },
 
     {
@@ -372,23 +371,29 @@
     {
       title: t('job.action'),
       dataIndex: 'action',
+      width: 120,
     },
     {
       title: t('team.name'),
       dataIndex: 'team_name',
+      width: 120,
     },
     {
       title: t('columns.updatedTime'),
       dataIndex: 'updated_time',
+      width: 170,
     },
     {
       title: t('columns.updatedUser'),
       dataIndex: 'updated_user',
+      width: 120,
     },
     {
       title: t('operations'),
       dataIndex: 'operations',
       slotName: 'operations',
+      width: 120,
+      fixed: 'right',
     },
   ]);
 
