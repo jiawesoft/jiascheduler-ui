@@ -485,7 +485,7 @@
       dataIndex: 'schedule_name',
       ellipsis: true,
       tooltip: true,
-      width: 120,
+      width: 150,
     },
     {
       title: t('job.startTime'),

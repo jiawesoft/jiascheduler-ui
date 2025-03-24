@@ -430,7 +430,7 @@
           title: t('job.name'),
           dataIndex: 'job_name',
           fixed: 'left',
-          ellipsis: true,
+          // ellipsis: true,
           width: 100,
         },
         {
@@ -498,9 +498,9 @@
       {
         title: t('job.name'),
         dataIndex: 'job_name',
-        ellipsis: true,
+        // ellipsis: true,
         width: 150,
-        tooltip: true,
+        // tooltip: true,
         fixed: 'left',
       },
       {
@@ -514,9 +514,9 @@
       {
         title: t('job.scheduleName'),
         dataIndex: 'schedule_name',
-        ellipsis: true,
+        // ellipsis: true,
         width: 150,
-        tooltip: true,
+        // tooltip: true,
       },
 
       {

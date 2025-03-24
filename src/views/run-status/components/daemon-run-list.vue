@@ -154,6 +154,15 @@
     <template #jobName="{ record }">
       {{ record.schedule_snapshot_data?.name }}
     </template>
+    <template #scheduleStatus="{ record }">
+      <a-tag v-if="record.schedule_status === 'unsupervised'" color="blue">
+        {{ record.schedule_status }}
+      </a-tag>
+      <a-tag v-else-if="record.run_status === 'stop'" color="orangered">
+        {{ record.schedule_status }}
+      </a-tag>
+      <a-tag v-else color="green">{{ record.schedule_status }}</a-tag>
+    </template>
     <template #runStatus="{ record }">
       <a-tag v-if="record.run_status === 'stop'" color="blue">
         {{ record.run_status }}
@@ -391,8 +400,14 @@
       dataIndex: 'job_name',
       slotName: 'jobName',
       fixed: 'left',
-      tooltip: true,
-      ellipsis: true,
+      // tooltip: true,
+      // ellipsis: true,
+      width: 120,
+    },
+    {
+      title: t('job.scheduleStatus'),
+      dataIndex: 'schedule_status',
+      slotName: 'scheduleStatus',
       width: 120,
     },
     {
@@ -418,6 +433,7 @@
       slotName: 'tags',
       width: 150,
     },
+
     {
       title: t('job.lastExitStatus'),
       dataIndex: 'exit_status',

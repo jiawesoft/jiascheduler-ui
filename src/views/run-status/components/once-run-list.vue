@@ -416,8 +416,8 @@
       dataIndex: 'job_name',
       slotName: 'jobName',
       fixed: 'left',
-      tooltip: true,
-      ellipsis: true,
+      // tooltip: true,
+      // ellipsis: true,
       width: 120,
     },
     {
