@@ -606,7 +606,6 @@
       setTimeout(() => {
         search();
       }, 200);
-
       return false;
     }
 

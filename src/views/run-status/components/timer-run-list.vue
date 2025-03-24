@@ -646,9 +646,9 @@
       });
     } catch {
       setTimeout(() => {
-        Message.success(t('form.submit.success'));
         search();
       }, 200);
+      return false;
     }
 
     setTimeout(() => {
