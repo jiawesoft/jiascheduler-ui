@@ -760,6 +760,9 @@
   const validateCallbackUrlRules = [
     {
       validator(value: any, callback: (error?: string | undefined) => void) {
+        if (!jobForm.value.completed_callback.enable && !value) {
+          return;
+        }
         const urlRegex = /^(https?:\/\/.+)/;
         if (!urlRegex.test(value)) {
           callback(t('job.completedCallback.url.error'));
