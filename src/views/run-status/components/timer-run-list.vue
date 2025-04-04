@@ -152,6 +152,13 @@
       {{ rowIndex + 1 + (pagination.page - 1) * pagination.pageSize }}
     </template>
 
+    <template #bindIp="{ record }">
+      {{ record.bind_ip }}
+      <a-typography-text v-if="!record.is_online" type="danger" delete>
+        <icon-poweroff />
+      </a-typography-text>
+    </template>
+
     <template #tags="{ record }">
       <table-tag-item
         :tag-list="record.tags"
@@ -425,8 +432,9 @@
     {
       title: t('job.bindIp'),
       dataIndex: 'bind_ip',
+      slotName: 'bindIp',
       fixed: 'left',
-      width: 130,
+      width: 140,
     },
     {
       title: t('job.name'),
@@ -529,7 +537,7 @@
     },
 
     {
-      title: t('columns.updatedUser'),
+      title: t('columns.createdUser'),
       dataIndex: 'updated_user',
       ellipsis: true,
       width: 120,
