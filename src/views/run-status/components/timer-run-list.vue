@@ -153,10 +153,10 @@
     </template>
 
     <template #bindIp="{ record }">
-      {{ record.bind_ip }}
-      <a-typography-text v-if="!record.is_online" type="danger" delete>
-        <icon-poweroff />
-      </a-typography-text>
+      <a-space v-if="!record.is_online" size="mini">
+        {{ record.bind_ip }}
+        <jicon-offline />
+      </a-space>
     </template>
 
     <template #tags="{ record }">
@@ -310,6 +310,7 @@
     defineProps,
   } from 'vue';
   import { useI18n } from 'vue-i18n';
+  import jiconOffline from '@/components/icon/jicon-offline.vue';
 
   import { Message } from '@arco-design/web-vue';
   import type { TableColumnData } from '@arco-design/web-vue/es/table/interface';
@@ -434,7 +435,7 @@
       dataIndex: 'bind_ip',
       slotName: 'bindIp',
       fixed: 'left',
-      width: 140,
+      width: 150,
     },
     {
       title: t('job.name'),
