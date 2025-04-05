@@ -76,10 +76,23 @@
   };
   const copySettings = async () => {
     // const text = JSON.stringify(appStore.$state, null, 2);
-    appStore.updateSettings({ ...appStore.$state, globalSettings: false });
+    const settings: {
+      [key: string]: any;
+    } = { ...appStore.$state };
+
+    delete settings.isInstalled;
+    delete settings.appVersion;
+    delete settings.configFile;
+    delete settings.teamList;
+    delete settings.bindAddr;
+
+    appStore.updateSettings({
+      ...appStore.$state,
+      globalSettings: false,
+    });
     localStorage.setItem(
       'setting-config',
-      JSON.stringify({ ...appStore.$state, globalSettings: false })
+      JSON.stringify({ ...settings, globalSettings: false })
     );
     Message.success(t('settings.saveSuccess'));
     // await copy(text);
