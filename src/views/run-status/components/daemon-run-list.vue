@@ -138,9 +138,9 @@
       {{ rowIndex + 1 + (pagination.page - 1) * pagination.pageSize }}
     </template>
     <template #bindIp="{ record }">
-      <a-space v-if="!record.is_online" size="mini">
+      <a-space size="mini">
         {{ record.bind_ip }}
-        <jicon-offline />
+        <jicon-offline v-if="!record.is_online" />
       </a-space>
     </template>
 
