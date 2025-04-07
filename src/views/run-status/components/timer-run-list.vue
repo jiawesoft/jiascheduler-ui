@@ -291,35 +291,35 @@
 <script lang="ts" setup>
   import {
     JobAction,
+    jobAction,
     QueryJobReq,
+    queryRunList,
     QueryRunListReq,
     RunRecord,
-    jobAction,
-    queryRunList,
   } from '@/api/job';
   import { queryCountResource, TagRecord } from '@/api/tag';
+  import jiconOffline from '@/components/icon/jicon-offline.vue';
   import useLoading from '@/hooks/loading';
   import { Pagination } from '@/types/global';
   import {
     computed,
+    defineProps,
     nextTick,
     reactive,
     ref,
     toRefs,
     watch,
-    defineProps,
   } from 'vue';
   import { useI18n } from 'vue-i18n';
-  import jiconOffline from '@/components/icon/jicon-offline.vue';
 
+  import TableTagItem from '@/components/table-tag-item/index.vue';
+  import TagItem from '@/components/tag-item/index.vue';
   import { Message } from '@arco-design/web-vue';
   import type { TableColumnData } from '@arco-design/web-vue/es/table/interface';
   import cloneDeep from 'lodash/cloneDeep';
   import Sortable from 'sortablejs';
-  import TagItem from '@/components/tag-item/index.vue';
-  import TableTagItem from '@/components/table-tag-item/index.vue';
-  import ExecHistory from './timer-exec-list.vue';
   import JobDetail from './job-detail.vue';
+  import ExecHistory from './timer-exec-list.vue';
 
   type SizeProps = 'mini' | 'small' | 'medium' | 'large';
   type Column = TableColumnData & { checked?: true };

@@ -350,7 +350,7 @@ export interface JobSupervisorRecord {
 export interface QueryJobSupervisorReq extends Partial<JobSupervisorRecord> {
   page: number;
   page_size: number;
-  tag_ids?: number[]
+  tag_ids?: number[];
 }
 
 export interface QueryJobSupervisorListResp {
@@ -387,7 +387,10 @@ export function saveJobSupervisor(data: SaveSupervisorReq) {
 }
 
 export interface DeleteExeHistoryReq {
-  schedule_id: string
+  schedule_id?: string;
+  schedule_type?: string;
+  eid?: string;
+  bind_ip?: string;
 }
 export function deleteExeHistory(data: DeleteExeHistoryReq) {
   return axios.post<DeleteExeHistoryReq>('/api/job/delete-exec-history', data);

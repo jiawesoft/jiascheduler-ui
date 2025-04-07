@@ -64,8 +64,18 @@
     </a-col>
   </a-row>
   <a-divider v-if="!$props.disableSearch" style="margin-top: 0" />
-  <a-row style="margin-bottom: 16px">
-    <a-col :span="22">
+  <a-row v-if="$props.bindIp && $props.eid" style="margin-bottom: 16px">
+    <a-col :span="2">
+      <a-popconfirm
+        :content="$t('job.action.confirm.clear.records')"
+        @before-ok="handleClearExecHistory($event)"
+      >
+        <a-button type="primary" size="small">
+          {{ $t('job.clear.records') }}
+        </a-button>
+      </a-popconfirm>
+    </a-col>
+    <a-col :span="20">
       <tag-item :tag-list="tagList" @query-tag-list="queryTagList"></tag-item>
     </a-col>
     <a-col
@@ -298,22 +308,28 @@
 </template>
 
 <script lang="ts" setup>
+  import {
+    deleteExeHistory,
+    ExecRecord,
+    queryExecList,
+    QueryExecListReq,
+  } from '@/api/job';
   import { queryCountResource, TagRecord } from '@/api/tag';
-  import { computed, ref, reactive, watch, nextTick, toRefs } from 'vue';
-  import { useI18n } from 'vue-i18n';
+  import TableTagItem from '@/components/table-tag-item/index.vue';
+  import TagItem from '@/components/tag-item/index.vue';
   import useLoading from '@/hooks/loading';
-  import { queryExecList, QueryExecListReq, ExecRecord } from '@/api/job';
+  import { useAppStore } from '@/store';
   import { Pagination } from '@/types/global';
+  import { Message } from '@arco-design/web-vue';
   import type { TableColumnData } from '@arco-design/web-vue/es/table/interface';
+  import 'ace-builds/src-noconflict/mode-text';
+  import 'ace-builds/src-noconflict/theme-chaos';
+  import 'ace-builds/src-noconflict/theme-chrome';
   import cloneDeep from 'lodash/cloneDeep';
   import Sortable from 'sortablejs';
-  import { useAppStore } from '@/store';
+  import { computed, nextTick, reactive, ref, toRefs, watch } from 'vue';
+  import { useI18n } from 'vue-i18n';
   import { VAceEditor } from 'vue3-ace-editor';
-  import TagItem from '@/components/tag-item/index.vue';
-  import TableTagItem from '@/components/table-tag-item/index.vue';
-  import 'ace-builds/src-noconflict/mode-text';
-  import 'ace-builds/src-noconflict/theme-chrome';
-  import 'ace-builds/src-noconflict/theme-chaos';
 
   const props = defineProps<{
     scheduleId?: string;
@@ -739,6 +755,23 @@
     cloneColumns.value = showColumns.value.filter((item) => item.checked);
   };
 
+  const handleClearExecHistory = async (e: any) => {
+    try {
+      await deleteExeHistory({
+        schedule_id: props.scheduleId,
+        schedule_type: 'timer',
+        eid: props.eid,
+        bind_ip: props.bindIp,
+      });
+    } catch (err) {
+      return false;
+    }
+
+    Message.success(t('form.submit.success'));
+    search();
+    return true;
+  };
+
   const popupVisibleChange = (val: boolean) => {
     if (val) {
       nextTick(() => {
@@ -791,6 +824,7 @@
   .container {
     padding: 0 20px 20px 20px;
   }
+
   :deep(.arco-table-th) {
     &:last-child {
       .arco-table-th-item-title {
@@ -798,18 +832,22 @@
       }
     }
   }
+
   .action-icon {
     margin-left: 12px;
     cursor: pointer;
   }
+
   .active {
     color: #0960bd;
     background-color: #e3f4fc;
   }
+
   .setting {
     display: flex;
     align-items: center;
     width: 200px;
+
     .title {
       margin-left: 12px;
       cursor: pointer;
