@@ -65,18 +65,18 @@
   </a-row>
   <a-divider v-if="!$props.disableSearch" style="margin-top: 0" />
   <a-row v-if="$props.bindIp && $props.eid" style="margin-bottom: 16px">
+    <a-col :span="20">
+      <tag-item :tag-list="tagList" @query-tag-list="queryTagList"></tag-item>
+    </a-col>
     <a-col :span="2">
       <a-popconfirm
         :content="$t('job.action.confirm.clear.records')"
         @before-ok="handleClearExecHistory($event)"
       >
-        <a-button type="primary" size="small">
+        <a-button type="primary" size="mini" plain>
           {{ $t('job.clear.records') }}
         </a-button>
       </a-popconfirm>
-    </a-col>
-    <a-col :span="20">
-      <tag-item :tag-list="tagList" @query-tag-list="queryTagList"></tag-item>
     </a-col>
     <a-col
       :span="2"
