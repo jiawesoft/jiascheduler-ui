@@ -151,7 +151,8 @@ const localeJob = {
   'job.nextTime': 'Next Execution',
 
   'job.clear.records': 'Clear execution records',
-  'job.action.confirm.clear.records': 'Are you sure you want to clear the execution records?',
+  'job.action.confirm.clear.records':
+    'Are you sure you want to clear the execution records?',
 
   'job.action.confirm.start': 'Are you sure you want to start?',
   'job.action.confirm.startTimer': 'Are you sure you want to start the timer?',
