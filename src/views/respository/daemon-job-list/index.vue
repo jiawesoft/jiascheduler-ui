@@ -327,7 +327,7 @@
     job_type: string;
     schedule_name: string;
     namespace: string;
-    restat_interval: number;
+    restart_interval: number;
     schedule_type: string;
     action: string;
     endpoints: endpoint[];
@@ -367,7 +367,7 @@
       schedule_type: 'daemon',
       action: 'exec',
       endpoints: [],
-      restat_interval: 0,
+      restart_interval: 0,
     },
   });
   const { jobSupervisorForm, dispatchJobSupervisorForm } = toRefs(state);
@@ -585,6 +585,7 @@
       await dispatchJob({
         schedule_type: dispatchJobSupervisorForm.value
           .schedule_type as ScheduleType,
+        restart_interval: dispatchJobSupervisorForm.value.restart_interval,
         eid: dispatchJobSupervisorForm.value.eid,
         schedule_name: dispatchJobSupervisorForm.value.schedule_name,
         action: dispatchJobSupervisorForm.value.action as JobAction,

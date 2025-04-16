@@ -68,7 +68,10 @@
     <a-col :span="20">
       <tag-item :tag-list="tagList" @query-tag-list="queryTagList"></tag-item>
     </a-col>
-    <a-col :span="2">
+    <a-col
+      :span="2"
+      style="display: flex; align-items: center; justify-content: end"
+    >
       <a-popconfirm
         :content="$t('job.action.confirm.clear.records')"
         @before-ok="handleClearExecHistory($event)"
@@ -83,9 +86,9 @@
       style="display: flex; align-items: center; justify-content: end"
     >
       <a-tooltip :content="$t('columns.actions.refresh')">
-        <div class="action-icon" @click="search"
-          ><icon-refresh size="18"
-        /></div>
+        <div class="action-icon" @click="search">
+          <icon-refresh size="18" />
+        </div>
       </a-tooltip>
       <a-dropdown @select="handleSelectDensity">
         <a-tooltip :content="$t('columns.actions.density')">
@@ -322,14 +325,14 @@
   import { Pagination } from '@/types/global';
   import { Message } from '@arco-design/web-vue';
   import type { TableColumnData } from '@arco-design/web-vue/es/table/interface';
-  import 'ace-builds/src-noconflict/mode-text';
-  import 'ace-builds/src-noconflict/theme-chaos';
-  import 'ace-builds/src-noconflict/theme-chrome';
   import cloneDeep from 'lodash/cloneDeep';
   import Sortable from 'sortablejs';
   import { computed, nextTick, reactive, ref, toRefs, watch } from 'vue';
   import { useI18n } from 'vue-i18n';
   import { VAceEditor } from 'vue3-ace-editor';
+  import 'ace-builds/src-noconflict/mode-text';
+  import 'ace-builds/src-noconflict/theme-chaos';
+  import 'ace-builds/src-noconflict/theme-chrome';
 
   const props = defineProps<{
     scheduleId?: string;

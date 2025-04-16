@@ -78,6 +78,7 @@ export interface DispatchJobReq {
   schedule_name: string;
   schedule_type: ScheduleType;
   timer_expr?: TimerExpr;
+  restart_interval?: number;
   action: JobAction;
   is_sync: false;
   endpoints: endpoint[];
