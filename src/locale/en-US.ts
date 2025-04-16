@@ -158,6 +158,8 @@ const localeJob = {
   'job.action.confirm.startTimer': 'Are you sure you want to start the timer?',
   'job.action.confirm.stop': 'Are you sure you want to stop?',
   'job.action.confirm.stopTimer': 'Are you sure you want to stop the timer?',
+  'job.action.confirm.deleteSchedule':
+    'Are you sure you want to delete the scheduling record? This will also clear all associated execution records',
   'job.action': 'Action',
   'job.schedule.dispatchResult': 'Dispatch Status',
 

@@ -396,3 +396,15 @@ export interface DeleteExeHistoryReq {
 export function deleteExeHistory(data: DeleteExeHistoryReq) {
   return axios.post<DeleteExeHistoryReq>('/api/job/delete-exec-history', data);
 }
+
+export interface DeleteScheduleHistoryReq {
+  schedule_id: string;
+  eid: string;
+}
+
+export function deleteScheduleHistory(data: DeleteScheduleHistoryReq) {
+  return axios.post<DeleteExeHistoryReq>(
+    '/api/job/delete-schedule-history',
+    data
+  );
+}

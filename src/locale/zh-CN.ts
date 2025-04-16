@@ -155,6 +155,8 @@ const localeJob = {
   'job.action.confirm.stopTimer': '确认要停止定时器么？',
   'job.action.confirm.startSupervising': '确认要开启运行守护么',
   'job.action.confirm.stopSupervising': '确认要关闭运行守护么',
+  'job.action.confirm.deleteSchedule':
+    '确认要删除调度记录吗？这将会同时清空执行记录',
   'job.action': '动作',
   'job.schedule.dispatchResult': '推送状态',
 
