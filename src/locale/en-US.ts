@@ -164,6 +164,10 @@ const localeJob = {
     'Are you sure you want to delete the running status record? This will also clear all associated execution records',
   'job.action.confirm.deleteJob':
     'Are you sure you want to delete the job record? This will also clear all associated execution and scheduling records',
+  'job.action.confirm.deleteJobTimer':
+    'Are you sure you want to delete the job timer record? ',
+  'job.action.confirm.deleteJobSupervisor':
+    'Are you sure you want to delete the job supvervisor record? ',
   'job.action': 'Action',
   'job.schedule.dispatchResult': 'Dispatch Status',
 

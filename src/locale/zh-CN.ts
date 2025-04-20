@@ -161,6 +161,8 @@ const localeJob = {
     '确认要删除该运行状态么？这将会清空对应的执行记录',
   'job.action.confirm.deleteJob':
     '确认要删除该作业么，这将会清空对应的调度记录和执行记录',
+  'job.action.confirm.deleteJobTimer': '确认要删除该定时器么',
+  'job.action.confirm.deleteJobSupervisor': '确认要删除该常驻任务么? ',
   'job.action': '动作',
   'job.schedule.dispatchResult': '推送状态',
 

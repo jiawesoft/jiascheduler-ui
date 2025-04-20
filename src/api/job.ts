@@ -430,18 +430,21 @@ export function deleteJob(data: DeleteJobReq) {
   return axios.post<DeleteJobReq>('/api/job/delete', data);
 }
 
-export interface DeleteTimerReq {
+export interface DeleteJobTimerReq {
   id: number;
 }
 
-export function deleteTimer(data: DeleteTimerReq) {
-  return axios.post<DeleteTimerReq>('/api/job/delete-timer', data);
+export function deleteJobTimer(data: DeleteJobTimerReq) {
+  return axios.post<DeleteJobTimerReq>('/api/job/delete-timer', data);
 }
 
-export interface DeleteSupervisorReq {
+export interface DeleteJobSupervisorReq {
   id: number;
 }
 
-export function deleteSupvervisor(data: DeleteSupervisorReq) {
-  return axios.post<DeleteSupervisorReq>('/api/job/delete-supvervisor', data);
+export function deleteJobSupvervisor(data: DeleteJobSupervisorReq) {
+  return axios.post<DeleteJobSupervisorReq>(
+    '/api/job/delete-supvervisor',
+    data
+  );
 }
