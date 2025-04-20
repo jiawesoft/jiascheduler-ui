@@ -556,20 +556,6 @@
     return true;
   };
 
-  const handleDeleteExecHistory = async (e: any, record: any) => {
-    setLoading(true);
-    try {
-      await deleteExeHistory({
-        schedule_id: record.schedule_id,
-      });
-    } finally {
-      setLoading(false);
-    }
-
-    search();
-    return true;
-  };
-
   const handleDeleteScheduleHistory = async (e: any, record: any) => {
     setLoading(true);
     try {

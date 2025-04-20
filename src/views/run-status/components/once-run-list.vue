@@ -227,6 +227,16 @@
             </a-button>
           </a-popconfirm>
         </a-space>
+        <a-space>
+          <a-popconfirm
+            :content="$t('job.action.confirm.deleteRunningStatus')"
+            @before-ok="handleDeleteRunningStatus($event, record)"
+          >
+            <a-button type="dashed" size="mini" status="danger">
+              {{ $t('operations.delete') }}
+            </a-button>
+          </a-popconfirm>
+        </a-space>
       </a-space>
     </template>
   </a-table>
@@ -277,6 +287,7 @@
     QueryJobReq,
     QueryRunListReq,
     RunRecord,
+    deleteRunningStatus,
     jobAction,
     queryRunList,
   } from '@/api/job';
@@ -623,6 +634,22 @@
       search();
     }, 200);
 
+    return true;
+  };
+
+  const handleDeleteRunningStatus = async (e: any, record: any) => {
+    setLoading(true);
+    try {
+      await deleteRunningStatus({
+        eid: record.eid,
+        instance_id: record.instance_id,
+        schedule_type: record.schedule_type,
+      });
+    } finally {
+      setLoading(false);
+    }
+
+    search();
     return true;
   };
 

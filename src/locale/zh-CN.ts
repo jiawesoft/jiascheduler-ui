@@ -157,6 +157,8 @@ const localeJob = {
   'job.action.confirm.stopSupervising': '确认要关闭运行守护么',
   'job.action.confirm.deleteSchedule':
     '确认要删除该调度记录吗？这将会同时清空执行记录, 后续你可以从运行状态停止正在运行的作业',
+  'job.action.confirm.deleteRunningStatus':
+    '确认要删除该运行状态么？这将会清空对应的执行记录',
   'job.action': '动作',
   'job.schedule.dispatchResult': '推送状态',
 

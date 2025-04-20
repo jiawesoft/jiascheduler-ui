@@ -124,7 +124,7 @@ export interface QueryRunListResp {
 }
 
 export function queryRunList(params: QueryRunListReq) {
-  return axios.get<QueryRunListResp>('/api/job/run-list', {
+  return axios.get<QueryRunListResp>('/api/job/running-status-list', {
     params,
     paramsSerializer: (obj) => {
       return qs.stringify(obj);
@@ -405,6 +405,19 @@ export interface DeleteScheduleHistoryReq {
 export function deleteScheduleHistory(data: DeleteScheduleHistoryReq) {
   return axios.post<DeleteExeHistoryReq>(
     '/api/job/delete-schedule-history',
+    data
+  );
+}
+
+export interface DeleteRunningStatusReq {
+  instance_id: string;
+  eid: string;
+  schedule_type: string;
+}
+
+export function deleteRunningStatus(data: DeleteRunningStatusReq) {
+  return axios.post<DeleteRunningStatusReq>(
+    '/api/job/delete-running-status',
     data
   );
 }
