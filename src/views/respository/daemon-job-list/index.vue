@@ -160,20 +160,35 @@
         </template>
 
         <template #operations="{ record }">
-          <a-button
-            type="text"
-            size="small"
-            @click="handleOpenDeamonJobModal($event, record)"
-          >
-            {{ $t('operations.view') }}
-          </a-button>
-          <a-button
-            type="text"
-            size="small"
-            @click="handleOpenDispatchJobSupervisorModal($event, record)"
-          >
-            {{ $t('operations.dispatch') }}
-          </a-button>
+          <a-space direction="horizontal">
+            <a-space>
+              <a-button
+                size="mini"
+                @click="handleOpenDeamonJobModal($event, record)"
+              >
+                {{ $t('operations.view') }}
+              </a-button>
+            </a-space>
+            <a-space>
+              <a-button
+                size="mini"
+                status="success"
+                @click="handleOpenDispatchJobSupervisorModal($event, record)"
+              >
+                {{ $t('operations.dispatch') }}
+              </a-button>
+            </a-space>
+            <a-space>
+              <a-popconfirm
+                :content="$t('job.action.confirm.deleteJobSupervisor')"
+                @before-ok="handleDeleteJobSupervisor($event, record)"
+              >
+                <a-button type="dashed" size="mini" status="danger">
+                  {{ $t('operations.delete') }}
+                </a-button>
+              </a-popconfirm>
+            </a-space>
+          </a-space>
         </template>
       </a-table>
     </a-card>
@@ -274,6 +289,7 @@
 
 <script lang="ts" setup>
   import {
+    deleteJobSupervisor,
     dispatchJob,
     endpoint,
     JobAction,
@@ -525,6 +541,20 @@
     if (str && !jobSupervisorForm.value.name) {
       jobSupervisorForm.value.name = str;
     }
+  };
+
+  const handleDeleteJobSupervisor = async (e: any, record: any) => {
+    setLoading(true);
+    try {
+      await deleteJobSupervisor({
+        id: record.id,
+      });
+    } finally {
+      setLoading(false);
+    }
+
+    search();
+    return true;
   };
 
   const handleOpenDeamonJobModal = (e: any, record: any) => {

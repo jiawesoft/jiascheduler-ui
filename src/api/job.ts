@@ -442,9 +442,17 @@ export interface DeleteJobSupervisorReq {
   id: number;
 }
 
-export function deleteJobSupvervisor(data: DeleteJobSupervisorReq) {
-  return axios.post<DeleteJobSupervisorReq>(
-    '/api/job/delete-supvervisor',
+export function deleteJobSupervisor(data: DeleteJobSupervisorReq) {
+  return axios.post<DeleteJobSupervisorReq>('/api/job/delete-supervisor', data);
+}
+
+export interface DeleteBundleScriptReq {
+  id: number;
+}
+
+export function deleteBundleScript(data: DeleteBundleScriptReq) {
+  return axios.post<DeleteBundleScriptReq>(
+    '/api/job/delete-bundle-script',
     data
   );
 }

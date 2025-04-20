@@ -168,6 +168,8 @@ const localeJob = {
     'Are you sure you want to delete the job timer record? ',
   'job.action.confirm.deleteJobSupervisor':
     'Are you sure you want to delete the job supvervisor record? ',
+  'job.action.confirm.deleteBundleScript':
+    'Are you sure you want to delete the bundle script? ',
   'job.action': 'Action',
   'job.schedule.dispatchResult': 'Dispatch Status',
 
