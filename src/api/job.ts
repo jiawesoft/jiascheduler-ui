@@ -421,3 +421,27 @@ export function deleteRunningStatus(data: DeleteRunningStatusReq) {
     data
   );
 }
+
+export interface DeleteJobReq {
+  eid: string;
+}
+
+export function deleteJob(data: DeleteJobReq) {
+  return axios.post<DeleteJobReq>('/api/job/delete', data);
+}
+
+export interface DeleteTimerReq {
+  id: number;
+}
+
+export function deleteTimer(data: DeleteTimerReq) {
+  return axios.post<DeleteTimerReq>('/api/job/delete-timer', data);
+}
+
+export interface DeleteSupervisorReq {
+  id: number;
+}
+
+export function deleteSupvervisor(data: DeleteSupervisorReq) {
+  return axios.post<DeleteSupervisorReq>('/api/job/delete-supvervisor', data);
+}

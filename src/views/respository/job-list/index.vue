@@ -180,20 +180,32 @@
         </template>
 
         <template #operations="{ record }">
-          <a-button
-            type="text"
-            size="small"
-            @click="handleOpenJobModal($event, record)"
-          >
-            {{ $t('operations.view') }}
-          </a-button>
-          <a-button
-            type="text"
-            size="small"
-            @click="handleOpenDispatchJobModal($event, record)"
-          >
-            {{ $t('operations.dispatch') }}
-          </a-button>
+          <a-space direction="horizontal">
+            <a-space>
+              <a-button size="mini" @click="handleOpenJobModal($event, record)">
+                {{ $t('operations.edit') }}
+              </a-button>
+            </a-space>
+            <a-space>
+              <a-button
+                size="mini"
+                status="success"
+                @click="handleOpenDispatchJobModal($event, record)"
+              >
+                {{ $t('operations.dispatch') }}
+              </a-button>
+            </a-space>
+            <a-space>
+              <a-popconfirm
+                :content="$t('job.action.confirm.deleteJob')"
+                @before-ok="handleDeleteJob($event, record)"
+              >
+                <a-button type="dashed" size="mini" status="danger">
+                  {{ $t('operations.delete') }}
+                </a-button>
+              </a-popconfirm>
+            </a-space>
+          </a-space>
         </template>
       </a-table>
     </a-card>
@@ -466,6 +478,7 @@
     QueryExecutorReq,
   } from '@/api/executor';
   import {
+    deleteJob,
     dispatchJob,
     endpoint,
     JobAction,
@@ -897,6 +910,20 @@
     if (value) {
       fetchJobOptions({ page: 1, page_size: 10, name: value });
     }
+  };
+
+  const handleDeleteJob = async (e: any, record: any) => {
+    setLoading(true);
+    try {
+      await deleteJob({
+        eid: record.eid,
+      });
+    } finally {
+      setLoading(false);
+    }
+
+    search();
+    return true;
   };
 
   const handleOpenDispatchJobModal = (e: any, record: any) => {
