@@ -137,6 +137,7 @@
     :data="renderData"
     :bordered="false"
     :size="size"
+    column-resizable
     @page-change="onPageChange"
   >
     <template #index="{ rowIndex }">
@@ -159,44 +160,39 @@
     <template #operations="{ record }">
       <a-space direction="horizontal">
         <a-space>
-          <a-button
-            type="dashed"
+          <a-dropdown-button
+            :hide-on-select="false"
             size="mini"
-            status="normal"
             @click="handleViewScheduleDetailModal($event, record)"
           >
             {{ $t('operations.view') }}
-          </a-button>
-        </a-space>
-        <a-space>
-          <a-popconfirm
-            :content="$t('job.action.confirm.start')"
-            @before-ok="handleAction($event, record, 'exec')"
-          >
-            <a-button type="dashed" size="mini" status="success">
-              {{ $t('job.start') }}
-            </a-button>
-          </a-popconfirm>
-        </a-space>
-        <!-- <a-space>
-          <a-popconfirm
-            :content="$t('job.action.confirm.clear.records')"
-            @before-ok="handleDelete($event, record)"
-          >
-            <a-button type="dashed" size="mini" status="danger">
-              {{ $t('job.clear.records') }}
-            </a-button>
-          </a-popconfirm>
-        </a-space> -->
-        <a-space>
-          <a-popconfirm
-            :content="$t('job.action.confirm.start')"
-            @before-ok="handleAction($event, record, 'kill')"
-          >
-            <a-button type="dashed" size="mini" status="warning">
-              {{ $t('job.stop') }}
-            </a-button>
-          </a-popconfirm>
+            <template #icon>
+              <icon-down />
+            </template>
+            <template #content>
+              <a-doption>
+                <a-popconfirm
+                  :content="$t('job.action.confirm.start')"
+                  @before-ok="handleAction($event, record, 'exec')"
+                >
+                  <a-button type="dashed" size="mini" status="success">
+                    {{ $t('job.start') }}
+                  </a-button>
+                </a-popconfirm>
+              </a-doption>
+              <a-doption>
+                <a-popconfirm
+                  :content="$t('job.action.confirm.start')"
+                  @before-ok="handleAction($event, record, 'kill')"
+                >
+                  <a-button type="dashed" size="mini" status="warning">
+                    {{ $t('job.stop') }}
+                  </a-button>
+                </a-popconfirm>
+              </a-doption>
+              <a-doption> </a-doption>
+            </template>
+          </a-dropdown-button>
         </a-space>
         <a-space>
           <a-popconfirm

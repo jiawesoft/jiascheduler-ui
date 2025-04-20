@@ -64,7 +64,7 @@
     </a-col>
   </a-row>
   <a-divider v-if="!$props.disableSearch" style="margin-top: 0" />
-  <a-row v-if="$props.bindIp && $props.eid" style="margin-bottom: 16px">
+  <a-row style="margin-bottom: 16px">
     <a-col :span="20">
       <tag-item :tag-list="tagList" @query-tag-list="queryTagList"></tag-item>
     </a-col>

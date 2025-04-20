@@ -146,48 +146,52 @@
     </template>
 
     <template #operations="{ record }">
-      <a-space>
-        <a-dropdown-button
-          :hide-on-select="false"
-          @click="handleViewScheduleDetailModal($event, record)"
-        >
-          {{ $t('operations.view') }}
-          <template #icon>
-            <icon-down />
-          </template>
-          <template #content>
-            <a-doption>
-              <a-popconfirm
-                :content="$t('job.action.confirm.startSupervising')"
-                @before-ok="handleAction($event, record, 'start_supervising')"
-              >
-                <a-button type="dashed" size="mini" status="success">
-                  {{ $t('operations.startSupervising') }}
-                </a-button>
-              </a-popconfirm>
-            </a-doption>
-            <a-doption>
-              <a-popconfirm
-                :content="$t('job.action.confirm.stopSupervising')"
-                @before-ok="handleAction($event, record, 'stop_supervising')"
-              >
-                <a-button type="dashed" size="mini" status="warning">
-                  {{ $t('operations.stopSupervising') }}
-                </a-button>
-              </a-popconfirm>
-            </a-doption>
-            <a-doption>
-              <a-popconfirm
-                :content="$t('job.action.confirm.clear.records')"
-                @before-ok="handleDelete($event, record)"
-              >
-                <a-button type="dashed" size="mini" status="danger">
-                  {{ $t('job.clear.records') }}
-                </a-button>
-              </a-popconfirm>
-            </a-doption>
-          </template>
-        </a-dropdown-button>
+      <a-space direction="horizontal">
+        <a-space>
+          <a-dropdown-button
+            :hide-on-select="false"
+            size="mini"
+            @click="handleViewScheduleDetailModal($event, record)"
+          >
+            {{ $t('operations.view') }}
+            <template #icon>
+              <icon-down />
+            </template>
+            <template #content>
+              <a-doption>
+                <a-popconfirm
+                  :content="$t('job.action.confirm.startSupervising')"
+                  @before-ok="handleAction($event, record, 'start_supervising')"
+                >
+                  <a-button type="dashed" size="mini" status="success">
+                    {{ $t('operations.startSupervising') }}
+                  </a-button>
+                </a-popconfirm>
+              </a-doption>
+              <a-doption>
+                <a-popconfirm
+                  :content="$t('job.action.confirm.stopSupervising')"
+                  @before-ok="handleAction($event, record, 'stop_supervising')"
+                >
+                  <a-button type="dashed" size="mini" status="warning">
+                    {{ $t('operations.stopSupervising') }}
+                  </a-button>
+                </a-popconfirm>
+              </a-doption>
+            </template>
+          </a-dropdown-button>
+        </a-space>
+
+        <a-space>
+          <a-popconfirm
+            :content="$t('job.action.confirm.deleteSchedule')"
+            @before-ok="handleDeleteScheduleHistory($event, record)"
+          >
+            <a-button type="dashed" size="mini" status="danger">
+              {{ $t('operations.delete') }}
+            </a-button>
+          </a-popconfirm>
+        </a-space>
       </a-space>
     </template>
   </a-table>
@@ -232,6 +236,7 @@
     queryScheduleList,
     redispatchJob,
     deleteExeHistory,
+    deleteScheduleHistory,
   } from '@/api/job';
   import { queryCountResource, TagRecord } from '@/api/tag';
   import useLoading from '@/hooks/loading';
@@ -329,7 +334,6 @@
       dataIndex: 'index',
       width: 30,
       slotName: 'index',
-
       fixed: 'left',
     },
     // {
@@ -535,10 +539,16 @@
     return true;
   };
 
-  const handleDelete = async (e: any, record: any) => {
-    await deleteExeHistory({
-      schedule_id: record.schedule_id,
-    });
+  const handleDeleteScheduleHistory = async (e: any, record: any) => {
+    setLoading(true);
+    try {
+      await deleteScheduleHistory({
+        schedule_id: record.schedule_id,
+        eid: record.eid,
+      });
+    } finally {
+      setLoading(false);
+    }
 
     search();
     return true;
