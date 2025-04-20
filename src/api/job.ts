@@ -447,7 +447,7 @@ export function deleteJobSupervisor(data: DeleteJobSupervisorReq) {
 }
 
 export interface DeleteBundleScriptReq {
-  id: number;
+  eid: string;
 }
 
 export function deleteBundleScript(data: DeleteBundleScriptReq) {

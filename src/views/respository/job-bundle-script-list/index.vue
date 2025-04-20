@@ -148,13 +148,23 @@
         </template>
 
         <template #operations="{ record }">
-          <a-button
-            type="text"
-            size="small"
-            @click="handleOpenJobModal($event, record)"
-          >
-            {{ $t('operations.view') }}
-          </a-button>
+          <a-space direction="horizontal">
+            <a-space>
+              <a-button size="mini" @click="handleOpenJobModal($event, record)">
+                {{ $t('operations.edit') }}
+              </a-button>
+            </a-space>
+            <a-space>
+              <a-popconfirm
+                :content="$t('job.action.confirm.deleteBundleScript')"
+                @before-ok="handleDeleteBundleScript($event, record)"
+              >
+                <a-button type="dashed" size="mini" status="danger">
+                  {{ $t('operations.delete') }}
+                </a-button>
+              </a-popconfirm>
+            </a-space>
+          </a-space>
         </template>
       </a-table>
     </a-card>
@@ -209,6 +219,7 @@
 
 <script lang="ts" setup>
   import {
+    deleteBundleScript,
     JobBundleScriptRecord,
     queryJobBundleScriptList,
     QueryJobReq,
@@ -400,6 +411,20 @@
     }
     fetchExecutorData({ default_id: jobBundleScriptForm.value.executor_id });
     jobBundleScriptModalVisible.value = true;
+  };
+
+  const handleDeleteBundleScript = async (e: any, record: any) => {
+    setLoading(true);
+    try {
+      await deleteBundleScript({
+        eid: record.eid,
+      });
+    } finally {
+      setLoading(false);
+    }
+
+    search();
+    return true;
   };
 
   const handleSaveJobBundleScript = async () => {
