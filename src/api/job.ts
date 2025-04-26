@@ -78,6 +78,7 @@ export interface DispatchJobReq {
   schedule_name: string;
   schedule_type: ScheduleType;
   timer_expr?: TimerExpr;
+  restart_interval?: number;
   action: JobAction;
   is_sync: false;
   endpoints: endpoint[];
@@ -123,7 +124,7 @@ export interface QueryRunListResp {
 }
 
 export function queryRunList(params: QueryRunListReq) {
-  return axios.get<QueryRunListResp>('/api/job/run-list', {
+  return axios.get<QueryRunListResp>('/api/job/running-status-list', {
     params,
     paramsSerializer: (obj) => {
       return qs.stringify(obj);
@@ -350,7 +351,7 @@ export interface JobSupervisorRecord {
 export interface QueryJobSupervisorReq extends Partial<JobSupervisorRecord> {
   page: number;
   page_size: number;
-  tag_ids?: number[]
+  tag_ids?: number[];
 }
 
 export interface QueryJobSupervisorListResp {
@@ -387,8 +388,71 @@ export function saveJobSupervisor(data: SaveSupervisorReq) {
 }
 
 export interface DeleteExeHistoryReq {
-  schedule_id: string
+  schedule_id?: string;
+  schedule_type?: string;
+  eid?: string;
+  bind_ip?: string;
 }
 export function deleteExeHistory(data: DeleteExeHistoryReq) {
   return axios.post<DeleteExeHistoryReq>('/api/job/delete-exec-history', data);
+}
+
+export interface DeleteScheduleHistoryReq {
+  schedule_id: string;
+  eid: string;
+}
+
+export function deleteScheduleHistory(data: DeleteScheduleHistoryReq) {
+  return axios.post<DeleteExeHistoryReq>(
+    '/api/job/delete-schedule-history',
+    data
+  );
+}
+
+export interface DeleteRunningStatusReq {
+  instance_id: string;
+  eid: string;
+  schedule_type: string;
+}
+
+export function deleteRunningStatus(data: DeleteRunningStatusReq) {
+  return axios.post<DeleteRunningStatusReq>(
+    '/api/job/delete-running-status',
+    data
+  );
+}
+
+export interface DeleteJobReq {
+  eid: string;
+}
+
+export function deleteJob(data: DeleteJobReq) {
+  return axios.post<DeleteJobReq>('/api/job/delete', data);
+}
+
+export interface DeleteJobTimerReq {
+  id: number;
+}
+
+export function deleteJobTimer(data: DeleteJobTimerReq) {
+  return axios.post<DeleteJobTimerReq>('/api/job/delete-timer', data);
+}
+
+export interface DeleteJobSupervisorReq {
+  id: number;
+}
+
+export function deleteJobSupervisor(data: DeleteJobSupervisorReq) {
+  return axios.post<DeleteJobSupervisorReq>('/api/job/delete-supervisor', data);
+}
+
+export interface DeleteBundleScriptReq {
+  eid: string;
+}
+
+export function deleteBundleScript(data: DeleteBundleScriptReq) {
+  return axios.post<DeleteBundleScriptReq>(
+    '/api/job/delete-bundle-script',
+    data
+  );
 }

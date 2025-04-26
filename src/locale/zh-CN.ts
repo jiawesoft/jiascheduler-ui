@@ -155,6 +155,15 @@ const localeJob = {
   'job.action.confirm.stopTimer': '确认要停止定时器么？',
   'job.action.confirm.startSupervising': '确认要开启运行守护么',
   'job.action.confirm.stopSupervising': '确认要关闭运行守护么',
+  'job.action.confirm.deleteSchedule':
+    '确认要删除该调度记录吗？这将会同时清空执行记录, 后续你可以从运行状态停止正在运行的作业',
+  'job.action.confirm.deleteRunningStatus':
+    '确认要删除该运行状态么？这将会清空对应的执行记录',
+  'job.action.confirm.deleteJob':
+    '确认要删除该作业么，这将会清空对应的调度记录和执行记录',
+  'job.action.confirm.deleteJobTimer': '确认要删除该定时器么',
+  'job.action.confirm.deleteJobSupervisor': '确认要删除该常驻任务么? ',
+  'job.action.confirm.deleteBundleScript': '确认要删除该脚本? ',
   'job.action': '动作',
   'job.schedule.dispatchResult': '推送状态',
 
@@ -347,6 +356,7 @@ export default {
   'operations': '操作',
   'operations.create': '新建',
   'operations.view': '查看',
+  'operations.edit': '编辑',
   'operations.dispatch': '启动',
   'operations.download': '下载',
   'operations.websshLogin': '登录',

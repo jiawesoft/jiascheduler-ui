@@ -175,20 +175,35 @@
         </template>
 
         <template #operations="{ record }">
-          <a-button
-            type="text"
-            size="small"
-            @click="handleOpenJobTimerModal($event, record)"
-          >
-            {{ $t('operations.view') }}
-          </a-button>
-          <a-button
-            type="text"
-            size="small"
-            @click="handleOpenDispatchJobTimerModal($event, record)"
-          >
-            {{ $t('operations.dispatch') }}
-          </a-button>
+          <a-space direction="horizontal">
+            <a-space>
+              <a-button
+                size="mini"
+                @click="handleOpenJobTimerModal($event, record)"
+              >
+                {{ $t('operations.edit') }}
+              </a-button>
+            </a-space>
+            <a-space>
+              <a-button
+                size="small"
+                status="success"
+                @click="handleOpenDispatchJobTimerModal($event, record)"
+              >
+                {{ $t('operations.dispatch') }}
+              </a-button>
+            </a-space>
+            <a-space>
+              <a-popconfirm
+                :content="$t('job.action.confirm.deleteJobTimer')"
+                @before-ok="handleDeleteJobTimer($event, record)"
+              >
+                <a-button type="dashed" size="mini" status="danger">
+                  {{ $t('operations.delete') }}
+                </a-button>
+              </a-popconfirm>
+            </a-space>
+          </a-space>
         </template>
       </a-table>
     </a-card>
@@ -328,6 +343,7 @@
 
 <script lang="ts" setup>
   import {
+    deleteJobTimer,
     dispatchJob,
     endpoint,
     JobAction,
@@ -627,6 +643,20 @@
       };
     }
     jobTimerModalVisible.value = true;
+  };
+
+  const handleDeleteJobTimer = async (e: any, record: any) => {
+    setLoading(true);
+    try {
+      await deleteJobTimer({
+        id: record.id,
+      });
+    } finally {
+      setLoading(false);
+    }
+
+    search();
+    return true;
   };
 
   const handleOpenDispatchJobTimerModal = (e: any, record: any) => {

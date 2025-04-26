@@ -151,12 +151,25 @@ const localeJob = {
   'job.nextTime': 'Next Execution',
 
   'job.clear.records': 'Clear execution records',
-  'job.action.confirm.clear.records': 'Are you sure you want to clear the execution records?',
+  'job.action.confirm.clear.records':
+    'Are you sure you want to clear the execution records?',
 
   'job.action.confirm.start': 'Are you sure you want to start?',
   'job.action.confirm.startTimer': 'Are you sure you want to start the timer?',
   'job.action.confirm.stop': 'Are you sure you want to stop?',
   'job.action.confirm.stopTimer': 'Are you sure you want to stop the timer?',
+  'job.action.confirm.deleteSchedule':
+    'Are you sure you want to delete the scheduling record? This will also clear all associated execution records',
+  'job.action.confirm.deleteRunningStatus':
+    'Are you sure you want to delete the running status record? This will also clear all associated execution records',
+  'job.action.confirm.deleteJob':
+    'Are you sure you want to delete the job record? This will also clear all associated execution and scheduling records',
+  'job.action.confirm.deleteJobTimer':
+    'Are you sure you want to delete the job timer record? ',
+  'job.action.confirm.deleteJobSupervisor':
+    'Are you sure you want to delete the job supvervisor record? ',
+  'job.action.confirm.deleteBundleScript':
+    'Are you sure you want to delete the bundle script? ',
   'job.action': 'Action',
   'job.schedule.dispatchResult': 'Dispatch Status',
 
@@ -354,6 +367,7 @@ export default {
   'operations': 'Operations',
   'operations.create': 'Create',
   'operations.view': 'View',
+  'operations.edit': 'Edit',
   'operations.dispatch': 'Dispatch',
   'operations.download': 'Download',
   'operations.websshLogin': 'Login',

@@ -227,6 +227,16 @@
             </a-button>
           </a-popconfirm>
         </a-space>
+        <a-space>
+          <a-popconfirm
+            :content="$t('job.action.confirm.deleteRunningStatus')"
+            @before-ok="handleDeleteRunningStatus($event, record)"
+          >
+            <a-button type="dashed" size="mini" status="danger">
+              {{ $t('operations.delete') }}
+            </a-button>
+          </a-popconfirm>
+        </a-space>
       </a-space>
     </template>
   </a-table>
@@ -271,26 +281,27 @@
 
 <script lang="ts" setup>
   import {
+    deleteRunningStatus,
     JobAction,
+    jobAction,
     QueryJobReq,
+    queryRunList,
     QueryRunListReq,
     RunRecord,
-    jobAction,
-    queryRunList,
   } from '@/api/job';
   import { queryCountResource, TagRecord } from '@/api/tag';
+  import jiconOffline from '@/components/icon/jicon-offline.vue';
   import useLoading from '@/hooks/loading';
   import { Pagination } from '@/types/global';
   import { computed, nextTick, reactive, ref, toRefs, watch } from 'vue';
   import { useI18n } from 'vue-i18n';
-  import jiconOffline from '@/components/icon/jicon-offline.vue';
 
+  import TableTagItem from '@/components/table-tag-item/index.vue';
+  import TagItem from '@/components/tag-item/index.vue';
   import { Message } from '@arco-design/web-vue';
   import type { TableColumnData } from '@arco-design/web-vue/es/table/interface';
   import cloneDeep from 'lodash/cloneDeep';
   import Sortable from 'sortablejs';
-  import TagItem from '@/components/tag-item/index.vue';
-  import TableTagItem from '@/components/table-tag-item/index.vue';
   import ExecHistory from './daemon-exec-list.vue';
   import JobDetail from './job-detail.vue';
 
@@ -614,6 +625,22 @@
       search();
     }, 200);
 
+    return true;
+  };
+
+  const handleDeleteRunningStatus = async (e: any, record: any) => {
+    setLoading(true);
+    try {
+      await deleteRunningStatus({
+        eid: record.eid,
+        instance_id: record.instance_id,
+        schedule_type: record.schedule_type,
+      });
+    } finally {
+      setLoading(false);
+    }
+
+    search();
     return true;
   };
 

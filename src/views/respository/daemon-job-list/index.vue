@@ -160,20 +160,35 @@
         </template>
 
         <template #operations="{ record }">
-          <a-button
-            type="text"
-            size="small"
-            @click="handleOpenDeamonJobModal($event, record)"
-          >
-            {{ $t('operations.view') }}
-          </a-button>
-          <a-button
-            type="text"
-            size="small"
-            @click="handleOpenDispatchJobSupervisorModal($event, record)"
-          >
-            {{ $t('operations.dispatch') }}
-          </a-button>
+          <a-space direction="horizontal">
+            <a-space>
+              <a-button
+                size="mini"
+                @click="handleOpenDeamonJobModal($event, record)"
+              >
+                {{ $t('operations.view') }}
+              </a-button>
+            </a-space>
+            <a-space>
+              <a-button
+                size="mini"
+                status="success"
+                @click="handleOpenDispatchJobSupervisorModal($event, record)"
+              >
+                {{ $t('operations.dispatch') }}
+              </a-button>
+            </a-space>
+            <a-space>
+              <a-popconfirm
+                :content="$t('job.action.confirm.deleteJobSupervisor')"
+                @before-ok="handleDeleteJobSupervisor($event, record)"
+              >
+                <a-button type="dashed" size="mini" status="danger">
+                  {{ $t('operations.delete') }}
+                </a-button>
+              </a-popconfirm>
+            </a-space>
+          </a-space>
         </template>
       </a-table>
     </a-card>
@@ -274,6 +289,7 @@
 
 <script lang="ts" setup>
   import {
+    deleteJobSupervisor,
     dispatchJob,
     endpoint,
     JobAction,
@@ -327,7 +343,7 @@
     job_type: string;
     schedule_name: string;
     namespace: string;
-    restat_interval: number;
+    restart_interval: number;
     schedule_type: string;
     action: string;
     endpoints: endpoint[];
@@ -367,7 +383,7 @@
       schedule_type: 'daemon',
       action: 'exec',
       endpoints: [],
-      restat_interval: 0,
+      restart_interval: 0,
     },
   });
   const { jobSupervisorForm, dispatchJobSupervisorForm } = toRefs(state);
@@ -527,6 +543,20 @@
     }
   };
 
+  const handleDeleteJobSupervisor = async (e: any, record: any) => {
+    setLoading(true);
+    try {
+      await deleteJobSupervisor({
+        id: record.id,
+      });
+    } finally {
+      setLoading(false);
+    }
+
+    search();
+    return true;
+  };
+
   const handleOpenDeamonJobModal = (e: any, record: any) => {
     saveJobSupervisorRef.value.clearValidate();
     if (record) {
@@ -585,6 +615,7 @@
       await dispatchJob({
         schedule_type: dispatchJobSupervisorForm.value
           .schedule_type as ScheduleType,
+        restart_interval: dispatchJobSupervisorForm.value.restart_interval,
         eid: dispatchJobSupervisorForm.value.eid,
         schedule_name: dispatchJobSupervisorForm.value.schedule_name,
         action: dispatchJobSupervisorForm.value.action as JobAction,
