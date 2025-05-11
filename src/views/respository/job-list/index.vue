@@ -289,6 +289,16 @@
               <a-row :gutter="16">
                 <a-col :span="8">
                   <a-form-item
+                    field="max_parallel"
+                    :tooltip="$t('job.maxParallel.tips')"
+                    validate-trigger="blur"
+                    :label="$t('job.maxParallel')"
+                  >
+                    <a-input-number v-model="jobForm.max_parallel" />
+                  </a-form-item>
+                </a-col>
+                <a-col :span="8">
+                  <a-form-item
                     field="display_on_dashboard"
                     :label="$t('job.displayOnDashboard')"
                   >
@@ -332,6 +342,17 @@
                 <a-col :span="8">
                   <a-form-item field="executor_id" :label="$t('job.executor')">
                     <SelectExecutor v-model="jobForm.executor_id" />
+                  </a-form-item>
+                </a-col>
+
+                <a-col :span="8">
+                  <a-form-item
+                    field="max_parallel"
+                    :tooltip="$t('job.maxParallel.tips')"
+                    validate-trigger="blur"
+                    :label="$t('job.maxParallel')"
+                  >
+                    <a-input-number v-model="jobForm.max_parallel" />
                   </a-form-item>
                 </a-col>
 
@@ -544,6 +565,7 @@
     work_dir: string;
     work_user: string;
     timeout: number;
+    max_parallel: number;
     name: string;
     code: string;
     executor_id: number;
@@ -608,6 +630,7 @@
       work_dir: '',
       work_user: '',
       timeout: 60,
+      max_parallel: 1,
       upload_file: '',
       display_on_dashboard: false,
       args: {},
@@ -881,6 +904,7 @@
         name: '',
         work_dir: '',
         work_user: '',
+        max_parallel: 1,
         timeout: 60,
         code: '# type your code',
         executor_id: 1,

@@ -82,6 +82,9 @@ const localeJob = {
   'job.workUser': '执行用户',
   'job.timeout': '执行超时',
   'job.timeout.tips': '脚本执行超时后自动kill进程, 单位秒',
+  'job.maxParallel': '最大并行',
+  'job.maxParallel.tips':
+    '相同的作业允许同时执行的最大并行数，超过这个数值则忽略执行，定时器和单次执行是分开计数的。对于定时器，如果作业的执行耗时大于定时周期，设置一个合适的并行数可以有效避免作业进程耗费过多内存',
   'job.displayOnDashboard': '大盘显示',
   'job.tab.basic': '基本',
   'job.tab.advance': '高级',
