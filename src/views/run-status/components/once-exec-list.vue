@@ -277,6 +277,7 @@
         field="output"
         :label="$t('job.output')"
       >
+        <!-- <output-area :output="form.output" /> -->
         <v-ace-editor
           v-if="visible"
           v-model:value="form.output"
@@ -318,6 +319,7 @@
   } from '@/api/job';
   import { queryCountResource, TagRecord } from '@/api/tag';
   import TableTagItem from '@/components/table-tag-item/index.vue';
+  import OutputArea from '@/components/output-area/index.vue';
   import TagItem from '@/components/tag-item/index.vue';
   import useLoading from '@/hooks/loading';
   import { useAppStore } from '@/store';
