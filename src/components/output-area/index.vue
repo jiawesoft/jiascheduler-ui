@@ -46,7 +46,7 @@
   onMounted(() => {
     if (parent.value && child.value) {
       const parentWidth = parent.value.offsetWidth;
-      child.value.style.width = `${parentWidth - 30}px`;
+      child.value.style.width = `${parentWidth - 50}px`;
     }
   });
 </script>
