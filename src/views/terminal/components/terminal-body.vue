@@ -252,7 +252,7 @@
     term = new Terminal({
       fontSize: themeConfig.terminalFontSize || 15,
       fontWeight: 'normal',
-      fontFamily: 'JetBrainsMono, monaco, Consolas, Lucida Console, monospace',
+      fontFamily: 'monospace, monaco, Consolas, Lucida Console',
       cursorBlink: true,
       disableStdin: false,
       allowProposedApi: true,

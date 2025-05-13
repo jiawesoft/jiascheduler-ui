@@ -277,14 +277,15 @@
         field="output"
         :label="$t('job.output')"
       >
-        <v-ace-editor
+        <output-area :output="form.output" v-if="visible" />
+        <!-- <v-ace-editor
           v-if="visible"
           v-model:value="form.output"
           :style="{ height: '300px', width: '100%' }"
           lang="text"
           :print-margin="false"
           :theme="theme === 'dark' ? 'chaos' : 'chrome'"
-        />
+        /> -->
       </a-form-item>
       <a-form-item
         v-if="jobType == 'bundle' || formModel.job_type == 'bundle'"
@@ -318,6 +319,7 @@
   } from '@/api/job';
   import { queryCountResource, TagRecord } from '@/api/tag';
   import TableTagItem from '@/components/table-tag-item/index.vue';
+  import OutputArea from '@/components/output-area/index.vue';
   import TagItem from '@/components/tag-item/index.vue';
   import useLoading from '@/hooks/loading';
   import { useAppStore } from '@/store';
@@ -328,10 +330,10 @@
   import Sortable from 'sortablejs';
   import { computed, nextTick, reactive, ref, toRefs, watch } from 'vue';
   import { useI18n } from 'vue-i18n';
-  import { VAceEditor } from 'vue3-ace-editor';
-  import 'ace-builds/src-noconflict/mode-text';
-  import 'ace-builds/src-noconflict/theme-chaos';
-  import 'ace-builds/src-noconflict/theme-chrome';
+  // import { VAceEditor } from 'vue3-ace-editor';
+  // import 'ace-builds/src-noconflict/mode-text';
+  // import 'ace-builds/src-noconflict/theme-chaos';
+  // import 'ace-builds/src-noconflict/theme-chrome';
 
   const props = defineProps<{
     scheduleId?: string;

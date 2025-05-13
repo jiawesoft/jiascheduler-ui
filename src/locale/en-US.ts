@@ -83,6 +83,10 @@ const localeJob = {
   'job.timeout': 'Execution Timeout',
   'job.timeout.tips':
     'The script process will be automatically killed after the timeout, in seconds',
+  'job.maxParallel': 'Max Parallel',
+  'job.maxParallel.tips':
+    'The maximum number of parallel instances allowed for the same job to execute simultaneously. Exceeding this threshold will result in ignored executions. Timers and one-time executions are counted separately. For timer-based jobs, if the execution duration exceeds the timer interval, setting an appropriate maximum parallel number can effectively prevent excessive memory consumption by job processes.',
+
   'job.displayOnDashboard': 'Display on the dashboard',
   'job.tab.basic': 'Basic',
   'job.tab.advance': 'Advance',
