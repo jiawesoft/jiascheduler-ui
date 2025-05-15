@@ -56,7 +56,7 @@ export default function useMenuTree() {
           return element;
         }
 
-        if (element.meta?.hideInMenu === false) {
+        if (!element.meta?.hideInMenu) {
           return element;
         }
 
