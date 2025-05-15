@@ -42,7 +42,8 @@ const localeExecutor = {
 };
 
 const localeJob = {
-  'menu.repository.jobList': 'Job List',
+  'menu.repository.jobList': 'Job',
+  'menu.repository.workflow': 'Workflow',
   'menu.repository.jobTimer': 'Timer',
   'menu.repository.jobBundleScript': 'Batch Task',
   'menu.repository.daemonJob': 'Daemon Job',
