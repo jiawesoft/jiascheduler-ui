@@ -25,17 +25,16 @@ const REPOSITORY: AppRouteRecordRaw = {
     {
       path: 'workflow', // The midline path complies with SEO specifications
       name: 'workflowList',
-      component: import('@/views/respository/workflow/index.vue'),
+      component: () => import('@/views/respository/workflow/index.vue'),
       children: [
         {
           path: 'edit',
           name: 'editWorkflow',
-          component: () =>
-            import('@/views/respository/workflow/edit/index.vue'),
+          component: () => import('@/views/respository/workflow/edit.vue'),
           meta: {
             locale: 'menu.repository.editWorkflow',
             requiresAuth: true,
-            hideInMenu: false,
+            hideInMenu: true,
             // activeMenu: 'workflowList',
             roles: ['*'],
           },
@@ -54,17 +53,6 @@ const REPOSITORY: AppRouteRecordRaw = {
       meta: {
         locale: 'menu.repository.jobTimer',
         requiresAuth: true,
-        roles: ['*'],
-      },
-    },
-    {
-      path: 'flow-job-list', // The midline path complies with SEO specifications
-      name: 'flowJobList',
-      component: () => import('@/views/respository/flow-job-list/index.vue'),
-      meta: {
-        locale: 'menu.repository.flowJobList',
-        requiresAuth: true,
-        hideInMenu: true,
         roles: ['*'],
       },
     },

@@ -28,6 +28,8 @@
   },
   "dependencies": {
     "@arco-design/web-vue": "^2.55.1",
+    "@logicflow/core": "^2.0.13",
+    "@logicflow/extension": "^2.0.18",
     "@types/splitpanes": "^2.2.6",
     "@vueuse/core": "^9.3.0",
     "@xterm/addon-fit": "^0.10.0",
