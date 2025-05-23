@@ -5,9 +5,44 @@
       <div class="workflow-container" ref="container"></div>
     </a-card>
   </div>
+
+  <a-drawer
+    width="40%"
+    :visible="editNodeModalVisible"
+    placement="right"
+    @before-ok="saveNodeConfig"
+    @cancel="editNodeModalVisible = false"
+    unmountOnClose
+  >
+    <template #title> {{ $t('workflow.nodeConfig') }} </template>
+
+    <a-form
+      ref="saveNodeConfigRef"
+      :rules="nodeConfigCheckRules"
+      :model="nodeConfig"
+      :auto-label-width="true"
+    >
+      <a-form-item
+        field="name"
+        validate-trigger="blur"
+        :label="$t('workflow.nodeConfig.name')"
+      >
+        <a-input v-model="nodeConfig.name" />
+      </a-form-item>
+      <a-form-item
+        field="name"
+        validate-trigger="blur"
+        :tooltip="$t('workflow.nodeConfig.id.tips')"
+        :label="$t('workflow.nodeConfig.id')"
+      >
+        <a-input v-model="nodeConfig.id" />
+      </a-form-item>
+    </a-form>
+  </a-drawer>
 </template>
 
 <script lang="ts" setup>
+  import { useAppStore } from '@/store';
   import LogicFlow from '@logicflow/core';
   import '@logicflow/core/lib/style/index.css';
   import {
@@ -21,11 +56,48 @@
     Snapshot,
   } from '@logicflow/extension';
   import '@logicflow/extension/lib/style/index.css';
+  import { useI18n } from 'vue-i18n';
 
-  import { onMounted, ref } from 'vue';
+  import { computed, onMounted, ref } from 'vue';
+
+  const { t } = useI18n();
 
   const minimapVisible = ref(false);
   const gridVisible = ref(false);
+  const editNodeModalVisible = ref(false);
+  const saveNodeConfigRef = ref();
+  const lf = ref<LogicFlow>();
+
+  interface NodeConfig {
+    id: string;
+    name: string;
+    nodeType: string;
+    taskType: string;
+    code?: string;
+    data: {
+      [key: string]: any;
+    };
+  }
+
+  const nodeConfig = ref<NodeConfig>({
+    id: '',
+    name: '',
+    nodeType: '',
+    taskType: '',
+    data: {},
+  });
+
+  interface EdgeConfig {
+    id: string;
+    name: string;
+    nodeType: string;
+    data: {
+      [key: string]: any;
+    };
+  }
+
+  const nodeConfigs = ref<NodeConfig[]>([]);
+  const editConfigs = ref<EdgeConfig[]>([]);
 
   const colorfulTheme = {
     baseNode: {
@@ -72,7 +144,6 @@
     polyline: {
       stroke: '#ff7e67',
       strokeWidth: 2,
-      // strokeDasharray: '5,5',
     },
     bezier: {
       stroke: '#c86b85',
@@ -138,175 +209,35 @@
     },
     edgeAnimation: {},
   };
-  const darkTheme = {
-    baseNode: {
-      fill: '#282c34',
-      stroke: '#FF79C6',
-      strokeWidth: 2,
-    },
-    baseEdge: {
-      stroke: '#FF79C6',
-      strokeWidth: 2,
-    },
-    rect: {
-      fill: '#282c34',
-      stroke: '#8dc87e',
-      strokeWidth: 2,
-    },
-    circle: {
-      fill: '#282c34',
-      stroke: '#62b2eb',
-      strokeWidth: 4,
-    },
-    diamond: {
-      fill: '#282c34',
-      stroke: '#ec5c72',
-      strokeWidth: 4,
-    },
-    ellipse: {
-      fill: '#282c34',
-      stroke: '#FFB86C',
-      strokeWidth: 4,
-    },
-    polygon: {
-      fill: '#282c34',
-      stroke: '#cd67d5',
-      strokeWidth: 4,
-    },
-    line: {
-      stroke: '#FF2222',
-      strokeWidth: 2,
-    },
-    polyline: {
-      stroke: '#1B2B34',
-      strokeWidth: 2,
-      strokeDasharray: '5,5',
-    },
-    bezier: {
-      stroke: '#282A36',
-      strokeWidth: 2,
-      strokeDasharray: '10,10',
-    },
-    anchorLine: {
-      stroke: '#DCDCAA',
-      strokeWidth: 8,
-      strokeDasharray: '15,15',
-    },
-    text: {
-      color: '#90549b',
-      fontSize: 14,
-    },
-    nodeText: {
-      color: '#D4D4D4',
-      fontSize: 14,
-      fontWeight: 800,
-    },
-    edgeText: {
-      color: '#D4D4D4',
-      fontSize: 14,
-    },
-    inputText: {
-      color: '#CE9178',
-      background: 'transparent',
-      fontSize: 14,
-    },
-    anchor: {
-      fill: '#282c34',
-      stroke: '#D7BA7D',
-    },
-    arrow: {
-      stroke: '#FF6600',
-      strokeWidth: 1,
-    },
-    snapline: {
-      stroke: '#666666',
-      strokeWidth: 1,
-    },
-    rotateControl: {
-      fill: '#282c34',
-      stroke: '#FF79C6',
-    },
-    resizeControl: {
-      fill: '#282c34',
-      stroke: '#D7BA7D',
-    },
-    resizeOutline: {
-      stroke: '#FF6600',
-    },
-    edgeAdjust: {
-      fill: '#fb929e',
-      stroke: '#fff6f6',
-    },
-    outline: {
-      hover: {
-        stroke: '#FF6600',
-      },
-      stroke: '#FF007F',
-      strokeWidth: 2,
-    },
-    edgeAnimation: {},
-  };
+
+  const theme = computed(() => {
+    return useAppStore().theme;
+  });
 
   const container: any = ref(null);
 
-  const graphData = {
-    nodes: [
-      {
-        id: 'node-1',
-        type: 'rect',
-        x: 100,
-        y: 100,
-        text: '矩形',
-      },
-      {
-        id: 'node-2',
-        type: 'circle',
-        x: 300,
-        y: 100,
-        text: '圆形',
-      },
-      {
-        id: 'node-3',
-        type: 'ellipse',
-        x: 300,
-        y: 250,
-        text: '椭圆',
-      },
-      {
-        id: 'node-4',
-        type: 'polygon',
-        x: 100,
-        y: 250,
-        text: '多边形',
-      },
-      {
-        id: 'node-5',
-        type: 'diamond',
-        x: 100,
-        y: 400,
-        text: '菱形',
-      },
-      {
-        id: 'node-6',
-        type: 'text',
-        x: 300,
-        y: 400,
-        text: '文本',
-      },
-    ],
-    edges: [
-      // {
-      //   id: 'rect-2-circle', // 边ID，性质与节点ID一样
-      //   type: 'polyline', // 边类型
-      //   sourceNodeId: '50', // 起始节点Id
-      //   targetNodeId: '21', // 目标节点Id
-      // },
-    ],
+  const nodeConfigCheckRules = {
+    name: {
+      required: true,
+    },
+  };
+
+  const saveNodeConfig = async () => {
+    const ret = await saveNodeConfigRef.value.validate();
+    if (ret) {
+      return false;
+    }
+
+    lf.value
+      ?.getNodeModelById(nodeConfig.value.id)
+      ?.updateText(nodeConfig.value.name);
+
+    editNodeModalVisible.value = false;
+    return true;
   };
 
   onMounted(() => {
-    const lf = new LogicFlow({
-      themes: colorfulTheme,
+    lf.value = new LogicFlow({
       isSilentMode: false,
       stopScrollGraph: true,
       stopZoomGraph: true,
@@ -323,20 +254,17 @@
       },
       animation: true,
       partial: true,
-      // background: {
-      //   color: '#FFFFFF',
-      // },
-      edgeTextDraggable: true,
-      edgeType: 'bezier',
-      idGenerator(type) {
-        return `${type}_${Math.random()}`;
+      background: {
+        background: theme.value === 'dark' ? '#29292c' : '#fff',
       },
+      edgeTextDraggable: true,
+      // idGenerator(type) {
+      //   return `${type}_${Math.random()}`;
+      // },
       edgeGenerator: (sourceNode) => {
-        return 'bezier';
-        // 限制'rect', 'diamond', 'polygon'节点的连线为贝塞尔曲线
         // if (['rect', 'diamond', 'polygon'].includes(sourceNode.type))
         //   return 'bezier';
-        // return 'polyline';
+        return 'polyline';
       },
       plugins: [
         BpmnElement,
@@ -350,9 +278,9 @@
       ],
     });
 
-    lf.setTheme(colorfulTheme as any);
+    lf.value?.setTheme(colorfulTheme as any);
 
-    (lf.extension.menu as any).addMenuConfig({
+    (lf.value?.extension.menu as any).addMenuConfig({
       nodeMenu: [
         {
           text: '分享',
@@ -400,17 +328,17 @@
           callback() {
             if (gridVisible.value) {
               gridVisible.value = false;
-              lf.graphModel.updateGridOptions({ visible: false });
+              lf.value?.graphModel.updateGridOptions({ visible: false });
             } else {
               gridVisible.value = true;
-              lf.graphModel.updateGridOptions({ visible: true });
+              lf.value?.graphModel.updateGridOptions({ visible: true });
             }
           },
         },
       ],
     });
 
-    (lf.extension.control as Control).addItem({
+    (lf.value?.extension.control as Control).addItem({
       key: 'mini-map',
       iconClass: 'custom-minimap',
       title: '导航',
@@ -427,16 +355,16 @@
       },
     });
 
-    (lf.extension.control as Control).addItem({
+    (lf.value?.extension.control as Control).addItem({
       key: 'reset-translate',
       iconClass: 'reset-translate',
       title: '',
-      text: '还原',
+      text: '定位还原',
       onClick: (lf, ev) => {
         lf.resetTranslate();
       },
     });
-    (lf.extension.control as Control).addItem({
+    (lf.value?.extension.control as Control).addItem({
       key: 'reset-translate',
       iconClass: 'reset-translate',
       title: '',
@@ -446,14 +374,14 @@
       },
     });
 
-    lf.setPatternItems([
+    lf.value?.setPatternItems([
       {
         label: '选区',
         icon: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAAH6ji2bAAAABGdBTUEAALGPC/xhBQAAAOVJREFUOBGtVMENwzAIjKP++2026ETdpv10iy7WFbqFyyW6GBywLCv5gI+Dw2Bluj1znuSjhb99Gkn6QILDY2imo60p8nsnc9bEo3+QJ+AKHfMdZHnl78wyTnyHZD53Zzx73MRSgYvnqgCUHj6gwdck7Zsp1VOrz0Uz8NbKunzAW+Gu4fYW28bUYutYlzSa7B84Fh7d1kjLwhcSdYAYrdkMQVpsBr5XgDGuXwQfQr0y9zwLda+DUYXLaGKdd2ZTtvbolaO87pdo24hP7ov16N0zArH1ur3iwJpXxm+v7oAJNR4JEP8DoAuSFEkYH7cAAAAASUVORK5CYII=',
         callback: () => {
-          lf.current.openSelectionSelect();
-          lf.current.once('selection:selected', () => {
-            lf.current.closeSelectionSelect();
+          lf.value?.openSelectionSelect();
+          lf.value?.once('selection:selected', () => {
+            lf.value?.closeSelectionSelect();
           });
         },
       },
@@ -471,14 +399,14 @@
       // },
       {
         type: 'bpmn:serviceTask',
-        label: '任务',
+        label: '用户任务',
         text: '任务',
         icon: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABMAAAATCAYAAAEFVwZaAAAABGdBTUEAALGPC/xhBQAAAqlJREFUOBF9VM9rE0EUfrMJNUKLihGbpLGtaCOIR8VjQMGDePCgCCIiCNqzCAp2MyYUCXhUtF5E0D+g1t48qAd7CCLqQUQKEWkStcEfVGlLdp/fm3aW2QQdyLzf33zz5m2IsAZ9XhDpyaaIZkTS4ASzK41TFao88GuJ3hsr2pAbipHxuSYyKRugagICGANkfFnNh3HeE2N0b3nN2cgnpcictw5veJIzxmDamSlxxQZicq/mflxhbaH8BLRbuRwNtZp0JAhoplVRUdzmCe/vO27wFuuA3S5qXruGdboy5/PRGFsbFGKo/haRtQHIrM83bVeTrOgNhZReWaYGnE4aUQgTJNvijJFF4jQ8BxJE5xfKatZWmZcTQ+BVgh7s8SgPlCkcec4mGTmieTP4xd7PcpIEg1TX6gdeLW8rTVMVLVvb7ctXoH0Cydl2QOPJBG21STE5OsnbweVYzAnD3A7PVILuY0yiiyDwSm2g441r6rMSgp6iK42yqroI2QoXeJVeA+YeZSa47gZdXaZWQKTrG93rukk/l2Al6Kzh5AZEl7dDQy+JjgFahQjRopSxPbrbvK7GRe9ePWBo1wcU7sYrFZtavXALwGw/7Dnc50urrHJuTPSoO2IMV3gUQGNg87IbSOIY9BpiT9HV7FCZ94nPXb3MSnwHn/FFFE1vG6DTby+r31KAkUktB3Qf6ikUPWxW1BkXSPQeMHHiW0+HAd2GelJsZz1OJegCxqzl+CLVHa/IibuHeJ1HAKzhuDR+ymNaRFM+4jU6UWKXorRmbyqkq/D76FffevwdCp+jN3UAN/C9JRVTDuOxC/oh+EdMnqIOrlYteKSfadVRGLJFJPSB/ti/6K8f0CNymg/iH2gO/f0DwE0yjAFO6l8JaR5j0VPwPwfaYHqOqrCI319WzwhwzNW/aQAAAABJRU5ErkJggg==',
       },
       {
         type: 'bpmn:exclusiveGateway',
         label: '条件',
-        text: '条件',
+        text: '条件判断',
         icon: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABUAAAAVCAYAAAHeEJUAAAAABGdBTUEAALGPC/xhBQAAAvVJREFUOBGNVEFrE0EU/mY3bQoiFlOkaUJrQUQoWMGePLX24EH0IIoHKQiCV0G8iE1covgLiqA/QTzVm1JPogc9tIJYFaQtlhQxqYjSpunu+L7JvmUTU3AgmTfvffPNN++9WSA1DO182f6xwILzD5btfAoQmwL5KJEwiQyVbSVZ0IgRyV6PTpIJ81E5ZvqfHQR0HUOBHW4L5Et2kQ6Zf7iAOhTFAA8s0pEP7AXO1uAA52SbqGk6h/6J45LaLhO64ByfcUzM39V7ZiAdS2yCePPEIQYvTUHqM/n7dgQNfBKWPjpF4ISk8q3J4nB11qw6X8l+FsF3EhlkEMfrjIer3wJTLwS2aCNcj4DbGxXTw00JmAuO+Ni6bBxVUCvS5d9aa04+so4pHW5jLTywuXAL7jJ+D06sl82Sgl2JuVBQn498zkc2bGKxULHjCnSMadBKYDYYHAtsby1EQ5lNGrQd4Y3v4Zo0XdGEmDno46yCM9Tk+RiJmUYHS/aXHPNTcjxcbTFna000PFJHIVZ5lFRqRpJWk9/+QtlOUYJj9HG5pVFEU7zqIYDVsw2s+AJaD8wTd2umgSCCyUxgGsS1Y6TBwXQQTFuZaHcd8gAGioE90hlsY+wMcs30RduYtxanjMGal8H5dMW67dmT1JFtYUEe8LiQLRsPZ6IIc7A4J5tqco3T0pnv/4u0kyzrYUq7gASuEyI8VXKvB9Odytv6jS/PNaZBln0nioJG/AVQRZvApOdhjj3Jt8QC8Im09SafwdBdvIpztpxWxpeKCC+EsFdS8DCyuCn2munFpL7ctHKp+Xc5cMybeIyMAN33SPL3ZR9QV1XVwLyzHm6Iv0/yeUuUb7PPlZC4D4HZkeu6dpF4v9j9MreGtMbxMMRLIcjJic9yHi7WQ3yVKzZVWUr5UrViJvn1FfUlwe/KYVfYyWRLSGNu16hR01U9IacajXPei0wx/5BqgInvJN+MMNtNme7ReU9SBbgntovn0kKHpFg7UogZvaZiOue/q1SBo9ktHzQAAAAASUVORK5CYII=',
       },
       {
@@ -489,7 +417,23 @@
       },
     ]);
 
-    lf.render({});
+    lf.value?.on('node:click', (e) => {
+      console.log('node:click', e.data);
+      editNodeModalVisible.value = true;
+
+      nodeConfig.value = {
+        id: e.data.id,
+        name: e.data.text?.value || '',
+        nodeType: e.data.type,
+        taskType: '',
+        data: e.data,
+      };
+    });
+    lf.value?.on('edge:click', (e) => {
+      console.log('edge:click', e.data);
+      editNodeModalVisible.value = true;
+    });
+    lf.value?.render({});
   });
 </script>
 

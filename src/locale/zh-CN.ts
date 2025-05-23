@@ -178,6 +178,16 @@ const localeJob = {
   'job.scheduleName.placeholder': '请输入名称',
 };
 
+const localeWorkflow = {
+  'workflow.nodeConfig': '节点配置',
+  'workflow.nodeConfig.name': '节点名',
+  'workflow.nodeConfig.id': '节点ID',
+  'workflow.nodeConfig.id.tips': '节点ID, 必须全局唯一',
+  'workflow.nodeConfig.TaskType': '任务类型',
+  'workflow.nodeConfig.TaskType.job': '作业',
+  'workflow.nodeConfig.TaskType.custom': '自定义',
+};
+
 const localeBase = {
   group: '分组',
 };
@@ -380,6 +390,7 @@ export default {
   'operations.next': '下一步',
 
   ...localeJob,
+  ...localeWorkflow,
   ...localeExecutor,
 
   ...localeUserAndPermissions,
