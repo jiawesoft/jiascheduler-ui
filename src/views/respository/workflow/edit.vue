@@ -365,10 +365,20 @@
       },
     });
     (lf.value?.extension.control as Control).addItem({
-      key: 'reset-translate',
-      iconClass: 'reset-translate',
+      key: 'save-workflow',
+      iconClass: 'save-workflow',
       title: '',
-      text: '导出',
+      text: '保存',
+      onClick: (lf, ev) => {
+        lf.getSnapshot('流程图');
+      },
+    });
+
+    (lf.value?.extension.control as Control).addItem({
+      key: 'release',
+      iconClass: 'release-workflow',
+      title: '',
+      text: '发布',
       onClick: (lf, ev) => {
         lf.getSnapshot('流程图');
       },
