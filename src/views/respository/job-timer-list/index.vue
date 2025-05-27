@@ -285,11 +285,10 @@
           </a-form-item>
 
           <a-form-item field="eid" validate-trigger="blur" :label="$t('job')">
-            <SelectJob
+            <select-job
               v-if="jobTimerModalVisible"
               v-model:eid="jobTimerForm.eid"
               v-model:job-type="formModel.job_type"
-              @change-job="changeJob"
             />
           </a-form-item>
         </a-form>

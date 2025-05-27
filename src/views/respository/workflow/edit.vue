@@ -37,6 +37,25 @@
       >
         <a-input v-model="nodeConfig.id" />
       </a-form-item>
+
+      <a-form-item field="taskType" :label="$t('workflow.nodeConfig.TaskType')">
+        <a-radio-group v-model="nodeConfig.taskType">
+          <a-radio value="job">
+            {{ $t('workflow.nodeConfig.TaskType.job') }}
+          </a-radio>
+          <a-radio value="custom">
+            {{ $t('workflow.nodeConfig.TaskType.custom') }}
+          </a-radio>
+        </a-radio-group>
+      </a-form-item>
+      <a-form-item
+        field="eid"
+        validate-trigger="blur"
+        :label="$t('job')"
+        v-if="nodeConfig.taskType == 'job'"
+      >
+        <SelectJob v-model:eid="nodeConfig.eid" job-type="default" />
+      </a-form-item>
     </a-form>
   </a-drawer>
 </template>
@@ -54,11 +73,13 @@
     BpmnElement,
     BpmnXmlAdapter,
     Snapshot,
+    CurvedEdge,
+    CurvedEdgeModel,
   } from '@logicflow/extension';
   import '@logicflow/extension/lib/style/index.css';
-  import { useI18n } from 'vue-i18n';
-
   import { computed, onMounted, ref } from 'vue';
+  import { useI18n } from 'vue-i18n';
+  import SelectJob from '../components/select-job.vue';
 
   const { t } = useI18n();
 
@@ -68,15 +89,50 @@
   const saveNodeConfigRef = ref();
   const lf = ref<LogicFlow>();
 
+  const CustomCurved = {
+    type: 'curvedEdge',
+    model: class CustomCurvedEdgeModel extends CurvedEdgeModel {
+      initEdgeData(data: LogicFlow.EdgeData) {
+        super.initEdgeData(data);
+        this.radius = 10;
+      }
+
+      getEdgeStyle() {
+        const style = super.getEdgeStyle();
+        style.strokeWidth = 2;
+        return style;
+      }
+    },
+    view: CurvedEdge,
+  };
+
   interface NodeConfig {
     id: string;
     name: string;
     nodeType: string;
     taskType: string;
+    eid?: string;
     code?: string;
     data: {
       [key: string]: any;
     };
+  }
+
+  interface EdgeConfig {
+    id: string;
+    name: string;
+    edgeType: string;
+    condition: string;
+    sourceNodeId: string;
+    targetNodeId: string;
+    data: {
+      [key: string]: any;
+    };
+  }
+
+  interface GraphConfig {
+    nodes: NodeConfig[];
+    edges: EdgeConfig[];
   }
 
   const nodeConfig = ref<NodeConfig>({
@@ -86,18 +142,8 @@
     taskType: '',
     data: {},
   });
-
-  interface EdgeConfig {
-    id: string;
-    name: string;
-    nodeType: string;
-    data: {
-      [key: string]: any;
-    };
-  }
-
   const nodeConfigs = ref<NodeConfig[]>([]);
-  const editConfigs = ref<EdgeConfig[]>([]);
+  const edgeConfigs = ref<EdgeConfig[]>([]);
 
   const colorfulTheme = {
     baseNode: {
@@ -228,10 +274,24 @@
       return false;
     }
 
+    const originNodeId: string = nodeConfig.value.data.id;
+
     lf.value
       ?.getNodeModelById(nodeConfig.value.id)
       ?.updateText(nodeConfig.value.name);
 
+    if (originNodeId !== nodeConfig.value.id) {
+      lf.value?.changeNodeId(originNodeId, nodeConfig.value.id);
+    }
+
+    const nodeData = lf.value?.getNodeDataById(nodeConfig.value.id);
+
+    nodeConfigs.value = nodeConfigs.value.filter((v) => v.id !== originNodeId);
+    nodeConfigs.value.push({
+      ...nodeConfig.value,
+      data: { ...nodeData },
+    });
+    console.log('val:', nodeConfig.value);
     editNodeModalVisible.value = false;
     return true;
   };
@@ -257,14 +317,13 @@
       background: {
         background: theme.value === 'dark' ? '#29292c' : '#fff',
       },
+      edgeType: 'curvedEdge',
       edgeTextDraggable: true,
       // idGenerator(type) {
       //   return `${type}_${Math.random()}`;
       // },
       edgeGenerator: (sourceNode) => {
-        // if (['rect', 'diamond', 'polygon'].includes(sourceNode.type))
-        //   return 'bezier';
-        return 'polyline';
+        return 'curvedEdge';
       },
       plugins: [
         BpmnElement,
@@ -277,6 +336,8 @@
         Snapshot,
       ],
     });
+
+    lf.value.register(CustomCurved);
 
     lf.value?.setTheme(colorfulTheme as any);
 
@@ -359,9 +420,10 @@
       key: 'reset-translate',
       iconClass: 'reset-translate',
       title: '',
-      text: '定位还原',
+      text: '居中',
       onClick: (lf, ev) => {
-        lf.resetTranslate();
+        // lf.resetTranslate();
+        lf.translateCenter();
       },
     });
     (lf.value?.extension.control as Control).addItem({
@@ -370,7 +432,8 @@
       title: '',
       text: '保存',
       onClick: (lf, ev) => {
-        lf.getSnapshot('流程图');
+        const data = lf.getGraphData();
+        console.log(data);
       },
     });
 
@@ -409,7 +472,7 @@
       // },
       {
         type: 'bpmn:serviceTask',
-        label: '用户任务',
+        label: '系统任务',
         text: '任务',
         icon: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABMAAAATCAYAAAEFVwZaAAAABGdBTUEAALGPC/xhBQAAAqlJREFUOBF9VM9rE0EUfrMJNUKLihGbpLGtaCOIR8VjQMGDePCgCCIiCNqzCAp2MyYUCXhUtF5E0D+g1t48qAd7CCLqQUQKEWkStcEfVGlLdp/fm3aW2QQdyLzf33zz5m2IsAZ9XhDpyaaIZkTS4ASzK41TFao88GuJ3hsr2pAbipHxuSYyKRugagICGANkfFnNh3HeE2N0b3nN2cgnpcictw5veJIzxmDamSlxxQZicq/mflxhbaH8BLRbuRwNtZp0JAhoplVRUdzmCe/vO27wFuuA3S5qXruGdboy5/PRGFsbFGKo/haRtQHIrM83bVeTrOgNhZReWaYGnE4aUQgTJNvijJFF4jQ8BxJE5xfKatZWmZcTQ+BVgh7s8SgPlCkcec4mGTmieTP4xd7PcpIEg1TX6gdeLW8rTVMVLVvb7ctXoH0Cydl2QOPJBG21STE5OsnbweVYzAnD3A7PVILuY0yiiyDwSm2g441r6rMSgp6iK42yqroI2QoXeJVeA+YeZSa47gZdXaZWQKTrG93rukk/l2Al6Kzh5AZEl7dDQy+JjgFahQjRopSxPbrbvK7GRe9ePWBo1wcU7sYrFZtavXALwGw/7Dnc50urrHJuTPSoO2IMV3gUQGNg87IbSOIY9BpiT9HV7FCZ94nPXb3MSnwHn/FFFE1vG6DTby+r31KAkUktB3Qf6ikUPWxW1BkXSPQeMHHiW0+HAd2GelJsZz1OJegCxqzl+CLVHa/IibuHeJ1HAKzhuDR+ymNaRFM+4jU6UWKXorRmbyqkq/D76FffevwdCp+jN3UAN/C9JRVTDuOxC/oh+EdMnqIOrlYteKSfadVRGLJFJPSB/ti/6K8f0CNymg/iH2gO/f0DwE0yjAFO6l8JaR5j0VPwPwfaYHqOqrCI319WzwhwzNW/aQAAAABJRU5ErkJggg==',
       },
@@ -427,22 +490,79 @@
       },
     ]);
 
+    lf.value.adapterOut = (data) => {
+      console.log('adapterOut', data);
+      const convertData: GraphConfig = {
+        nodes: data.nodes.map((data1) => {
+          const v = nodeConfigs.value.find((data2) => data1.id === data2.id);
+          return v!;
+        }),
+        edges: data.edges.map((data1) => {
+          const v = edgeConfigs.value.find((data2) => data1.id === data2.id);
+          return v!;
+        }),
+      };
+      return convertData;
+    };
+
+    lf.value.adapterIn = (data) => {
+      console.log('adapterIn', data);
+      return data as LogicFlow.GraphData;
+    };
+
     lf.value?.on('node:click', (e) => {
       console.log('node:click', e.data);
       editNodeModalVisible.value = true;
+      const selectNode = nodeConfigs.value.find((v) => v.id === e.data.id)!;
 
       nodeConfig.value = {
+        ...selectNode,
+      };
+    });
+
+    lf.value?.on('node:dnd-add', (e) => {
+      console.log('node:dnd-add', e.data);
+      nodeConfigs.value.push({
         id: e.data.id,
         name: e.data.text?.value || '',
         nodeType: e.data.type,
         taskType: '',
         data: e.data,
-      };
+      });
     });
+
+    lf.value?.on('node:delete', (e) => {
+      console.log('node:delete', e.data);
+      nodeConfigs.value = nodeConfigs.value.filter((data) => {
+        return data.id !== e.data.id;
+      });
+    });
+
     lf.value?.on('edge:click', (e) => {
       console.log('edge:click', e.data);
-      editNodeModalVisible.value = true;
+      // editNodeModalVisible.value = true;
     });
+
+    lf.value?.on('edge:add', (e) => {
+      console.log('edge:add', e.data);
+      edgeConfigs.value.push({
+        id: e.data.id,
+        name: e.data.text?.value || '',
+        sourceNodeId: e.data.sourceNodeId,
+        targetNodeId: e.data.targetNodeId,
+        edgeType: '',
+        condition: '',
+        data: e.data,
+      });
+    });
+
+    lf.value?.on('edge:delete', (e) => {
+      console.log('edge:delete', e.data);
+      edgeConfigs.value = edgeConfigs.value.filter((data) => {
+        return data.id !== e.data.id;
+      });
+    });
+
     lf.value?.render({});
   });
 </script>

@@ -22,7 +22,7 @@
   import { ref, watch } from 'vue';
 
   const props = defineProps<{
-    eid: string;
+    eid?: string;
     jobType: string;
   }>();
 
