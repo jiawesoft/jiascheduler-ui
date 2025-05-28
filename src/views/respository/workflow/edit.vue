@@ -39,7 +39,10 @@
       </a-form-item>
 
       <a-form-item field="taskType" :label="$t('workflow.nodeConfig.TaskType')">
-        <a-radio-group v-model="nodeConfig.taskType">
+        <a-radio-group
+          v-model="nodeConfig.taskType"
+          @change="changeNodeTaskType"
+        >
           <a-radio value="job">
             {{ $t('workflow.nodeConfig.TaskType.job') }}
           </a-radio>
@@ -48,14 +51,51 @@
           </a-radio>
         </a-radio-group>
       </a-form-item>
-      <a-form-item
-        field="eid"
-        validate-trigger="blur"
-        :label="$t('job')"
-        v-if="nodeConfig.taskType == 'job'"
-      >
-        <SelectJob v-model:eid="nodeConfig.eid" job-type="default" />
-      </a-form-item>
+
+      <template v-if="nodeConfig.taskType == 'job'">
+        <a-form-item
+          field="eid"
+          validate-trigger="blur"
+          :label="$t('job')"
+          v-if="nodeConfig.taskType == 'job'"
+        >
+          <SelectJob v-model:eid="nodeConfig.eid" job-type="default" />
+        </a-form-item>
+      </template>
+
+      <template v-else>
+        <a-form-item field="executor_id" :label="$t('job.executor')">
+          <SelectExecutor v-model="nodeConfig.customTask!.executor_id" />
+        </a-form-item>
+
+        <a-form-item field="code" :label="$t('job.code')">
+          <v-ace-editor
+            :key="nodeConfig.customTask?.executor_id"
+            v-model:value="nodeConfig.customTask!.code"
+            :style="{ height: '300px', width: '100%' }"
+            :lang="getEditorLang"
+            :print-margin="false"
+            :theme="theme === 'dark' ? 'chaos' : 'chrome'"
+          />
+        </a-form-item>
+        <a-form-item
+          field="upload_file"
+          :label="$t('job.upload_file')"
+          :tooltip="$t('job.upload_file.tooltip')"
+        >
+          <a-space direction="vertical" :style="{ width: '100%' }">
+            <a-upload
+              v-model="uploadFileList"
+              action="/api/file/upload"
+              :limit="1"
+              :default-file-list="defaultFileList()"
+              :file-list="uploadFileList"
+              @before-remove="removeUploadfile"
+              @success="onUploadSuccess"
+            />
+          </a-space>
+        </a-form-item>
+      </template>
     </a-form>
   </a-drawer>
 </template>
@@ -79,15 +119,38 @@
   import '@logicflow/extension/lib/style/index.css';
   import { computed, onMounted, ref } from 'vue';
   import { useI18n } from 'vue-i18n';
+  import { VAceEditor } from 'vue3-ace-editor';
+
+  import 'ace-builds/src-noconflict/mode-powershell';
+  import 'ace-builds/src-noconflict/mode-python';
+  import 'ace-builds/src-noconflict/mode-sh';
+  import 'ace-builds/src-noconflict/theme-chaos';
+  import 'ace-builds/src-noconflict/theme-chrome';
+
+  import {
+    ExecutorRecord,
+    queryExecutorList,
+    QueryExecutorReq,
+  } from '@/api/executor';
+  import { Pagination } from '@/types/global';
+  import { getCommand } from '@/utils';
+  import { FileItem, Message } from '@arco-design/web-vue';
   import SelectJob from '../components/select-job.vue';
+  import SelectExecutor from '../components/select-executor.vue';
 
   const { t } = useI18n();
+
+  const basePagination: Pagination = {
+    page: 1,
+    pageSize: 20,
+  };
 
   const minimapVisible = ref(false);
   const gridVisible = ref(false);
   const editNodeModalVisible = ref(false);
   const saveNodeConfigRef = ref();
   const lf = ref<LogicFlow>();
+  const uploadFileList = ref<FileItem[]>([]);
 
   const CustomCurved = {
     type: 'curvedEdge',
@@ -111,8 +174,15 @@
     name: string;
     nodeType: string;
     taskType: string;
+    customTask?: {
+      work_dir: string;
+      work_user: string;
+      timeout: number;
+      upload_file: string;
+      code: string;
+      executor_id: number;
+    };
     eid?: string;
-    code?: string;
     data: {
       [key: string]: any;
     };
@@ -268,6 +338,27 @@
     },
   };
 
+  const executorOptions = ref<ExecutorRecord[]>([]);
+
+  const fetchExecutorData = async (params: {
+    name?: string;
+    default_id?: number;
+  }) => {
+    const { data } = await queryExecutorList({
+      ...basePagination,
+      ...params,
+    } as unknown as QueryExecutorReq);
+    executorOptions.value = data.list;
+  };
+
+  const getEditorLang = computed<string>(() => {
+    const executorItem = executorOptions.value.find(
+      (item) => item.id === nodeConfig.value.customTask?.executor_id
+    );
+    const currentCommand = executorItem ? executorItem.command : 'bash';
+    return getCommand(currentCommand);
+  });
+
   const saveNodeConfig = async () => {
     const ret = await saveNodeConfigRef.value.validate();
     if (ret) {
@@ -293,6 +384,56 @@
     });
     console.log('val:', nodeConfig.value);
     editNodeModalVisible.value = false;
+    return true;
+  };
+
+  const defaultFileList = (): FileItem[] => {
+    const uploadFile = nodeConfig.value.customTask?.upload_file;
+    if (uploadFile !== '') {
+      return [
+        {
+          uid: '1',
+          url: uploadFile,
+          name: uploadFile,
+        },
+      ];
+    }
+    return [];
+  };
+
+  const onUploadSuccess = (response: FileItem) => {
+    if (response.response.code === 20000) {
+      if (nodeConfig.value.customTask) {
+        nodeConfig.value.customTask.upload_file = response.response.data.result;
+      }
+      uploadFileList.value = [response];
+      Message.success(t('form.submit.success'));
+      return;
+    }
+    uploadFileList.value = [];
+    Message.error(response.response.msg);
+  };
+
+  const changeNodeTaskType = (val: any) => {
+    if (val === 'custom') {
+      if (!nodeConfig.value.customTask) {
+        nodeConfig.value.customTask = {
+          work_dir: '',
+          work_user: '',
+          timeout: 5,
+          upload_file: '',
+          code: '',
+          executor_id: 0,
+        };
+      }
+      fetchExecutorData({
+        default_id: nodeConfig.value.customTask.executor_id,
+      });
+    }
+  };
+
+  const removeUploadfile = async (file: FileItem) => {
+    nodeConfig.value.customTask!.upload_file = '';
     return true;
   };
 
@@ -526,7 +667,7 @@
         id: e.data.id,
         name: e.data.text?.value || '',
         nodeType: e.data.type,
-        taskType: '',
+        taskType: 'job',
         data: e.data,
       });
     });
