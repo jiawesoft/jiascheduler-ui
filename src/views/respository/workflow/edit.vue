@@ -21,13 +21,14 @@
       :rules="nodeConfigCheckRules"
       :model="nodeConfig"
       :auto-label-width="true"
+      @submit="saveNodeConfig"
     >
       <a-form-item
         field="name"
         validate-trigger="blur"
         :label="$t('workflow.nodeConfig.name')"
       >
-        <a-input v-model="nodeConfig.name" />
+        <a-input v-model="nodeConfig.name" @press-enter="saveNodeConfig" />
       </a-form-item>
       <a-form-item
         field="name"
@@ -98,6 +99,47 @@
       </template>
     </a-form>
   </a-drawer>
+
+  <a-modal
+    v-model:visible="workflowVersionModalVisible"
+    title-align="start"
+    style="width: auto"
+    :draggable="true"
+    :ok-text="$t('form.save')"
+    unmount-on-close
+    width="40%"
+    @before-ok="handleSaveWorkflowVersion"
+    @cancel="handleCancel"
+  >
+    <template #title> {{ $t('workflow.save_version') }}</template>
+    <a-form
+      ref="saveWorkflowVersionRef"
+      :key="workflowVersionForm.id"
+      :rules="workflowVersionFormValidateRules"
+      :model="workflowVersionForm"
+      :auto-label-width="true"
+    >
+      <a-form-item
+        field="version"
+        required
+        validate-trigger="blur"
+        :label="$t('workflow.version')"
+      >
+        <a-input v-model="workflowVersionForm.version" />
+      </a-form-item>
+      <a-form-item
+        field="name"
+        required
+        validate-trigger="blur"
+        :label="$t('workflow.version_name')"
+      >
+        <a-input v-model="workflowVersionForm.name" />
+      </a-form-item>
+      <a-form-item field="info" :label="$t('workflow.info')">
+        <a-textarea v-model="workflowVersionForm.info" />
+      </a-form-item>
+    </a-form>
+  </a-modal>
 </template>
 
 <script lang="ts" setup>
@@ -111,7 +153,6 @@
     DndPanel,
     SelectionSelect,
     BpmnElement,
-    BpmnXmlAdapter,
     Snapshot,
     CurvedEdge,
     CurvedEdgeModel,
@@ -135,6 +176,7 @@
   import { Pagination } from '@/types/global';
   import { getCommand } from '@/utils';
   import { FileItem, Message } from '@arco-design/web-vue';
+  import { saveWorkflowVersion } from '@/api/workflow';
   import SelectJob from '../components/select-job.vue';
   import SelectExecutor from '../components/select-executor.vue';
 
@@ -145,12 +187,29 @@
     pageSize: 20,
   };
 
+  const saveWorkflowVersionRef = ref();
   const minimapVisible = ref(false);
   const gridVisible = ref(false);
   const editNodeModalVisible = ref(false);
+  const workflowVersionModalVisible = ref(false);
   const saveNodeConfigRef = ref();
   const lf = ref<LogicFlow>();
   const uploadFileList = ref<FileItem[]>([]);
+  const workflowVersionForm = ref({
+    id: 0,
+    version: '',
+    name: '',
+    info: '',
+    nodes: [],
+    edges: [],
+  });
+
+  const workflowVersionFormValidateRules = {
+    version: { required: true },
+    name: {
+      required: true,
+    },
+  };
 
   const CustomCurved = {
     type: 'curvedEdge',
@@ -437,6 +496,31 @@
     return true;
   };
 
+  const handleSaveWorkflowVersion = async () => {
+    const ret = await saveWorkflowVersionRef.value.validate();
+    if (ret) {
+      return false;
+    }
+    try {
+      const data = {
+        ...workflowVersionForm.value,
+      };
+      await saveWorkflowVersion({
+        ...data,
+        save_type: 'draft',
+      });
+    } catch (err) {
+      return false;
+    }
+
+    Message.success(t('form.submit.success'));
+    return true;
+  };
+
+  const handleCancel = () => {
+    workflowVersionModalVisible.value = false;
+  };
+
   onMounted(() => {
     lf.value = new LogicFlow({
       isSilentMode: false,
@@ -468,7 +552,6 @@
       },
       plugins: [
         BpmnElement,
-        BpmnXmlAdapter,
         DndPanel,
         SelectionSelect,
         Control,
@@ -574,7 +657,9 @@
       text: '保存',
       onClick: (lf, ev) => {
         const data = lf.getGraphData();
-        console.log(data);
+        workflowVersionForm.value.nodes = (data as any).nodes;
+        workflowVersionForm.value.edges = (data as any).edges;
+        workflowVersionModalVisible.value = true;
       },
     });
 
@@ -584,7 +669,8 @@
       title: '',
       text: '发布',
       onClick: (lf, ev) => {
-        lf.getSnapshot('流程图');
+        console.log(lf.getGraphRawData());
+        alert(lf.getGraphData());
       },
     });
 

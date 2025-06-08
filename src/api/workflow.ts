@@ -1,4 +1,5 @@
 import axios from 'axios';
+import qs from 'query-string';
 
 export interface WorkflowRecord {
   id?: number;
@@ -48,7 +49,7 @@ export interface SaveWorkflowVersionReq {
   pid?: number;
   name: string;
   info?: string;
-  save_time: 'draft' | 'release';
+  save_type: 'draft' | 'release';
   nodes: NodeConfig[];
   edges: EdgeConfig[];
 }
@@ -58,4 +59,22 @@ export function saveWorkflowVersion(data: SaveWorkflowVersionReq) {
     delete data.id;
   }
   return axios.post<SaveWorkflowResp>('/api/workflow/version/save', data);
+}
+
+export interface QueryWorkflowListReq {
+  name?: string;
+}
+
+export interface QueryWorkflowListResp {
+  list: WorkflowRecord[];
+  total: number;
+}
+
+export function queryWorkflowList(params: QueryWorkflowListReq) {
+  return axios.get<QueryWorkflowListResp>('/api/workflow/list', {
+    params,
+    paramsSerializer: (obj) => {
+      return qs.stringify(obj);
+    },
+  });
 }
