@@ -41,10 +41,10 @@
 
       <a-form-item field="taskType" :label="$t('workflow.nodeConfig.TaskType')">
         <a-radio-group
-          v-model="nodeConfig.taskType"
+          v-model="nodeConfig.task_type"
           @change="changeNodeTaskType"
         >
-          <a-radio value="job">
+          <a-radio value="standard">
             {{ $t('workflow.nodeConfig.TaskType.job') }}
           </a-radio>
           <a-radio value="custom">
@@ -53,12 +53,12 @@
         </a-radio-group>
       </a-form-item>
 
-      <template v-if="nodeConfig.taskType == 'job'">
+      <template v-if="nodeConfig.task_type == 'standard'">
         <a-form-item
           field="eid"
           validate-trigger="blur"
           :label="$t('job')"
-          v-if="nodeConfig.taskType == 'job'"
+          v-if="nodeConfig.task_type == 'standard'"
         >
           <SelectJob v-model:eid="nodeConfig.eid" job-type="default" />
         </a-form-item>
@@ -66,13 +66,13 @@
 
       <template v-else>
         <a-form-item field="executor_id" :label="$t('job.executor')">
-          <SelectExecutor v-model="nodeConfig.customTask!.executor_id" />
+          <SelectExecutor v-model="nodeConfig.task.custom!.executor_id" />
         </a-form-item>
 
         <a-form-item field="code" :label="$t('job.code')">
           <v-ace-editor
-            :key="nodeConfig.customTask?.executor_id"
-            v-model:value="nodeConfig.customTask!.code"
+            :key="nodeConfig.task.custom?.executor_id"
+            v-model:value="nodeConfig.task.custom!.code"
             :style="{ height: '300px', width: '100%' }"
             :lang="getEditorLang"
             :print-margin="false"
@@ -107,7 +107,7 @@
     :draggable="true"
     :ok-text="$t('form.save')"
     unmount-on-close
-    width="40%"
+    width="500px"
     @before-ok="handleSaveWorkflowVersion"
     @cancel="handleCancel"
   >
@@ -159,6 +159,8 @@
   } from '@logicflow/extension';
   import '@logicflow/extension/lib/style/index.css';
   import { computed, onMounted, ref } from 'vue';
+  import { useRoute } from 'vue-router';
+
   import { useI18n } from 'vue-i18n';
   import { VAceEditor } from 'vue3-ace-editor';
 
@@ -181,6 +183,7 @@
   import SelectExecutor from '../components/select-executor.vue';
 
   const { t } = useI18n();
+  const route = useRoute();
 
   const basePagination: Pagination = {
     page: 1,
@@ -196,7 +199,7 @@
   const lf = ref<LogicFlow>();
   const uploadFileList = ref<FileItem[]>([]);
   const workflowVersionForm = ref({
-    id: 0,
+    id: Number(route.query.id) || 0,
     version: '',
     name: '',
     info: '',
@@ -231,16 +234,22 @@
   interface NodeConfig {
     id: string;
     name: string;
-    nodeType: string;
-    taskType: string;
-    customTask?: {
-      work_dir: string;
-      work_user: string;
-      timeout: number;
-      upload_file: string;
-      code: string;
-      executor_id: number;
+    node_type: string;
+    task_type: string;
+    task: {
+      custom?: {
+        work_dir: string;
+        work_user: string;
+        timeout: number;
+        upload_file: string;
+        code: string;
+        executor_id: number;
+      };
+      standard?: {
+        eid: string;
+      };
     };
+
     eid?: string;
     data: {
       [key: string]: any;
@@ -250,10 +259,9 @@
   interface EdgeConfig {
     id: string;
     name: string;
-    edgeType: string;
     condition: string;
-    sourceNodeId: string;
-    targetNodeId: string;
+    source_node_id: string;
+    target_node_id: string;
     data: {
       [key: string]: any;
     };
@@ -267,8 +275,9 @@
   const nodeConfig = ref<NodeConfig>({
     id: '',
     name: '',
-    nodeType: '',
-    taskType: '',
+    node_type: '',
+    task_type: '',
+    task: {},
     data: {},
   });
   const nodeConfigs = ref<NodeConfig[]>([]);
@@ -412,7 +421,7 @@
 
   const getEditorLang = computed<string>(() => {
     const executorItem = executorOptions.value.find(
-      (item) => item.id === nodeConfig.value.customTask?.executor_id
+      (item) => item.id === nodeConfig.value.task.custom?.executor_id
     );
     const currentCommand = executorItem ? executorItem.command : 'bash';
     return getCommand(currentCommand);
@@ -447,7 +456,7 @@
   };
 
   const defaultFileList = (): FileItem[] => {
-    const uploadFile = nodeConfig.value.customTask?.upload_file;
+    const uploadFile = nodeConfig.value.task.custom?.upload_file;
     if (uploadFile !== '') {
       return [
         {
@@ -462,8 +471,9 @@
 
   const onUploadSuccess = (response: FileItem) => {
     if (response.response.code === 20000) {
-      if (nodeConfig.value.customTask) {
-        nodeConfig.value.customTask.upload_file = response.response.data.result;
+      if (nodeConfig.value.task.custom) {
+        nodeConfig.value.task.custom.upload_file =
+          response.response.data.result;
       }
       uploadFileList.value = [response];
       Message.success(t('form.submit.success'));
@@ -475,8 +485,8 @@
 
   const changeNodeTaskType = (val: any) => {
     if (val === 'custom') {
-      if (!nodeConfig.value.customTask) {
-        nodeConfig.value.customTask = {
+      if (!nodeConfig.value.task.custom) {
+        nodeConfig.value.task.custom = {
           work_dir: '',
           work_user: '',
           timeout: 5,
@@ -486,13 +496,13 @@
         };
       }
       fetchExecutorData({
-        default_id: nodeConfig.value.customTask.executor_id,
+        default_id: nodeConfig.value.task.custom.executor_id,
       });
     }
   };
 
   const removeUploadfile = async (file: FileItem) => {
-    nodeConfig.value.customTask!.upload_file = '';
+    nodeConfig.value.task.custom!.upload_file = '';
     return true;
   };
 
@@ -507,7 +517,7 @@
       };
       await saveWorkflowVersion({
         ...data,
-        save_type: 'draft',
+        status: 'draft',
       });
     } catch (err) {
       return false;
@@ -752,8 +762,9 @@
       nodeConfigs.value.push({
         id: e.data.id,
         name: e.data.text?.value || '',
-        nodeType: e.data.type,
-        taskType: 'job',
+        node_type: e.data.type,
+        task_type: 'standard',
+        task: {},
         data: e.data,
       });
     });
@@ -775,9 +786,8 @@
       edgeConfigs.value.push({
         id: e.data.id,
         name: e.data.text?.value || '',
-        sourceNodeId: e.data.sourceNodeId,
-        targetNodeId: e.data.targetNodeId,
-        edgeType: '',
+        source_node_id: e.data.sourceNodeId,
+        target_node_id: e.data.targetNodeId,
         condition: '',
         data: e.data,
       });

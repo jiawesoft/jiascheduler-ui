@@ -182,6 +182,7 @@ const localeWorkflow = {
   'workflow.name': '流程名',
   'workflow.info': '描述',
   'workflow.version': '版本',
+  'workflow.save': '保存流程',
   'workflow.version_name': '版本名',
   'workflow.save_version': '保存版本',
   'workflow.nodeConfig': '节点配置',

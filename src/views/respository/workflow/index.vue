@@ -136,7 +136,10 @@
           <template #operations="{ record }">
             <a-space direction="horizontal">
               <a-space>
-                <a-button size="mini" @click="router.push('workflow/edit')">
+                <a-button
+                  size="mini"
+                  @click="router.push('workflow/edit?id=' + record.id)"
+                >
                   {{ $t('operations.edit') }}
                 </a-button>
               </a-space>
@@ -176,7 +179,7 @@
         :draggable="true"
         :ok-text="$t('form.save')"
         unmount-on-close
-        width="60%"
+        width="500px"
         @before-ok="handleSaveWorkflow"
         @cancel="handleCancel"
       >

@@ -49,7 +49,7 @@ export interface SaveWorkflowVersionReq {
   pid?: number;
   name: string;
   info?: string;
-  save_type: 'draft' | 'release';
+  status: 'draft' | 'release';
   nodes: NodeConfig[];
   edges: EdgeConfig[];
 }
