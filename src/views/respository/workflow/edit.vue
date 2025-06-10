@@ -178,12 +178,17 @@
   import { Pagination } from '@/types/global';
   import { getCommand } from '@/utils';
   import { FileItem, Message } from '@arco-design/web-vue';
-  import { saveWorkflowVersion } from '@/api/workflow';
+  import useLoading from '@/hooks/loading';
+  import {
+    getWorkflowVersionDetail,
+    saveWorkflowVersion,
+  } from '@/api/workflow';
   import SelectJob from '../components/select-job.vue';
   import SelectExecutor from '../components/select-executor.vue';
 
   const { t } = useI18n();
   const route = useRoute();
+  const { loading, setLoading } = useLoading(true);
 
   const basePagination: Pagination = {
     page: 1,
@@ -530,6 +535,20 @@
   const handleCancel = () => {
     workflowVersionModalVisible.value = false;
   };
+
+  const fetchWorkflowVersionDetail = async (versionId: number) => {
+    setLoading(true);
+    try {
+      const { data } = await getWorkflowVersionDetail({
+        version_id: versionId,
+      });
+    } catch (err) {
+      // you can report use errorHandler or other
+    } finally {
+      setLoading(false);
+    }
+  };
+  fetchWorkflowVersionDetail(Number(route.query.id));
 
   onMounted(() => {
     lf.value = new LogicFlow({

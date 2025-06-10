@@ -78,3 +78,31 @@ export function queryWorkflowList(params: QueryWorkflowListReq) {
     },
   });
 }
+
+export interface getWorkflowVersionDetailReq {
+  version_id: number;
+}
+
+export interface getWorkflowVersionDetailResp {
+  id: number;
+  workflow_name: string;
+  version_name: string;
+  version_info: string;
+  version_status: 'draft' | 'release';
+  created_user: string;
+  updated_time: string;
+  nodes: NodeConfig[];
+  edges: EdgeConfig[];
+}
+
+export function getWorkflowVersionDetail(params: getWorkflowVersionDetailReq) {
+  return axios.get<getWorkflowVersionDetailResp>(
+    '/api/workflow/version/detail',
+    {
+      params,
+      paramsSerializer: (obj) => {
+        return qs.stringify(obj);
+      },
+    }
+  );
+}
