@@ -2,7 +2,40 @@
   <div class="container">
     <Breadcrumb :items="['menu.repository', 'menu.repository.jobList']" />
     <a-card class="general-card">
-      <div class="workflow-container" ref="container"></div>
+      <a-tabs default-active-key="processDefine">
+        <a-tab-pane key="basicInfo" :title="$t('workflow.basicInfo')">
+          <a-form
+            ref="saveWorkflowVersionRef"
+            :key="workflowVersionForm.id"
+            :rules="workflowVersionFormValidateRules"
+            :model="workflowVersionForm"
+            :auto-label-width="true"
+          >
+            <a-form-item
+              field="version"
+              required
+              validate-trigger="blur"
+              :label="$t('workflow.version')"
+            >
+              <a-input v-model="workflowVersionForm.version" />
+            </a-form-item>
+            <a-form-item
+              field="name"
+              required
+              validate-trigger="blur"
+              :label="$t('workflow.version_name')"
+            >
+              <a-input v-model="workflowVersionForm.name" />
+            </a-form-item>
+            <a-form-item field="info" :label="$t('workflow.info')">
+              <a-textarea v-model="workflowVersionForm.info" />
+            </a-form-item>
+          </a-form>
+        </a-tab-pane>
+        <a-tab-pane key="processDefine" :title="$t('workflow.processDefine')">
+          <div class="workflow-container" ref="container"></div>
+        </a-tab-pane>
+      </a-tabs>
     </a-card>
   </div>
 
@@ -111,7 +144,7 @@
     @before-ok="handleSaveWorkflowVersion"
     @cancel="handleCancel"
   >
-    <template #title> {{ $t('workflow.save_version') }}</template>
+    <template #title> {{ $t('workflow.saveVersion') }}</template>
     <a-form
       ref="saveWorkflowVersionRef"
       :key="workflowVersionForm.id"
@@ -200,6 +233,7 @@
   const saveNodeConfigRef = ref();
   const lf = ref<LogicFlow>();
   const uploadFileList = ref<FileItem[]>([]);
+
   const workflowVersionForm = ref({
     id: Number(route.query.id) || 0,
     version: '',
@@ -533,15 +567,20 @@
     workflowVersionModalVisible.value = false;
   };
 
-  const fetchWorkflowVersionDetail = async (id: number) => {
+  const fetchWorkflowVersionDetail = async (workflowId: number) => {
     setLoading(true);
     try {
       const { data } = await getWorkflowDetail({
-        id,
+        workflow_id: workflowId,
       });
-      nodeConfigs.value = data.nodes as any;
-      edgeConfigs.value = data.edges as any;
-      console.log('---------------------');
+      nodeConfigs.value = (data.nodes as any) ?? [];
+      edgeConfigs.value = (data.edges as any) ?? [];
+      const graphData = {
+        nodes: nodeConfigs.value.map((v) => v.data) as any,
+        edges: edgeConfigs.value.map((v) => v.data) as any,
+      };
+
+      lf.value?.render(graphData);
     } catch (err) {
       // you can report use errorHandler or other
     } finally {
@@ -555,6 +594,7 @@
         isSilentMode: false,
         stopScrollGraph: true,
         stopZoomGraph: true,
+        snapToGrid: true,
         container: container.value,
         grid: false,
         multipleSelectKey: 'shift',
@@ -751,27 +791,30 @@
         const convertData: GraphConfig = {
           nodes: data.nodes.map((data1) => {
             const v = nodeConfigs.value.find((data2) => data1.id === data2.id);
-            return v!;
+            return {
+              ...v!,
+              data: data1,
+            };
           }),
           edges: data.edges.map((data1) => {
             const v = edgeConfigs.value.find((data2) => data1.id === data2.id);
-            return v!;
+            return {
+              ...v!,
+              data: data1,
+            };
           }),
         };
         return convertData;
       };
 
       lf.value.adapterIn = (data) => {
-        console.log('adapterIn', data);
-
-        return {} as LogicFlow.GraphData;
+        return data as LogicFlow.GraphData;
       };
 
       lf.value?.on('node:click', (e) => {
         console.log('node:click', e.data);
         editNodeModalVisible.value = true;
         const selectNode = nodeConfigs.value.find((v) => v.id === e.data.id)!;
-
         nodeConfig.value = {
           ...selectNode,
         };
@@ -821,11 +864,6 @@
       });
 
       fetchWorkflowVersionDetail(Number(route.query.id));
-
-      lf.value?.render({
-        nodes: nodeConfigs.value as any,
-        edges: edgeConfigs.value as any,
-      });
     });
   });
 </script>

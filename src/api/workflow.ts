@@ -80,16 +80,16 @@ export function queryWorkflowList(params: QueryWorkflowListReq) {
 }
 
 export interface getWorkflowDetailReq {
-  id: number;
+  workflow_id: number;
+  version_id?: number;
 }
 
 export interface getWorkflowDetailResp {
-  id: number;
-  pid: number;
+  workflow_id: number;
+  version_id: number;
   workflow_name: string;
-  version_name: string;
+  version: string;
   version_info: string;
-  version_status: 'draft' | 'release';
   created_user: string;
   updated_time: string;
   nodes: NodeConfig[];
