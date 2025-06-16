@@ -183,7 +183,8 @@ const localeWorkflow = {
   'workflow.info': '描述',
   'workflow.version': '版本',
   'workflow.save': '保存流程',
-  'workflow.version_name': '版本名',
+  'workflow.versionName': '版本名',
+  'workflow.versionInfo': '版本信息',
   'workflow.saveVersion': '保存版本',
   'workflow.basicInfo': '基础信息',
   'workflow.processDefine': '流程定义',
@@ -374,6 +375,7 @@ export default {
   'form.reset': '重置',
   'form.save': '保存',
   'form.add': '新增',
+  'form.submit': '提交',
   'form.submit.success': '提交成功',
 
   'operations': '操作',

@@ -5,30 +5,31 @@
       <a-tabs default-active-key="processDefine">
         <a-tab-pane key="basicInfo" :title="$t('workflow.basicInfo')">
           <a-form
-            ref="saveWorkflowVersionRef"
-            :key="workflowVersionForm.id"
-            :rules="workflowVersionFormValidateRules"
-            :model="workflowVersionForm"
-            :auto-label-width="true"
+            :style="{ width: '550px' }"
+            ref="saveWorkflowBasicInfoRef"
+            :key="workflowBasicInfoForm.id"
+            :rules="workflowBasicInfoFormValidateRules"
+            :model="workflowBasicInfoForm"
+            auto-label-width
+            @submit="handleSaveWorkflowBasicInfo"
           >
-            <a-form-item
-              field="version"
-              required
-              validate-trigger="blur"
-              :label="$t('workflow.version')"
-            >
-              <a-input v-model="workflowVersionForm.version" />
-            </a-form-item>
             <a-form-item
               field="name"
               required
               validate-trigger="blur"
-              :label="$t('workflow.version_name')"
+              :label="$t('workflow.name')"
             >
-              <a-input v-model="workflowVersionForm.name" />
+              <a-input v-model="workflowBasicInfoForm.name" />
             </a-form-item>
             <a-form-item field="info" :label="$t('workflow.info')">
-              <a-textarea v-model="workflowVersionForm.info" />
+              <a-textarea v-model="workflowBasicInfoForm.info" />
+            </a-form-item>
+            <a-form-item>
+              <a-space>
+                <a-button type="primary" html-type="submit">
+                  {{ $t('form.submit') }}
+                </a-button>
+              </a-space>
             </a-form-item>
           </a-form>
         </a-tab-pane>
@@ -86,14 +87,17 @@
         </a-radio-group>
       </a-form-item>
 
-      <template v-if="nodeConfig.task_type == 'standard'">
+      <template v-if="nodeConfig.task_type === 'standard'">
         <a-form-item
           field="eid"
           validate-trigger="blur"
           :label="$t('job')"
           v-if="nodeConfig.task_type == 'standard'"
         >
-          <SelectJob v-model:eid="nodeConfig.eid" job-type="default" />
+          <SelectJob
+            v-model:eid="nodeConfig.task.standard!.eid"
+            job-type="default"
+          />
         </a-form-item>
       </template>
 
@@ -141,13 +145,13 @@
     :ok-text="$t('form.save')"
     unmount-on-close
     width="500px"
-    @before-ok="handleSaveWorkflowVersion"
+    @before-ok="handleReleaseWorkflowVersion"
     @cancel="handleCancel"
   >
     <template #title> {{ $t('workflow.saveVersion') }}</template>
     <a-form
       ref="saveWorkflowVersionRef"
-      :key="workflowVersionForm.id"
+      :key="workflowVersionForm.workflow_id"
       :rules="workflowVersionFormValidateRules"
       :model="workflowVersionForm"
       :auto-label-width="true"
@@ -160,16 +164,9 @@
       >
         <a-input v-model="workflowVersionForm.version" />
       </a-form-item>
-      <a-form-item
-        field="name"
-        required
-        validate-trigger="blur"
-        :label="$t('workflow.version_name')"
-      >
-        <a-input v-model="workflowVersionForm.name" />
-      </a-form-item>
+
       <a-form-item field="info" :label="$t('workflow.info')">
-        <a-textarea v-model="workflowVersionForm.info" />
+        <a-textarea v-model="workflowVersionForm.version_info" />
       </a-form-item>
     </a-form>
   </a-modal>
@@ -212,7 +209,13 @@
   import { getCommand } from '@/utils';
   import { FileItem, Message } from '@arco-design/web-vue';
   import useLoading from '@/hooks/loading';
-  import { getWorkflowDetail, saveWorkflowVersion } from '@/api/workflow';
+  import {
+    EdgeConfig,
+    getWorkflowDetail,
+    NodeConfig,
+    releaseWorkflowVersion,
+    saveWorkflow,
+  } from '@/api/workflow';
   import SelectJob from '../components/select-job.vue';
   import SelectExecutor from '../components/select-executor.vue';
 
@@ -225,6 +228,7 @@
     pageSize: 20,
   };
 
+  const saveWorkflowBasicInfoRef = ref();
   const saveWorkflowVersionRef = ref();
   const minimapVisible = ref(false);
   const gridVisible = ref(false);
@@ -234,20 +238,34 @@
   const lf = ref<LogicFlow>();
   const uploadFileList = ref<FileItem[]>([]);
 
-  const workflowVersionForm = ref({
+  const workflowBasicInfoForm = ref({
     id: Number(route.query.id) || 0,
-    version: '',
     name: '',
     info: '',
+  });
+
+  const workflowBasicInfoFormValidateRules = {
+    name: {
+      required: true,
+    },
+  };
+
+  const workflowVersionForm = ref<{
+    workflow_id: number;
+    version: string;
+    version_info?: string;
+    nodes: NodeConfig[];
+    edges: EdgeConfig[];
+  }>({
+    workflow_id: Number(route.query.id) || 0,
+    version: '',
+    version_info: '',
     nodes: [],
     edges: [],
   });
 
   const workflowVersionFormValidateRules = {
     version: { required: true },
-    name: {
-      required: true,
-    },
   };
 
   const CustomCurved = {
@@ -267,41 +285,41 @@
     view: CurvedEdge,
   };
 
-  interface NodeConfig {
-    id: string;
-    name: string;
-    node_type: string;
-    task_type: string;
-    task: {
-      custom?: {
-        work_dir: string;
-        work_user: string;
-        timeout: number;
-        upload_file: string;
-        code: string;
-        executor_id: number;
-      };
-      standard?: {
-        eid: string;
-      };
-    };
+  // interface NodeConfig {
+  //   id: string;
+  //   name: string;
+  //   node_type: string;
+  //   task_type: string;
+  //   task: {
+  //     custom?: {
+  //       work_dir: string;
+  //       work_user: string;
+  //       timeout: number;
+  //       upload_file: string;
+  //       code: string;
+  //       executor_id: number;
+  //     };
+  //     standard?: {
+  //       eid: string;
+  //     };
+  //   };
 
-    eid?: string;
-    data: {
-      [key: string]: any;
-    };
-  }
+  //   eid?: string;
+  //   data: {
+  //     [key: string]: any;
+  //   };
+  // }
 
-  interface EdgeConfig {
-    id: string;
-    name: string;
-    condition: string;
-    source_node_id: string;
-    target_node_id: string;
-    data: {
-      [key: string]: any;
-    };
-  }
+  // interface EdgeConfig {
+  //   id: string;
+  //   name: string;
+  //   condition: string;
+  //   source_node_id: string;
+  //   target_node_id: string;
+  //   data: {
+  //     [key: string]: any;
+  //   };
+  // }
 
   interface GraphConfig {
     nodes: NodeConfig[];
@@ -312,8 +330,10 @@
     id: '',
     name: '',
     node_type: '',
-    task_type: '',
-    task: {},
+    task_type: 'standard',
+    task: {
+      standard: { eid: '' },
+    },
     data: {},
   });
   const nodeConfigs = ref<NodeConfig[]>([]);
@@ -542,23 +562,64 @@
     return true;
   };
 
-  const handleSaveWorkflowVersion = async () => {
+  const handleReleaseWorkflowVersion = async () => {
     const ret = await saveWorkflowVersionRef.value.validate();
     if (ret) {
       return false;
     }
     try {
-      const data = {
-        ...workflowVersionForm.value,
-      };
-      await saveWorkflowVersion({
-        ...data,
-        status: 'draft',
+      const data = workflowVersionForm.value;
+      await releaseWorkflowVersion({
+        workflow_id: data.workflow_id,
+        version: data.version,
+        version_info: data.version_info,
+        nodes: data.nodes,
+        edges: data.edges,
       });
     } catch (err) {
       return false;
     }
 
+    Message.success(t('form.submit.success'));
+    return true;
+  };
+
+  const handleSaveWorkflowBasicInfo = async () => {
+    const ret = await saveWorkflowBasicInfoRef.value.validate();
+    if (ret) {
+      return false;
+    }
+    try {
+      const data = workflowBasicInfoForm.value;
+      await saveWorkflow({
+        id: data.id,
+        name: data.name,
+        info: data.info,
+      });
+    } catch (err) {
+      return false;
+    }
+    Message.success(t('form.submit.success'));
+    return true;
+  };
+
+  const handleWorkflowDraft = async () => {
+    const ret = await saveWorkflowBasicInfoRef.value.validate();
+    if (ret) {
+      return false;
+    }
+    try {
+      const data = workflowBasicInfoForm.value;
+      await saveWorkflow({
+        id: data.id,
+        name: data.name,
+        info: data.info,
+        nodes: workflowVersionForm.value.nodes,
+        edges: workflowVersionForm.value.edges,
+      });
+    } catch (err) {
+      return false;
+    }
     Message.success(t('form.submit.success'));
     return true;
   };
@@ -578,6 +639,11 @@
       const graphData = {
         nodes: nodeConfigs.value.map((v) => v.data) as any,
         edges: edgeConfigs.value.map((v) => v.data) as any,
+      };
+      workflowBasicInfoForm.value = {
+        id: workflowId,
+        name: data.workflow_name,
+        info: data.workflow_info,
       };
 
       lf.value?.render(graphData);
@@ -728,7 +794,7 @@
           const data = lf.getGraphData();
           workflowVersionForm.value.nodes = (data as any).nodes;
           workflowVersionForm.value.edges = (data as any).edges;
-          workflowVersionModalVisible.value = true;
+          handleWorkflowDraft();
         },
       });
 
@@ -738,8 +804,10 @@
         title: '',
         text: '发布',
         onClick: (lf, ev) => {
-          console.log(lf.getGraphRawData());
-          alert(lf.getGraphData());
+          const data = lf.getGraphData();
+          workflowVersionForm.value.nodes = (data as any).nodes;
+          workflowVersionForm.value.edges = (data as any).edges;
+          workflowVersionModalVisible.value = true;
         },
       });
 
@@ -827,7 +895,9 @@
           name: e.data.text?.value || '',
           node_type: e.data.type,
           task_type: 'standard',
-          task: {},
+          task: {
+            standard: { eid: '' },
+          },
           data: e.data,
         });
       });
@@ -875,5 +945,7 @@
   .workflow-container {
     width: 100%;
     height: 680px;
+  }
+  .custom-minimap {
   }
 </style>

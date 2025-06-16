@@ -368,6 +368,7 @@ export default {
   'form.reset': 'Reset',
   'form.save': 'Save',
   'form.add': 'Add',
+  'form.submit': 'Submit',
   'form.submit.success': 'Submission Successful',
 
   'operations': 'Operations',

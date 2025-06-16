@@ -395,8 +395,8 @@
       dataIndex: 'updated_time',
     },
     {
-      title: t('columns.updatedUser'),
-      dataIndex: 'updated_user',
+      title: t('columns.createdUser'),
+      dataIndex: 'created_user',
     },
     {
       title: t('operations'),
