@@ -144,7 +144,10 @@
                 </a-button>
               </a-space>
               <a-space>
-                <a-button size="mini" @click="router.push('workflow/edit')">
+                <a-button
+                  size="mini"
+                  @click="handleOpenWorkflowVersionModal($event, record)"
+                >
                   {{ $t('workflow.version') }}
                 </a-button>
               </a-space>
@@ -242,6 +245,8 @@
           </a-form-item>
         </a-form>
       </a-modal>
+
+      <a-drawer> hello world </a-drawer>
     </div>
   </div>
 </template>
@@ -273,6 +278,7 @@
     saveWorkflow,
     queryWorkflowList,
     WorkflowRecord,
+    QueryWorkflowListReq,
   } from '@/api/workflow';
   import SelectInstance from '../components/select-instance.vue';
 
@@ -420,7 +426,7 @@
   };
 
   const fetchData = async (
-    params: QueryJobReq = {
+    params: QueryWorkflowListReq = {
       page: basePagination.page,
       page_size: basePagination.pageSize,
     }

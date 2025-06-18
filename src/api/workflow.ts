@@ -19,7 +19,7 @@ export interface NodeConfig {
   id: string;
   name: string;
   node_type: string;
-  task_type: 'standard' | 'custom';
+  task_type: 'standard' | 'custom' | 'none';
   task: Task;
   data: {
     [key: string]: any;
@@ -71,6 +71,8 @@ export function releaseWorkflowVersion(data: ReleaseWorkflowVersionReq) {
 
 export interface QueryWorkflowListReq {
   name?: string;
+  page: number;
+  page_size: number;
 }
 
 export interface QueryWorkflowListResp {
@@ -107,6 +109,38 @@ export interface getWorkflowDetailResp {
 
 export function getWorkflowDetail(params: getWorkflowDetailReq) {
   return axios.get<getWorkflowDetailResp>('/api/workflow/detail', {
+    params,
+    paramsSerializer: (obj) => {
+      return qs.stringify(obj);
+    },
+  });
+}
+
+export interface QueryWorkflowVersionListReq {
+  version?: string;
+  workflow_id: number;
+  default_id?: number;
+  page: number;
+  page_size: number;
+}
+
+export interface WorkflowVersionRecord {
+  id: number;
+  version: string;
+  version_info: string;
+  created_time: string;
+  created_user: string;
+  nodes?: NodeConfig[];
+  edges?: EdgeConfig[];
+}
+
+export interface QueryWorkflowVersionListResp {
+  list: WorkflowVersionRecord[];
+  total: number;
+}
+
+export function queryWorkflowVersionList(params: QueryWorkflowVersionListReq) {
+  return axios.get<QueryWorkflowVersionListResp>('/api/workflow/version/list', {
     params,
     paramsSerializer: (obj) => {
       return qs.stringify(obj);

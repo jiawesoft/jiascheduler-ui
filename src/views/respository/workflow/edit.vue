@@ -215,7 +215,9 @@
     NodeConfig,
     releaseWorkflowVersion,
     saveWorkflow,
+    Task,
   } from '@/api/workflow';
+  import { genVersionFromTime } from '@/utils/time';
   import SelectJob from '../components/select-job.vue';
   import SelectExecutor from '../components/select-executor.vue';
 
@@ -567,8 +569,8 @@
     if (ret) {
       return false;
     }
+    const data = workflowVersionForm.value;
     try {
-      const data = workflowVersionForm.value;
       await releaseWorkflowVersion({
         workflow_id: data.workflow_id,
         version: data.version,
@@ -579,6 +581,8 @@
     } catch (err) {
       return false;
     }
+
+    workflowVersionForm.value = { ...data, version: '', version_info: '' };
 
     Message.success(t('form.submit.success'));
     return true;
@@ -805,6 +809,15 @@
         text: '发布',
         onClick: (lf, ev) => {
           const data = lf.getGraphData();
+
+          workflowVersionForm.value = {
+            ...workflowVersionForm.value,
+            version: `${
+              workflowBasicInfoForm.value.name
+            }-${genVersionFromTime()}`,
+            nodes: (data as any).nodes,
+            edges: (data as any).edges,
+          };
           workflowVersionForm.value.nodes = (data as any).nodes;
           workflowVersionForm.value.edges = (data as any).edges;
           workflowVersionModalVisible.value = true;
@@ -890,14 +903,26 @@
 
       lf.value?.on('node:dnd-add', (e) => {
         console.log('node:dnd-add', e.data);
+        let taskType: 'standard' | 'custom' | 'none';
+        const task: Task = {};
+        switch (e.data.type) {
+          case 'bpmn:serviceTask':
+            taskType = 'standard';
+            task.standard = { eid: '' };
+            break;
+          case 'bpmn:startEvent':
+          case 'bpmn:endEvent':
+          case 'bpmn:exclusiveGateway':
+          default:
+            taskType = 'none';
+        }
+
         nodeConfigs.value.push({
           id: e.data.id,
           name: e.data.text?.value || '',
           node_type: e.data.type,
-          task_type: 'standard',
-          task: {
-            standard: { eid: '' },
-          },
+          task_type: taskType,
+          task,
           data: e.data,
         });
       });
@@ -945,7 +970,5 @@
   .workflow-container {
     width: 100%;
     height: 680px;
-  }
-  .custom-minimap {
   }
 </style>
