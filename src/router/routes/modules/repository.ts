@@ -24,9 +24,21 @@ const REPOSITORY: AppRouteRecordRaw = {
     },
     {
       path: 'workflow', // The midline path complies with SEO specifications
-      name: 'workflowList',
-      component: () => import('@/views/respository/workflow/index.vue'),
+      name: 'workflowIndex',
+      component: () => import('@/views/respository/workflow/layout.vue'),
       children: [
+        {
+          path: '',
+          name: 'workflowList',
+          component: () => import('@/views/respository/workflow/index.vue'),
+          meta: {
+            locale: 'menu.repository.workflow',
+            requiresAuth: true,
+            hideInMenu: true,
+            activeMenu: 'workflowIndex',
+            roles: ['*'],
+          },
+        },
         {
           path: 'edit',
           name: 'editWorkflow',
@@ -35,7 +47,7 @@ const REPOSITORY: AppRouteRecordRaw = {
             locale: 'menu.repository.editWorkflow',
             requiresAuth: true,
             hideInMenu: true,
-            // activeMenu: 'workflowList',
+            activeMenu: 'workflowIndex',
             roles: ['*'],
           },
         },

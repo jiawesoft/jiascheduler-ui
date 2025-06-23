@@ -1,7 +1,6 @@
 <template>
   <div>
-    <router-view />
-    <div v-if="!isEdit" class="container">
+    <div class="container">
       <Breadcrumb :items="['menu.repository', 'menu.repository.jobList']" />
       <a-card class="general-card">
         <a-row>
@@ -246,7 +245,9 @@
         </a-form>
       </a-modal>
 
-      <a-drawer> hello world </a-drawer>
+      <a-drawer :visible="workflowVersionListModalVisible">
+        <!-- <version-list :workflow-id="" /> -->
+      </a-drawer>
     </div>
   </div>
 </template>
@@ -281,13 +282,16 @@
     QueryWorkflowListReq,
   } from '@/api/workflow';
   import SelectInstance from '../components/select-instance.vue';
+  import versionList from './components/version-list.vue';
 
   type SizeProps = 'mini' | 'small' | 'medium' | 'large';
   type Column = TableColumnData & { checked?: true };
   const workflowModalVisible = ref(false);
   const dispatchJobModalVisible = ref(false);
+  const workflowVersionListModalVisible = ref(false);
   const saveWorkflowRef = ref();
   const dispatchJobRef = ref();
+  const workflowVersionListRef = ref();
   const router = useRouter();
 
   const isEdit = computed(() => {
@@ -497,15 +501,8 @@
   };
 
   const handleOpenWorkflowVersionModal = (e: any, record: any) => {
-    dispatchJobRef.value.clearValidate();
-    dispatchJobForm.value = {
-      ...record,
-      schedule_name: `${record.name}-${genVersionFromTime()}`,
-      ip: [],
-      action: 'exec',
-      schedule_type: 'once',
-    };
-    dispatchJobModalVisible.value = true;
+    workflowVersionListRef.value.clearValidate();
+    workflowVersionListRef.value = true;
   };
 
   const handleSaveWorkflow = async () => {
