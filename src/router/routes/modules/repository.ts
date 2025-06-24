@@ -23,7 +23,7 @@ const REPOSITORY: AppRouteRecordRaw = {
       },
     },
     {
-      path: 'workflow', // The midline path complies with SEO specifications
+      path: '/repository/workflow', // The midline path complies with SEO specifications
       name: 'workflowIndex',
       component: () => import('@/views/respository/workflow/layout.vue'),
       children: [

@@ -71,6 +71,7 @@ export function releaseWorkflowVersion(data: ReleaseWorkflowVersionReq) {
 
 export interface QueryWorkflowListReq {
   name?: string;
+  tag_ids?: number[];
   page: number;
   page_size: number;
 }
