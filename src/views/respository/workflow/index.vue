@@ -263,8 +263,16 @@
         </a-form>
       </a-modal>
 
-      <a-drawer :visible="workflowVersionListModalVisible">
-        <!-- <version-list :workflow-id="" /> -->
+      <a-drawer
+        :visible="workflowVersionListModalVisible"
+        width="50%"
+        :closable="true"
+        @cancel="handleCancel"
+      >
+        <version-list
+          v-if="workflowVersionListModalVisible"
+          :workflow-id="workflowId"
+        />
       </a-drawer>
     </div>
   </div>
@@ -316,6 +324,7 @@
   const tagList = ref<TagRecord[]>([]);
   const tagIds = ref<number[]>([]);
   const router = useRouter();
+  const workflowId = ref(0);
 
   interface WorkflowForm {
     id: number;
@@ -543,8 +552,8 @@
   };
 
   const handleOpenWorkflowVersionModal = (e: any, record: any) => {
-    workflowVersionListRef.value.clearValidate();
-    workflowVersionListRef.value = true;
+    workflowVersionListModalVisible.value = true;
+    workflowId.value = record.id;
   };
 
   const handleSaveWorkflow = async () => {
@@ -602,6 +611,7 @@
 
   const handleCancel = () => {
     workflowModalVisible.value = false;
+    workflowVersionListModalVisible.value = false;
   };
 
   fetchData();

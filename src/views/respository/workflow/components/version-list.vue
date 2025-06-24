@@ -2,7 +2,7 @@
   <a-row>
     <a-col flex="auto">
       <a-form
-        key="search-daemon-exec-list"
+        key="search-workflow-version"
         :model="formModel"
         :label-col-props="{ span: 6 }"
         :auto-label-width="true"
@@ -11,13 +11,9 @@
         @submit="search"
       >
         <a-row :gutter="5">
-          <a-col :span="10">
+          <a-col :span="20">
             <a-form-item field="version" :label="$t('workflow.version')">
-              <a-input
-                v-model="formModel.version"
-                @press-enter="search"
-                :placeholder="$t('job.scheduleName.placeholder')"
-              />
+              <a-input v-model="formModel.version" @press-enter="search" />
             </a-form-item>
           </a-col>
         </a-row>
@@ -43,18 +39,15 @@
   </a-row>
   <a-divider style="margin-top: 0" />
   <a-row style="margin-bottom: 16px">
-    <a-col :span="20">
-      <tag-item :tag-list="tagList" @query-tag-list="queryTagList"></tag-item>
-    </a-col>
-
+    <a-col :span="22" />
     <a-col
       :span="2"
       style="display: flex; align-items: center; justify-content: end"
     >
       <a-tooltip :content="$t('columns.actions.refresh')">
-        <div class="action-icon" @click="search"
-          ><icon-refresh size="18"
-        /></div>
+        <div class="action-icon" @click="search">
+          <icon-refresh size="18" />
+        </div>
       </a-tooltip>
       <a-dropdown @select="handleSelectDensity">
         <a-tooltip :content="$t('columns.actions.density')">
@@ -123,15 +116,6 @@
       {{ rowIndex + 1 + (pagination.page - 1) * pagination.pageSize }}
     </template>
 
-    <template #tags="{ record }">
-      <table-tag-item
-        :tag-list="record.tags"
-        :resource-id="record.id"
-        :resource-type="resourceType"
-        @refresh-page="refreshPage"
-      ></table-tag-item>
-    </template>
-
     <template #operations="{ record }">
       <a-button
         type="text"
@@ -145,14 +129,9 @@
 </template>
 
 <script lang="ts" setup>
-  import { queryCountResource, TagRecord } from '@/api/tag';
-  import TableTagItem from '@/components/table-tag-item/index.vue';
-  import TagItem from '@/components/tag-item/index.vue';
-
   import useLoading from '@/hooks/loading';
   import { useAppStore } from '@/store';
   import { Pagination } from '@/types/global';
-  import { Message } from '@arco-design/web-vue';
   import type { TableColumnData } from '@arco-design/web-vue/es/table/interface';
 
   import cloneDeep from 'lodash/cloneDeep';
@@ -172,11 +151,6 @@
   type SizeProps = 'mini' | 'small' | 'medium' | 'large';
   type Column = TableColumnData & { checked?: true };
   const visible = ref(false);
-
-  const scroll = ref({
-    x: 2000,
-    y: 200,
-  });
 
   const theme = computed(() => {
     return useAppStore().theme;
@@ -260,7 +234,7 @@
     },
 
     {
-      title: t('workflow.version_info'),
+      title: t('workflow.versionInfo'),
       dataIndex: 'version_info',
       ellipsis: true,
       width: 150,
@@ -295,27 +269,11 @@
     },
   ]);
 
-  const tagList = ref<TagRecord[]>([]);
-  const resourceType = ref('workflow');
-  const tagIds = ref<number[]>([]);
-
-  const initTagList = async () => {
-    try {
-      const { data } = await queryCountResource({
-        resource_type: resourceType.value,
-      });
-      tagList.value = data.list;
-    } catch (err) {
-      // you can report use errorHandler or other
-    }
-  };
-  initTagList();
-
   const fetchData = async (
     params: QueryWorkflowVersionListReq = {
       page: 1,
       page_size: 20,
-      workflow_id: 0,
+      workflow_id: props.workflowId,
     }
   ) => {
     setLoading(true);
@@ -330,14 +288,8 @@
       setLoading(false);
     }
   };
-  const queryTagList = (tag: number[]) => {
-    tagIds.value = tag;
-    fetchData();
-  };
 
-  // 刷新
   const refreshPage = () => {
-    initTagList();
     fetchData();
   };
 
@@ -358,6 +310,7 @@
       page: basePagination.page,
       page_size: basePagination.pageSize,
       ...formModel.value,
+      workflow_id: props.workflowId,
     } as unknown as QueryWorkflowVersionListReq);
   };
   const onPageChange = (current: number) => {
@@ -365,6 +318,7 @@
       page_size: pagination.pageSize,
       page: current,
       ...formModel.value,
+      workflow_id: props.workflowId,
     } as unknown as QueryWorkflowVersionListReq);
   };
 
@@ -432,7 +386,7 @@
 
 <script lang="ts">
   export default {
-    name: 'ExecList',
+    name: 'WorkflowVersionList',
   };
 </script>
 
