@@ -252,7 +252,8 @@
     term = new Terminal({
       fontSize: themeConfig.terminalFontSize || 15,
       fontWeight: 'normal',
-      fontFamily: 'monospace, monaco, Consolas, Lucida Console',
+      fontFamily:
+        'JetBrainsMono, DejaVu Sans Mono, Consolas, monaco, Lucida Console, monospace',
       cursorBlink: true,
       disableStdin: false,
       allowProposedApi: true,
@@ -261,7 +262,7 @@
         foreground: themeConfig.terminalForeground || '#7e9192', // 字体
         background: themeConfig.terminalBackground || '#002833', // 背景色
         cursor: themeConfig.terminalCursor || '#268F81', // 设置光标
-        // cursorAccent: "red",  // 光标停止颜色
+        cursorAccent: 'red', // 光标停止颜色
       } as ITheme,
     });
     term.open(terminalRef.value);

@@ -264,8 +264,9 @@
       </a-modal>
 
       <a-drawer
+        :title="$t('workflow.version')"
         :visible="workflowVersionListModalVisible"
-        width="50%"
+        width="60%"
         :closable="true"
         @cancel="handleCancel"
       >

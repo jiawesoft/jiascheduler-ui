@@ -117,15 +117,65 @@
     </template>
 
     <template #operations="{ record }">
-      <a-button
-        type="text"
-        size="small"
-        @click="handleViewExecDetailModal($event, record)"
-      >
-        {{ $t('operations.view') }}
-      </a-button>
+      <a-space direction="horizontal">
+        <a-space>
+          <a-button
+            size="mini"
+            @click="handleViewExecDetailModal($event, record)"
+          >
+            {{ $t('operations.view') }}
+          </a-button>
+        </a-space>
+        <a-space>
+          <a-button
+            size="mini"
+            status="normal"
+            type="outline"
+            @click="handleStartProcessModal($event, record)"
+          >
+            {{ $t('operations.start') }}
+          </a-button>
+        </a-space>
+      </a-space>
     </template>
   </a-table>
+
+  <a-modal
+    v-model:visible="startProcessModalVisible"
+    title-align="start"
+    :draggable="true"
+    :ok-text="$t('job.dispatch')"
+    width="60%"
+    @before-ok="handleStartProcess"
+    @cancel="handleCancel"
+  >
+    <template #title> {{ $t('job.schedule') }}</template>
+    <a-form
+      ref="startProcessFormRef"
+      :model="startProcessForm"
+      :rules="{}"
+      :auto-label-width="true"
+    >
+      <a-form-item
+        field="process_name"
+        validate-trigger="blur"
+        :label="$t('workflow.name')"
+      >
+        <a-input v-model="startProcessForm.process_name" />
+      </a-form-item>
+
+      <a-form-item
+        field="endpoints"
+        validate-trigger="blur"
+        :label="$t('job.endpoint')"
+      >
+        <SelectInstance
+          v-if="startProcessModalVisible"
+          v-model="startProcessForm.default_target"
+        />
+      </a-form-item>
+    </a-form>
+  </a-modal>
 </template>
 
 <script lang="ts" setup>
@@ -138,11 +188,13 @@
   import Sortable from 'sortablejs';
   import { computed, nextTick, reactive, ref, toRefs, watch } from 'vue';
   import { useI18n } from 'vue-i18n';
+
   import {
     queryWorkflowVersionList,
     QueryWorkflowVersionListReq,
     WorkflowVersionRecord,
   } from '@/api/workflow';
+  import SelectInstance from '../../components/select-instance.vue';
 
   const props = defineProps<{
     workflowId: number;
@@ -151,6 +203,13 @@
   type SizeProps = 'mini' | 'small' | 'medium' | 'large';
   type Column = TableColumnData & { checked?: true };
   const visible = ref(false);
+  const startProcessModalVisible = ref(false);
+  const startProcessForm = ref({
+    workflow_id: 0,
+    version_id: 0,
+    process_name: '',
+    default_target: [],
+  });
 
   const theme = computed(() => {
     return useAppStore().theme;
@@ -242,12 +301,6 @@
     },
 
     {
-      title: t('tag.name'),
-      dataIndex: 'tags',
-      slotName: 'tags',
-      width: 180,
-    },
-    {
       title: t('columns.createdTime'),
       dataIndex: 'created_time',
       ellipsis: true,
@@ -299,6 +352,16 @@
     }
 
     visible.value = true;
+  };
+
+  const handleStartProcessModal = (e: any, record: any) => {
+    if (record) {
+      form.value = { ...record };
+    }
+
+    console.log('record:', record);
+
+    startProcessModalVisible.value = true;
   };
 
   const handleCancel = () => {
@@ -369,6 +432,37 @@
         });
       });
     }
+  };
+
+  const handleStartProcess = async () => {
+    // const ret = await dispatchJobRef.value.validate();
+    // if (ret) {
+    //   return false;
+    // }
+    // try {
+    //   await start({
+    //     schedule_type: dispatchJobForm.value.schedule_type as ScheduleType,
+    //     eid: dispatchJobForm.value.eid,
+    //     schedule_name: dispatchJobForm.value.schedule_name,
+    //     action: dispatchJobForm.value.action as JobAction,
+    //     is_sync: false,
+    //     endpoints: dispatchJobForm.value.endpoints,
+    //   });
+    // } catch (err) {
+    //   return false;
+    // }
+    // Message.success(t('form.submit.success'));
+
+    // setTimeout(() => {
+    //   router.push({
+    //     path: '/run-status/run-list',
+    //     query: {
+    //       scheduleType: 'workflow',
+    //     },
+    //   });
+    // }, 200);
+
+    return true;
   };
 
   watch(
