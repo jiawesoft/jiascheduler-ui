@@ -189,7 +189,7 @@
   } from '@logicflow/extension';
   import '@logicflow/extension/lib/style/index.css';
   import { computed, nextTick, onMounted, ref } from 'vue';
-  import { useRoute } from 'vue-router';
+  import { useRoute, useRouter } from 'vue-router';
 
   import { useI18n } from 'vue-i18n';
   import { VAceEditor } from 'vue3-ace-editor';
@@ -223,6 +223,7 @@
 
   const { t } = useI18n();
   const route = useRoute();
+  const router = useRouter();
   const { loading, setLoading } = useLoading(true);
 
   const basePagination: Pagination = {
@@ -255,11 +256,15 @@
   const workflowVersionForm = ref<{
     workflow_id: number;
     version: string;
+    version_id?: number;
     version_info?: string;
     nodes: NodeConfig[];
     edges: EdgeConfig[];
   }>({
     workflow_id: Number(route.query.id) || 0,
+    version_id: route.query.version_id
+      ? Number(route.query.version_id)
+      : undefined,
     version: '',
     version_info: '',
     nodes: [],
@@ -585,6 +590,13 @@
     workflowVersionForm.value = { ...data, version: '', version_info: '' };
 
     Message.success(t('form.submit.success'));
+
+    if (workflowVersionForm.value.version_id) {
+      router.push(
+        `/repository/workflow/edit?id=${workflowBasicInfoForm.value.id}`
+      );
+    }
+
     return true;
   };
 
@@ -607,7 +619,7 @@
     return true;
   };
 
-  const handleWorkflowDraft = async () => {
+  const handleSaveWorkflowDraft = async () => {
     const ret = await saveWorkflowBasicInfoRef.value.validate();
     if (ret) {
       return false;
@@ -625,6 +637,11 @@
       return false;
     }
     Message.success(t('form.submit.success'));
+    if (workflowVersionForm.value.version_id) {
+      router.push(
+        `/repository/workflow/edit?id=${workflowBasicInfoForm.value.id}`
+      );
+    }
     return true;
   };
 
@@ -632,11 +649,15 @@
     workflowVersionModalVisible.value = false;
   };
 
-  const fetchWorkflowVersionDetail = async (workflowId: number) => {
+  const fetchWorkflowVersionDetail = async (
+    workflowId: number,
+    versionId?: number
+  ) => {
     setLoading(true);
     try {
       const { data } = await getWorkflowDetail({
         workflow_id: workflowId,
+        version_id: versionId,
       });
       nodeConfigs.value = (data.nodes as any) ?? [];
       edgeConfigs.value = (data.edges as any) ?? [];
@@ -798,7 +819,7 @@
           const data = lf.getGraphData();
           workflowVersionForm.value.nodes = (data as any).nodes;
           workflowVersionForm.value.edges = (data as any).edges;
-          handleWorkflowDraft();
+          handleSaveWorkflowDraft();
         },
       });
 
@@ -958,7 +979,10 @@
         });
       });
 
-      fetchWorkflowVersionDetail(Number(route.query.id));
+      fetchWorkflowVersionDetail(
+        Number(route.query.id),
+        workflowVersionForm.value.version_id
+      );
     });
   });
 </script>

@@ -148,3 +148,36 @@ export function queryWorkflowVersionList(params: QueryWorkflowVersionListReq) {
     },
   });
 }
+
+export interface WorkflowNodeArgs {
+  node_id: string;
+  target: string[];
+  args: {
+    [key: string]: any;
+  };
+}
+export interface WorkflowProcessArgs {
+  default_target?: string[];
+  user_variables: {
+    [key: string]: any;
+  };
+  nodes?: WorkflowNodeArgs[];
+}
+
+export interface StartWorkflowProcessReq {
+  workflow_id: number;
+  version_id: number;
+  process_name: string;
+  process_args?: WorkflowProcessArgs;
+}
+
+export interface StartWorkflowProcessResp {
+  process_id: number;
+}
+
+export function startWorkflowProcess(data: StartWorkflowProcessReq) {
+  return axios.post<StartWorkflowProcessResp>(
+    '/api/workflow/start-process',
+    data
+  );
+}

@@ -121,7 +121,14 @@
         <a-space>
           <a-button
             size="mini"
-            @click="handleViewExecDetailModal($event, record)"
+            @click="
+              router.push(
+                'workflow/edit?id=' +
+                  record.workflow_id +
+                  '&version_id=' +
+                  record.id
+              )
+            "
           >
             {{ $t('operations.view') }}
           </a-button>
@@ -149,17 +156,17 @@
     @before-ok="handleStartProcess"
     @cancel="handleCancel"
   >
-    <template #title> {{ $t('job.schedule') }}</template>
+    <template #title> {{ $t('workflow.startProcess') }}</template>
     <a-form
       ref="startProcessFormRef"
       :model="startProcessForm"
-      :rules="{}"
       :auto-label-width="true"
     >
       <a-form-item
         field="process_name"
         validate-trigger="blur"
         :label="$t('workflow.name')"
+        required
       >
         <a-input v-model="startProcessForm.process_name" />
       </a-form-item>
@@ -186,12 +193,16 @@
 
   import cloneDeep from 'lodash/cloneDeep';
   import Sortable from 'sortablejs';
-  import { computed, nextTick, reactive, ref, toRefs, watch } from 'vue';
+  import { computed, nextTick, reactive, ref, watch } from 'vue';
   import { useI18n } from 'vue-i18n';
+  import { Message } from '@arco-design/web-vue';
+  import { useRouter } from 'vue-router';
 
   import {
     queryWorkflowVersionList,
     QueryWorkflowVersionListReq,
+    startWorkflowProcess,
+    WorkflowProcessArgs,
     WorkflowVersionRecord,
   } from '@/api/workflow';
   import SelectInstance from '../../components/select-instance.vue';
@@ -204,35 +215,18 @@
   type Column = TableColumnData & { checked?: true };
   const visible = ref(false);
   const startProcessModalVisible = ref(false);
-  const startProcessForm = ref({
+  const startProcessForm = ref<{
+    process_args?: WorkflowProcessArgs;
+    [key: string]: any;
+  }>({
     workflow_id: 0,
     version_id: 0,
     process_name: '',
-    default_target: [],
   });
 
   const theme = computed(() => {
     return useAppStore().theme;
   });
-
-  const state = reactive({
-    form: {
-      bind_ip: '',
-      created_time: '',
-      created_user: '',
-      end_time: '',
-      exit_code: 0,
-      bundle_script_result: [],
-      exit_status: '',
-      id: 0,
-      output: '',
-      schedule_id: '',
-      schedule_name: '',
-      start_time: '',
-      updated_time: '',
-    },
-  });
-  const { form } = toRefs(state);
 
   const generateFormModel = () => {
     return {
@@ -243,8 +237,10 @@
   const { t } = useI18n();
   const renderData = ref<WorkflowVersionRecord[]>([]);
   const formModel = ref(generateFormModel());
+  const startProcessFormRef = ref();
   const cloneColumns = ref<Column[]>([]);
   const showColumns = ref<Column[]>([]);
+  const router = useRouter();
 
   const size = ref<SizeProps>('medium');
 
@@ -346,21 +342,10 @@
     fetchData();
   };
 
-  const handleViewExecDetailModal = (e: any, record: any) => {
-    if (record) {
-      form.value = { ...record };
-    }
-
-    visible.value = true;
-  };
-
   const handleStartProcessModal = (e: any, record: any) => {
     if (record) {
-      form.value = { ...record };
+      startProcessForm.value = { ...record, version_id: record.id };
     }
-
-    console.log('record:', record);
-
     startProcessModalVisible.value = true;
   };
 
@@ -435,23 +420,23 @@
   };
 
   const handleStartProcess = async () => {
-    // const ret = await dispatchJobRef.value.validate();
-    // if (ret) {
-    //   return false;
-    // }
-    // try {
-    //   await start({
-    //     schedule_type: dispatchJobForm.value.schedule_type as ScheduleType,
-    //     eid: dispatchJobForm.value.eid,
-    //     schedule_name: dispatchJobForm.value.schedule_name,
-    //     action: dispatchJobForm.value.action as JobAction,
-    //     is_sync: false,
-    //     endpoints: dispatchJobForm.value.endpoints,
-    //   });
-    // } catch (err) {
-    //   return false;
-    // }
-    // Message.success(t('form.submit.success'));
+    const ret = await startProcessFormRef.value.validate();
+    if (ret) {
+      return false;
+    }
+
+    console.log(startProcessForm);
+
+    try {
+      await startWorkflowProcess({
+        workflow_id: startProcessForm.value.workflow_id,
+        version_id: startProcessForm.value.version_id,
+        process_name: startProcessForm.value.process_name,
+      });
+    } catch (err) {
+      return false;
+    }
+    Message.success(t('form.submit.success'));
 
     // setTimeout(() => {
     //   router.push({

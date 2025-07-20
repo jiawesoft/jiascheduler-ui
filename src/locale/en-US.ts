@@ -185,6 +185,26 @@ const localeJob = {
   'job.scheduleName.placeholder': 'Please enter the name',
 };
 
+const localeWorkflow = {
+  'workflow.name': 'Name',
+  'workflow.info': 'Info',
+  'workflow.version': 'Version',
+  'workflow.save': 'Save Workflow',
+  'workflow.startProcess': 'Start Process',
+  'workflow.versionName': 'Version Name',
+  'workflow.versionInfo': 'Version Info',
+  'workflow.saveVersion': 'Save Version',
+  'workflow.basicInfo': 'Base Info',
+  'workflow.processDefine': 'Process Define',
+  'workflow.nodeConfig': 'Node Config',
+  'workflow.nodeConfig.name': 'Node Name',
+  'workflow.nodeConfig.id': 'Node ID',
+  'workflow.nodeConfig.id.tips': 'Node IDs must be globally unique.',
+  'workflow.nodeConfig.TaskType': 'Task Type',
+  'workflow.nodeConfig.TaskType.job': 'Job',
+  'workflow.nodeConfig.TaskType.custom': 'Custom',
+};
+
 const localeBase = {
   group: 'Group',
 };
