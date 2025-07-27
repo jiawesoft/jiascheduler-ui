@@ -178,7 +178,7 @@
       >
         <SelectInstance
           v-if="startProcessModalVisible"
-          v-model="startProcessForm.default_target"
+          v-model="startProcessForm.process_args.default_target"
         />
       </a-form-item>
     </a-form>
@@ -197,7 +197,7 @@
   import { useI18n } from 'vue-i18n';
   import { Message } from '@arco-design/web-vue';
   import { useRouter } from 'vue-router';
-
+  import { getFormatTimeVersion } from '@/utils/time';
   import {
     queryWorkflowVersionList,
     QueryWorkflowVersionListReq,
@@ -209,6 +209,7 @@
 
   const props = defineProps<{
     workflowId: number;
+    workflowName: string;
   }>();
 
   type SizeProps = 'mini' | 'small' | 'medium' | 'large';
@@ -216,12 +217,17 @@
   const visible = ref(false);
   const startProcessModalVisible = ref(false);
   const startProcessForm = ref<{
-    process_args?: WorkflowProcessArgs;
+    process_args: WorkflowProcessArgs;
     [key: string]: any;
   }>({
     workflow_id: 0,
     version_id: 0,
     process_name: '',
+    process_args: {
+      user_variables: {},
+      default_target: [],
+      nodes: [],
+    },
   });
 
   const theme = computed(() => {
@@ -344,8 +350,18 @@
 
   const handleStartProcessModal = (e: any, record: any) => {
     if (record) {
-      startProcessForm.value = { ...record, version_id: record.id };
+      startProcessForm.value = {
+        ...record,
+        version_id: record.id,
+        process_name: `${props.workflowName}-${getFormatTimeVersion()}`,
+        process_args: {
+          user_variables: {},
+          default_target: [],
+          nodes: [],
+        },
+      };
     }
+    console.log('record:', record);
     startProcessModalVisible.value = true;
   };
 
@@ -432,6 +448,7 @@
         workflow_id: startProcessForm.value.workflow_id,
         version_id: startProcessForm.value.version_id,
         process_name: startProcessForm.value.process_name,
+        process_args: startProcessForm.value.process_args,
       });
     } catch (err) {
       return false;

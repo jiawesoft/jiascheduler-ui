@@ -273,6 +273,7 @@
         <version-list
           v-if="workflowVersionListModalVisible"
           :workflow-id="workflowId"
+          :workflow-name="workflowName"
         />
       </a-drawer>
     </div>
@@ -326,6 +327,7 @@
   const tagIds = ref<number[]>([]);
   const router = useRouter();
   const workflowId = ref(0);
+  const workflowName = ref('');
 
   interface WorkflowForm {
     id: number;
@@ -555,6 +557,7 @@
   const handleOpenWorkflowVersionModal = (e: any, record: any) => {
     workflowVersionListModalVisible.value = true;
     workflowId.value = record.id;
+    workflowName.value = record.name;
   };
 
   const handleSaveWorkflow = async () => {

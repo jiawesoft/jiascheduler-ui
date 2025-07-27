@@ -1,5 +1,6 @@
 import axios from 'axios';
 import qs from 'query-string';
+import { endpoint } from './job';
 
 export interface Task {
   standard?: {
@@ -157,11 +158,11 @@ export interface WorkflowNodeArgs {
   };
 }
 export interface WorkflowProcessArgs {
-  default_target?: string[];
+  default_target: endpoint[];
   user_variables: {
     [key: string]: any;
   };
-  nodes?: WorkflowNodeArgs[];
+  nodes: WorkflowNodeArgs[];
 }
 
 export interface StartWorkflowProcessReq {
