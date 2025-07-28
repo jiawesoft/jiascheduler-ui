@@ -71,6 +71,7 @@ export interface TimerExpr {
 export interface endpoint {
   namespace: string;
   ip: string;
+  instance_id: string;
 }
 
 export interface DispatchJobReq {

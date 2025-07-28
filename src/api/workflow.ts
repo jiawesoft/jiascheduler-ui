@@ -158,7 +158,7 @@ export interface WorkflowNodeArgs {
   };
 }
 export interface WorkflowProcessArgs {
-  default_target: endpoint[];
+  default_target: string[];
   user_variables: {
     [key: string]: any;
   };

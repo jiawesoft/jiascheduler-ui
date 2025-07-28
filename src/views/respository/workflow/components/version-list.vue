@@ -178,7 +178,7 @@
       >
         <SelectInstance
           v-if="startProcessModalVisible"
-          v-model="startProcessForm.process_args.default_target"
+          v-model="defaultTarget"
         />
       </a-form-item>
     </a-form>
@@ -198,6 +198,7 @@
   import { Message } from '@arco-design/web-vue';
   import { useRouter } from 'vue-router';
   import { getFormatTimeVersion } from '@/utils/time';
+  import { endpoint } from '@/api/job';
   import {
     queryWorkflowVersionList,
     QueryWorkflowVersionListReq,
@@ -229,6 +230,8 @@
       nodes: [],
     },
   });
+
+  const defaultTarget = ref<endpoint[]>([]);
 
   const theme = computed(() => {
     return useAppStore().theme;
@@ -448,7 +451,12 @@
         workflow_id: startProcessForm.value.workflow_id,
         version_id: startProcessForm.value.version_id,
         process_name: startProcessForm.value.process_name,
-        process_args: startProcessForm.value.process_args,
+        process_args: {
+          ...startProcessForm.value.process_args,
+          default_target: defaultTarget.value.map((v) => {
+            return v.instance_id;
+          }),
+        },
       });
     } catch (err) {
       return false;
