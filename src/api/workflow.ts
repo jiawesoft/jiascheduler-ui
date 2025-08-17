@@ -2,9 +2,21 @@ import axios from 'axios';
 import qs from 'query-string';
 import { endpoint } from './job';
 
+export interface WorkflowJobArgs {
+  name: string;
+  val: string;
+  node_assignment?: {
+    source_node_id: string;
+    is_first_instance_result: boolean;
+    is_completed_result: boolean;
+  };
+}
+
 export interface Task {
   standard?: {
     eid: string;
+    formal_args: WorkflowJobArgs[];
+    target?: string[];
   };
   custom?: {
     work_dir?: string;
@@ -27,10 +39,25 @@ export interface NodeConfig {
   };
 }
 
+export interface ConditionVal {
+  val: string;
+  val_type: 'user_variables' | 'custom' | 'exit_code' | 'output';
+}
+
+export interface Condition {
+  rules: {
+    name: string;
+    left_val: ConditionVal;
+    op: string;
+    right_val: ConditionVal;
+    compute_type: string;
+  }[];
+  expr: string;
+}
 export interface EdgeConfig {
   id: string;
   name: string;
-  condition: string;
+  condition?: Condition;
   source_node_id: string;
   target_node_id: string;
   data: {

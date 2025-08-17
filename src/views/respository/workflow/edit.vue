@@ -339,7 +339,10 @@
     node_type: '',
     task_type: 'standard',
     task: {
-      standard: { eid: '' },
+      standard: {
+        eid: '',
+        formal_args: [],
+      },
     },
     data: {},
   });
@@ -580,7 +583,15 @@
         workflow_id: data.workflow_id,
         version: data.version,
         version_info: data.version_info,
-        nodes: data.nodes,
+        nodes: data.nodes.map((v) => {
+          if (v.task_type === 'standard') {
+            delete v.task.custom;
+          }
+          if (v.task_type === 'custom') {
+            delete v.task.standard;
+          }
+          return v;
+        }),
         edges: data.edges,
       });
     } catch (err) {
@@ -630,7 +641,15 @@
         id: data.id,
         name: data.name,
         info: data.info,
-        nodes: workflowVersionForm.value.nodes,
+        nodes: workflowVersionForm.value.nodes.map((v) => {
+          if (v.task_type === 'standard') {
+            delete v.task.custom;
+          }
+          if (v.task_type === 'custom') {
+            delete v.task.standard;
+          }
+          return v;
+        }),
         edges: workflowVersionForm.value.edges,
       });
     } catch (err) {
@@ -929,7 +948,7 @@
         switch (e.data.type) {
           case 'bpmn:serviceTask':
             taskType = 'standard';
-            task.standard = { eid: '' };
+            task.standard = { eid: '', formal_args: [] };
             break;
           case 'bpmn:startEvent':
           case 'bpmn:endEvent':
@@ -967,7 +986,6 @@
           name: e.data.text?.value || '',
           source_node_id: e.data.sourceNodeId,
           target_node_id: e.data.targetNodeId,
-          condition: '',
           data: e.data,
         });
       });
