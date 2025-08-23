@@ -98,6 +98,12 @@ const localeJob = {
   'job.completedCallback.triggerOn.error': '仅在执行失败时触发',
   'job.completedCallback.header.error': '请填写JSON格式数据',
   'job.completedCallback.url.error': '请填写正确的url地址',
+  'job.arg': '参数',
+  'job.arg.name': '参数名',
+  'job.arg.validator.name.required': '参数名必填',
+  'job.arg.val': '参数值',
+  'job.arg.defaultVal': '默认值',
+  'job.arg.info': '描述',
 
   'job.timer': '定时器',
   'job.saveTimer': '保存定时器',

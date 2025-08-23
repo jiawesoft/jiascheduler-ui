@@ -12,7 +12,7 @@ export interface JobRecord {
   eid?: string;
   job_type?: string;
   executor_id: number;
-  args?: { [key: string]: string };
+  args?: { [key: string]: string }[];
   info: string;
 }
 
@@ -82,6 +82,7 @@ export interface DispatchJobReq {
   restart_interval?: number;
   action: JobAction;
   is_sync: false;
+  args?: { [key: string]: any };
   endpoints: endpoint[];
 }
 export interface DispatchJobResp {
@@ -456,4 +457,10 @@ export function deleteBundleScript(data: DeleteBundleScriptReq) {
     '/api/job/delete-bundle-script',
     data
   );
+}
+
+export interface JobArg {
+  name: string;
+  val: string;
+  info: string;
 }

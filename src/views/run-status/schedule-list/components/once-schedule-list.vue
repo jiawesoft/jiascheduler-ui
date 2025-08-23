@@ -282,6 +282,7 @@
       action: 'string',
       code: '',
       job_name: '',
+      actual_args: {},
       dispatch_data: 'string',
       snapshot_data: 'string',
       created_user: 'string',

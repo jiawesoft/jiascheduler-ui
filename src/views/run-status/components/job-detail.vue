@@ -101,13 +101,13 @@
         />
       </a-form-item>
       <a-form-item
-        field="upload_file"
-        :label="$t('job.upload_file')"
-        :tooltip="$t('job.upload_file.tooltip')"
         v-if="
           $props.value.schedule_type == 'job' ||
           $props.value.schedule_type == 'timer'
         "
+        field="upload_file"
+        :label="$t('job.upload_file')"
+        :tooltip="$t('job.upload_file.tooltip')"
       >
         <a-space direction="vertical" :style="{ width: '100%' }">
           <a-upload

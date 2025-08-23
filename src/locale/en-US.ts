@@ -102,6 +102,11 @@ const localeJob = {
   'job.completedCallback.header.error':
     'Please fill in the data in JSON format',
   'job.completedCallback.url.error': 'Please enter a valid URL address',
+  'job.arg.name': 'Name',
+  'job.arg.validator.name.required': 'Job argument name required',
+  'job.arg.val': 'Value',
+  'job.arg.defaultVal': 'Default Value',
+  'job.arg.info': 'Description',
 
   'job.timer': 'Timer',
   'job.saveTimer': 'Save Timer',
