@@ -74,7 +74,7 @@
         v-for="(val, index) in $props.value.bundle_script"
         :key="index"
         :field="`bundle_script[${index}]`"
-        :label="$t('job.task') + '-' + (index + 1)"
+        :label="$t('job.script') + '-' + (index + 1)"
         validate-trigger="blur"
         :tooltip="$t('jobBundleScript.condExpr.tooltips')"
       >

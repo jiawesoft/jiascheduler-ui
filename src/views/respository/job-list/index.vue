@@ -310,7 +310,7 @@
                 v-for="(val, index) in jobForm.bundle_script"
                 :key="index"
                 :field="`bundle_script[${index}]`"
-                :label="$t('job.task') + '-' + (index + 1)"
+                :label="$t('job.script') + '-' + (index + 1)"
                 validate-trigger="blur"
                 :rules="bundleScriptValidateRules"
                 :tooltip="$t('jobBundleScript.condExpr.tooltips')"

@@ -69,7 +69,7 @@ const localeJob = {
   'job.scheduleType.once': '单次',
   'job.scheduleType.timer': '定时',
   'job.scheduleType.daemon': '常驻',
-  'job.task': '任务',
+  'job.script': '脚本',
   'job.schedule': '作业调度',
   'job.schedule.name': '调度名称',
   'job.schedule.detail': '调度详情',

@@ -68,7 +68,7 @@ const localeJob = {
   'job.scheduleType.once': 'Once',
   'job.scheduleType.timer': 'Timer',
   'job.scheduleType.daemon': 'Daemon',
-  'job.task': 'Task',
+  'job.script': 'Script',
   'job.schedule': 'Job Schedule',
   'job.schedule.name': 'Schedule Name',
   'job.schedule.detail': 'Schedule Details',
