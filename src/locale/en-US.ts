@@ -51,6 +51,7 @@ const localeJob = {
   'menu.runStatus.runList': 'Run List',
   'menu.runStatus.scheduleList': 'Schedule List',
   'menu.runStatus.execList': 'Execution List',
+  'menu.runStatus.processList': 'Process List',
 
   'job': 'Job',
   'job.eid': 'Execution ID',

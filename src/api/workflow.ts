@@ -1,6 +1,5 @@
 import axios from 'axios';
 import qs from 'query-string';
-import { endpoint } from './job';
 
 export interface WorkflowJobArgs {
   name: string;
@@ -208,4 +207,37 @@ export function startWorkflowProcess(data: StartWorkflowProcessReq) {
     '/api/workflow/start-process',
     data
   );
+}
+
+export interface QueryWorkflowProcessListReq {
+  process_name?: string;
+  workflow_id: number;
+  default_id?: number;
+  tag_ids?: number[];
+  page: number;
+  page_size: number;
+}
+
+export interface WorkflowProcessRecord {
+  process_id: string;
+  process_name: string;
+  created_user: string;
+  current_run_id: string;
+  current_node_id: string;
+  current_node_status: string;
+  process_status: string;
+}
+
+export interface QueryWorkflowProcessListResp {
+  list: WorkflowProcessRecord[];
+  total: number;
+}
+
+export function queryWorkflowProcessList(params: QueryWorkflowProcessListReq) {
+  return axios.get<QueryWorkflowProcessListResp>('/api/workflow/process/list', {
+    params,
+    paramsSerializer: (obj) => {
+      return qs.stringify(obj);
+    },
+  });
 }

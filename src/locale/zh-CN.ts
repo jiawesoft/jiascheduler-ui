@@ -52,6 +52,7 @@ const localeJob = {
   'menu.runStatus.runList': '运行列表',
   'menu.runStatus.scheduleList': '调度记录',
   'menu.runStatus.execList': '执行记录',
+  'menu.runStatus.processList': '流程记录',
 
   'job': '作业',
   'job.eid': '执行id',
@@ -202,6 +203,10 @@ const localeWorkflow = {
   'workflow.nodeConfig.TaskType': '任务类型',
   'workflow.nodeConfig.TaskType.job': '作业',
   'workflow.nodeConfig.TaskType.custom': '自定义',
+  'workflow.processName': '流程名',
+  'workflow.processStatus': '状态',
+  'workflow.nodeId': '节点名',
+  'workflow.nodeStatus': '节点状态',
 };
 
 const localeBase = {
