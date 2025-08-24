@@ -293,6 +293,7 @@
     dispatchJob,
     endpoint,
     JobAction,
+    JobRecord,
     JobSupervisorRecord,
     QueryJobReq,
     queryJobSupervisorList,
@@ -537,9 +538,9 @@
     fetchData();
   };
 
-  const changeJob = (str: string) => {
-    if (str && !jobSupervisorForm.value.name) {
-      jobSupervisorForm.value.name = str;
+  const changeJob = (currentJob: JobRecord) => {
+    if (currentJob && !jobSupervisorForm.value.name) {
+      jobSupervisorForm.value.name = currentJob?.name || '';
     }
   };
 

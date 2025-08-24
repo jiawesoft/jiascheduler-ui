@@ -58,9 +58,8 @@
   };
 
   const changeJob = (val: any) => {
-    const currentName = jobOptions.value.find((item) => item.eid === val);
-    const jobName = currentName?.name || '';
-    emit('changeJob', jobName);
+    const currentJob = jobOptions.value.find((item) => item.eid === val);
+    emit('changeJob', currentJob);
   };
 
   fetchData({ default_eid: props.eid, job_type: props.jobType });

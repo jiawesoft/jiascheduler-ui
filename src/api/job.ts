@@ -1,6 +1,12 @@
 import axios from 'axios';
 import qs from 'query-string';
 
+export interface JobArg {
+  name: string;
+  val: string;
+  info: string;
+}
+
 export interface JobRecord {
   id?: number;
   name: string;
@@ -12,7 +18,7 @@ export interface JobRecord {
   eid?: string;
   job_type?: string;
   executor_id: number;
-  args?: { [key: string]: string }[];
+  args?: JobArg[];
   info: string;
 }
 
@@ -280,6 +286,7 @@ export interface JobTimerRecord {
   id?: number;
   name: string;
   job_name: string;
+  job_args: JobArg[];
   code: string;
   eid: string;
   info: string;
@@ -457,10 +464,4 @@ export function deleteBundleScript(data: DeleteBundleScriptReq) {
     '/api/job/delete-bundle-script',
     data
   );
-}
-
-export interface JobArg {
-  name: string;
-  val: string;
-  info: string;
 }

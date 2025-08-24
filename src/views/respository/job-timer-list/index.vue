@@ -289,6 +289,7 @@
               v-if="jobTimerModalVisible"
               v-model:eid="jobTimerForm.eid"
               v-model:job-type="formModel.job_type"
+              @change-job="changeJob"
             />
           </a-form-item>
         </a-form>
@@ -323,7 +324,15 @@
             v-if="dispatchJobTimerModalVisible"
             v-model:eid="dispatchJobTimerForm.eid"
             v-model:job-type="dispatchJobTimerForm.job_type"
+            @change-timer="changeTimer"
           />
+        </a-form-item>
+        <a-form-item
+          v-if="dispatchJobTimerForm.args"
+          field="args"
+          :label="$t('job.arg')"
+        >
+          <job-args :args="dispatchJobTimerForm.args" />
         </a-form-item>
         <a-form-item
           field="endpoints"
@@ -346,6 +355,8 @@
     dispatchJob,
     endpoint,
     JobAction,
+    JobArg,
+    JobRecord,
     JobTimerRecord,
     QueryJobReq,
     queryJobTimerList,
@@ -365,6 +376,7 @@
 
   import { Message } from '@arco-design/web-vue';
 
+  import JobArgs from '@/components/job-args/index.vue';
   import TableTagItem from '@/components/table-tag-item/index.vue';
   import TagItem from '@/components/tag-item/index.vue';
   import { genVersionFromTime } from '@/utils/time';
@@ -395,6 +407,7 @@
     eid: string;
     job_type: string;
     schedule_name: string;
+    args: JobArg[];
     namespace: string;
     timer_expr: TimerExpr;
     schedule_type: string;
@@ -446,6 +459,7 @@
       namespace: 'default',
       job_type: formModel.value.job_type,
       timer_expr: defaultTimerExpr,
+      args: [],
       schedule_type: 'once',
       action: 'exec',
       is_sync: false,
@@ -620,9 +634,15 @@
     fetchData();
   };
 
-  const changeJob = (str: string) => {
-    if (str && !jobTimerForm.value.name) {
-      jobTimerForm.value.name = str;
+  const changeJob = (v: JobRecord) => {
+    if (v && !jobTimerForm.value.name) {
+      jobTimerForm.value.name = v?.name || '';
+    }
+  };
+
+  const changeTimer = (v: JobTimerRecord) => {
+    if (v && v.job_args) {
+      dispatchJobTimerForm.value.args = v.job_args;
     }
   };
 
@@ -695,6 +715,13 @@
     if (ret) {
       return false;
     }
+    const args = {};
+    if (dispatchJobTimerForm.value.args) {
+      dispatchJobTimerForm.value.args.forEach((v) => {
+        args[v.name] = v.val;
+      });
+    }
+
     try {
       await dispatchJob({
         schedule_type: dispatchJobTimerForm.value.schedule_type as ScheduleType,
@@ -702,6 +729,7 @@
         schedule_name: dispatchJobTimerForm.value.schedule_name,
         timer_expr: dispatchJobTimerForm.value.timer_expr,
         action: dispatchJobTimerForm.value.action as JobAction,
+        args,
         is_sync: false,
         endpoints: dispatchJobTimerForm.value.endpoints,
       });
