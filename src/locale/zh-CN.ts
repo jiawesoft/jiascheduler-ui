@@ -70,6 +70,7 @@ const localeJob = {
   'job.scheduleType.once': '单次',
   'job.scheduleType.timer': '定时',
   'job.scheduleType.daemon': '常驻',
+  'job.scheduleType.workflow': '工作流',
   'job.script': '脚本',
   'job.schedule': '作业调度',
   'job.schedule.name': '调度名称',
@@ -205,8 +206,9 @@ const localeWorkflow = {
   'workflow.nodeConfig.TaskType.custom': '自定义',
   'workflow.processName': '流程名',
   'workflow.processStatus': '状态',
-  'workflow.nodeId': '节点名',
+  'workflow.node': '节点',
   'workflow.nodeStatus': '节点状态',
+  'workflow.process.detail': '流程详情',
 };
 
 const localeBase = {

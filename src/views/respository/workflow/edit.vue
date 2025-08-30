@@ -742,7 +742,7 @@
 
       lf.value.register(CustomCurved);
 
-      lf.value?.setTheme(colorfulTheme as any);
+      // lf.value?.setTheme(colorfulTheme as any);
 
       (lf.value?.extension.menu as any).addMenuConfig({
         nodeMenu: [

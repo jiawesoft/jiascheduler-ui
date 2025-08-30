@@ -2,7 +2,7 @@
   <a-row v-if="!$props.disableSearch">
     <a-col flex="auto">
       <a-form
-        key="search-once-exec-list"
+        key="search-timer-exec-list"
         :model="formModel"
         :label-col-props="{ span: 6 }"
         :auto-label-width="true"
@@ -11,6 +11,19 @@
         @submit="search"
       >
         <a-row :gutter="5">
+          <a-col :span="5" v-if="!$props.hideJobTypeSwitch">
+            <a-form-item field="job_type" :label="$t('job.type')">
+              <a-radio-group
+                v-model="formModel.job_type"
+                type="button"
+                @change="search"
+              >
+                <a-radio value="default">{{ $t('job.type.default') }}</a-radio>
+                <a-radio value="bundle">{{ $t('job.type.bundle') }}</a-radio>
+              </a-radio-group>
+            </a-form-item>
+          </a-col>
+
           <a-col :span="7">
             <a-form-item field="schedule_name" :label="$t('job.scheduleName')">
               <a-input
@@ -61,7 +74,7 @@
     >
       <a-popconfirm
         :content="$t('job.action.confirm.clear.records')"
-        @before-ok="handleClearProcessHistory($event)"
+        @before-ok="handleClearExecHistory($event)"
       >
         <a-button type="primary" size="mini" plain>
           {{ $t('job.clear.records') }}
@@ -73,9 +86,9 @@
       style="display: flex; align-items: center; justify-content: end"
     >
       <a-tooltip :content="$t('columns.actions.refresh')">
-        <div class="action-icon" @click="search"
-          ><icon-refresh size="18"
-        /></div>
+        <div class="action-icon" @click="search">
+          <icon-refresh size="18" />
+        </div>
       </a-tooltip>
       <a-dropdown @select="handleSelectDensity">
         <a-tooltip :content="$t('columns.actions.density')">
@@ -131,6 +144,56 @@
   </a-row>
 
   <a-table
+    v-if="jobType == 'bundle' && scheduleId"
+    row-key="id"
+    :loading="loading"
+    :pagination="pagination"
+    :columns="(cloneColumns as TableColumnData[])"
+    :data="renderData"
+    :size="size"
+    :scrollbar="true"
+    :scroll="scroll"
+    :bordered="false"
+    @page-change="onPageChange"
+  >
+    <template #index="{ rowIndex }">
+      {{ rowIndex + 1 + (pagination.page - 1) * pagination.pageSize }}
+    </template>
+
+    <template #tags="{ record }">
+      <table-tag-item
+        :tag-list="record.tags"
+        :resource-id="record.id"
+        :resource-type="resourceType"
+        @refresh-page="refreshPage"
+      ></table-tag-item>
+    </template>
+
+    <template #validate="{ column, record }">
+      <a-tag
+        v-if="
+          record.bundle_script_result[getBundleScriptIndex(column.dataIndex)]
+            .result === true
+        "
+        color="green"
+        ><icon-check
+      /></a-tag>
+      <a-tag v-else color="red"><icon-close /></a-tag>
+    </template>
+
+    <template #operations="{ record }">
+      <a-button
+        type="text"
+        size="small"
+        @click="handleViewExecDetailModal($event, record)"
+      >
+        {{ $t('operations.view') }}
+      </a-button>
+    </template>
+  </a-table>
+
+  <a-table
+    v-else
     row-key="id"
     :loading="loading"
     :pagination="pagination"
@@ -157,7 +220,7 @@
       <a-button
         type="text"
         size="small"
-        @click="handleViewProcessDetailModal($event, record)"
+        @click="handleViewExecDetailModal($event, record)"
       >
         {{ $t('operations.view') }}
       </a-button>
@@ -180,25 +243,85 @@
     </template>
   </a-table>
 
-  <a-drawer
-    width="61.8%"
+  <a-modal
     v-model:visible="visible"
-    placement="right"
-    @cancel="visible = false"
-    unmountOnClose
+    title-align="start"
+    style="width: auto"
+    :draggable="true"
+    width="60%"
+    hide-cancel
+    @cancel="handleCancel"
   >
-    <template #title>{{ $t('workflow.process.detail') }}</template>
-    <process-detail
-      v-if="selectedProcess.process_id"
-      :process-id="selectedProcess.process_id"
-    />
-  </a-drawer>
+    <template #title>{{ $t('job.runDetail') }}</template>
+    <a-form :model="form" :auto-label-width="true">
+      <a-form-item field="schedule_name" :label="$t('job.scheduleName')">
+        {{ form.schedule_name }}
+      </a-form-item>
+      <a-form-item field="bind_ip" :label="$t('job.bindIp')">
+        {{ form.bind_ip }}
+      </a-form-item>
+      <a-form-item field="start_time" :label="$t('job.startTime')">
+        {{ form.start_time }}
+      </a-form-item>
+      <a-form-item field="end_time" :label="$t('job.endTime')">
+        {{ form.end_time }}
+      </a-form-item>
+      <a-form-item
+        v-if="jobType == 'default' || formModel.job_type == 'default'"
+        field="exit_status"
+        :label="$t('job.exitStatus')"
+      >
+        {{ form.exit_status }}
+      </a-form-item>
+      <a-form-item
+        v-if="jobType == 'default' || formModel.job_type == 'default'"
+        field="output"
+        :label="$t('job.output')"
+      >
+        <output-area :output="form.output" v-if="visible" />
+        <!-- <v-ace-editor
+          v-if="visible"
+          v-model:value="form.output"
+          :style="{ height: '300px', width: '100%' }"
+          lang="text"
+          :print-margin="false"
+          :theme="theme === 'dark' ? 'chaos' : 'chrome'"
+        /> -->
+      </a-form-item>
+      <a-form-item
+        v-if="jobType == 'bundle' || formModel.job_type == 'bundle'"
+        label="批执行结果"
+      >
+        <a-table
+          :columns="bundleExecResultCols"
+          :data="form.bundle_script_result"
+        >
+          <template #index="{ rowIndex }">
+            {{ rowIndex + 1 + (pagination.page - 1) * pagination.pageSize }}
+          </template>
+          <template #checkResult="{ record }">
+            <a-tag v-if="record.result === true" color="green">
+              <icon-check />
+            </a-tag>
+            <a-tag v-else color="red"><icon-close /></a-tag>
+          </template>
+        </a-table>
+      </a-form-item>
+    </a-form>
+  </a-modal>
 </template>
 
 <script lang="ts" setup>
-  import { deleteExeHistory } from '@/api/job';
+  import {
+    deleteExeHistory,
+    ExecRecord,
+    queryExecList,
+    QueryExecListReq,
+  } from '@/api/job';
   import { queryCountResource, TagRecord } from '@/api/tag';
-
+  import TableTagItem from '@/components/table-tag-item/index.vue';
+  import TagItem from '@/components/tag-item/index.vue';
+  import OutputArea from '@/components/output-area/index.vue';
   import useLoading from '@/hooks/loading';
   import { useAppStore } from '@/store';
   import { Pagination } from '@/types/global';
@@ -208,14 +331,10 @@
   import Sortable from 'sortablejs';
   import { computed, nextTick, reactive, ref, toRefs, watch } from 'vue';
   import { useI18n } from 'vue-i18n';
-  import {
-    queryWorkflowProcessList,
-    QueryWorkflowProcessListReq,
-    WorkflowProcessRecord,
-  } from '@/api/workflow';
-  import TableTagItem from '@/components/table-tag-item/index.vue';
-  import TagItem from '@/components/tag-item/index.vue';
-  import ProcessDetail from './process-detail.vue';
+  // import { VAceEditor } from 'vue3-ace-editor';
+  // import 'ace-builds/src-noconflict/mode-text';
+  // import 'ace-builds/src-noconflict/theme-chaos';
+  // import 'ace-builds/src-noconflict/theme-chrome';
 
   const props = defineProps<{
     scheduleId?: string;
@@ -242,29 +361,35 @@
   });
 
   const state = reactive({
-    selectedProcess: {
-      process_id: '',
-      process_name: '',
+    form: {
+      bind_ip: '',
+      created_time: '',
       created_user: '',
-      current_run_id: '',
-      current_node_id: '',
-      current_node_status: '',
-      process_status: '',
+      end_time: '',
+      exit_code: 0,
+      bundle_script_result: [],
+      exit_status: '',
+      id: 0,
+      output: '',
+      schedule_id: '',
+      schedule_name: '',
+      start_time: '',
+      updated_time: '',
     },
   });
-  const { selectedProcess } = toRefs(state);
+  const { form } = toRefs(state);
 
   const generateFormModel = () => {
     return {
       schedule_name: '',
       job_type: props.jobType || 'default',
-      schedule_type: 'once',
+      schedule_type: 'timer',
       start_time_range: [],
     };
   };
   const { loading, setLoading } = useLoading(true);
   const { t } = useI18n();
-  const renderData = ref<WorkflowProcessRecord[]>([]);
+  const renderData = ref<ExecRecord[]>([]);
   const formModel = ref(generateFormModel());
   const cloneColumns = ref<Column[]>([]);
   const showColumns = ref<Column[]>([]);
@@ -297,74 +422,240 @@
       value: 'large',
     },
   ]);
-  const columns = computed<TableColumnData[]>(() => [
+  const columns = computed<TableColumnData[]>(() => {
+    if (formModel.value.job_type === 'bundle' && props.scheduleId) {
+      const cols: TableColumnData[] = [
+        {
+          title: t('columns.index'),
+          dataIndex: 'index',
+          width: 30,
+          fixed: 'left',
+          slotName: 'index',
+        },
+        // {
+        //   title: t('job.scheduleId'),
+        //   dataIndex: 'schedule_id',
+        //   ellipsis: true,
+        //   fixed: 'left',
+        //   width: 130,
+        //   tooltip: true,
+        // },
+        {
+          title: t('job.scheduleName'),
+          dataIndex: 'schedule_name',
+          fixed: 'left',
+          ellipsis: true,
+          width: 100,
+        },
+        {
+          title: t('job.name'),
+          dataIndex: 'job_name',
+          fixed: 'left',
+          // ellipsis: true,
+          width: 100,
+        },
+        {
+          title: t('job.bindIp'),
+          fixed: 'left',
+          dataIndex: 'bind_ip',
+          width: 100,
+        },
+        {
+          title: t('team.name'),
+          dataIndex: 'team_name',
+        },
+      ];
+
+      if (
+        renderData.value.length > 0 &&
+        renderData.value[0].job_type === 'bundle'
+      ) {
+        renderData.value[0].bundle_script_result.forEach((val, i) => {
+          if (cols.length > 10) {
+            scroll.value.x = 2000;
+          } else {
+            scroll.value.x = 1000;
+          }
+
+          cols.push({
+            title: val.name,
+            ellipsis: true,
+            tooltip: true,
+            children: [
+              {
+                title: '输出',
+                dataIndex: `bundle_script_result[${i}].stdout`,
+              },
+              {
+                title: '校验',
+                slotName: `validate`,
+                dataIndex: `bundle_script_result[${i}].result`,
+              },
+            ],
+          });
+        });
+      }
+
+      cols.push({
+        title: t('operations'),
+        dataIndex: 'operations',
+        fixed: 'right',
+        width: 100,
+        slotName: 'operations',
+      });
+
+      return cols;
+    }
+
+    return [
+      {
+        title: t('columns.index'),
+        dataIndex: 'index',
+        width: 30,
+        slotName: 'index',
+        fixed: 'left',
+      },
+
+      {
+        title: t('job.name'),
+        dataIndex: 'job_name',
+        // ellipsis: true,
+        width: 150,
+        // tooltip: true,
+        fixed: 'left',
+      },
+      {
+        title: t('job.exitStatus'),
+        dataIndex: 'exit_status',
+        ellipsis: true,
+        slotName: 'exitStatus',
+        width: 120,
+        fixed: 'left',
+      },
+      {
+        title: t('job.scheduleName'),
+        dataIndex: 'schedule_name',
+        // ellipsis: true,
+        width: 150,
+        // tooltip: true,
+      },
+
+      {
+        title: t('job.bindIp'),
+        dataIndex: 'bind_ip',
+        ellipsis: true,
+        width: 150,
+      },
+
+      {
+        title: t('tag.name'),
+        dataIndex: 'tags',
+        slotName: 'tags',
+        width: 150,
+      },
+
+      {
+        title: t('job.startTime'),
+        dataIndex: 'start_time',
+        ellipsis: true,
+        width: 170,
+      },
+      {
+        title: t('job.endTime'),
+        dataIndex: 'end_time',
+        ellipsis: true,
+        width: 170,
+      },
+      {
+        title: t('team.name'),
+        dataIndex: 'team_name',
+        width: 120,
+      },
+      {
+        title: t('columns.createdUser'),
+        dataIndex: 'created_user',
+        width: 120,
+      },
+      {
+        title: t('operations'),
+        dataIndex: 'operations',
+        slotName: 'operations',
+        width: 120,
+        fixed: 'right',
+      },
+    ];
+  });
+
+  const getBundleScriptIndex = (dataIndex: string): number => {
+    return Number(
+      dataIndex.replace('bundle_script_result[', '').replace('].result', '')
+    );
+  };
+
+  const bundleExecResultCols = computed<TableColumnData[]>(() => [
     {
       title: t('columns.index'),
       dataIndex: 'index',
       width: 30,
       slotName: 'index',
-      fixed: 'left',
     },
-
     {
-      title: t('workflow.processName'),
-      dataIndex: 'process_name',
+      title: '名称',
+      dataIndex: 'name',
       ellipsis: true,
-      width: 150,
       tooltip: true,
-      fixed: 'left',
-    },
-    {
-      title: t('workflow.processStatus'),
-      dataIndex: 'process_status',
-      ellipsis: true,
       width: 150,
-      fixed: 'left',
-    },
-    {
-      title: t('workflow.node'),
-      dataIndex: 'current_node_name',
-      width: 150,
-    },
-    {
-      title: t('workflow.nodeStatus'),
-      dataIndex: 'current_node_status',
-      width: 170,
-    },
-    {
-      title: t('tag.name'),
-      dataIndex: 'tags',
-      slotName: 'tags',
-      width: 120,
     },
 
     {
-      title: t('team.name'),
-      dataIndex: 'team_name',
+      title: 'stdout',
+      dataIndex: 'stdout',
+      ellipsis: true,
+      tooltip: true,
+      width: 150,
+    },
+    {
+      title: '校验结果',
+      dataIndex: 'result',
+      slotName: 'checkResult',
       width: 120,
     },
     {
-      title: t('columns.createdUser'),
-      dataIndex: 'created_user',
+      title: 'exit code',
+      dataIndex: 'exit_code',
       width: 120,
     },
     {
-      title: t('operations'),
-      dataIndex: 'operations',
-      slotName: 'operations',
-      width: 120,
-      fixed: 'right',
+      title: 'exit status',
+      dataIndex: 'exit_status',
+      ellipsis: true,
+      tooltip: true,
+      width: 150,
+    },
+    {
+      title: 'stderr',
+      dataIndex: 'stderr',
+      ellipsis: true,
+      tooltip: true,
+      width: 150,
+    },
+    {
+      title: '校验异常',
+      dataIndex: 'eval_err',
+      ellipsis: true,
+      tooltip: true,
+      width: 150,
     },
   ]);
 
   const tagList = ref<TagRecord[]>([]);
-  const resourceType = 'workflow';
+  const resourceType = ref('job');
   const tagIds = ref<number[]>([]);
 
   const initTagList = async () => {
     try {
       const { data } = await queryCountResource({
-        resource_type: resourceType,
+        resource_type: resourceType.value,
       });
       tagList.value = data.list;
     } catch (err) {
@@ -372,17 +663,23 @@
     }
   };
   initTagList();
+
   const fetchData = async (
-    params: QueryWorkflowProcessListReq = {
+    params: QueryExecListReq = {
       page: 1,
       page_size: 20,
+      schedule_id: props.scheduleId,
+      schedule_type: formModel.value.schedule_type,
+      eid: props.eid,
+      job_type: formModel.value.job_type,
       tag_ids: tagIds.value,
-      workflow_id: 0,
+      bind_ip: props.bindIp,
+      bind_namespace: props.bindNamespace,
     }
   ) => {
     setLoading(true);
     try {
-      const { data } = await queryWorkflowProcessList(params);
+      const { data } = await queryExecList(params);
       renderData.value = data.list;
       pagination.page = params.page;
       pagination.total = data.total;
@@ -404,10 +701,11 @@
     fetchData();
   };
 
-  const handleViewProcessDetailModal = (e: any, record: any) => {
+  const handleViewExecDetailModal = (e: any, record: any) => {
     if (record) {
-      selectedProcess.value = { ...record };
+      form.value = { ...record };
     }
+
     visible.value = true;
   };
 
@@ -420,18 +718,26 @@
       page: basePagination.page,
       page_size: basePagination.pageSize,
       ...formModel.value,
-      workflow_id: 0,
+      schedule_id: props.scheduleId,
+      schedule_type: formModel.value.schedule_type,
+      job_type: formModel.value.job_type,
+      eid: props.eid,
+      bind_ip: props.bindIp,
       tag_ids: tagIds.value,
-    });
+    } as unknown as QueryExecListReq);
   };
   const onPageChange = (current: number) => {
     fetchData({
       page_size: pagination.pageSize,
       page: current,
       ...formModel.value,
-      workflow_id: 0,
+      schedule_id: props.scheduleId,
+      schedule_type: formModel.value.schedule_type,
+      eid: props.eid,
+      job_type: formModel.value.job_type,
+      bind_ip: props.bindIp,
       tag_ids: tagIds.value,
-    });
+    } as unknown as QueryExecListReq);
   };
 
   fetchData();
@@ -454,11 +760,11 @@
     cloneColumns.value = showColumns.value.filter((item) => item.checked);
   };
 
-  const handleClearProcessHistory = async (e: any) => {
+  const handleClearExecHistory = async (e: any) => {
     try {
       await deleteExeHistory({
         schedule_id: props.scheduleId,
-        schedule_type: 'once',
+        schedule_type: 'timer',
         eid: props.eid,
         bind_ip: props.bindIp,
       });
@@ -515,7 +821,7 @@
 
 <script lang="ts">
   export default {
-    name: 'WorkflowProcessList',
+    name: 'ExecList',
   };
 </script>
 
@@ -523,6 +829,7 @@
   .container {
     padding: 0 20px 20px 20px;
   }
+
   :deep(.arco-table-th) {
     &:last-child {
       .arco-table-th-item-title {
@@ -530,18 +837,22 @@
       }
     }
   }
+
   .action-icon {
     margin-left: 12px;
     cursor: pointer;
   }
+
   .active {
     color: #0960bd;
     background-color: #e3f4fc;
   }
+
   .setting {
     display: flex;
     align-items: center;
     width: 200px;
+
     .title {
       margin-left: 12px;
       cursor: pointer;

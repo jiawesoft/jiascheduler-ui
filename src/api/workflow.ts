@@ -241,3 +241,79 @@ export function queryWorkflowProcessList(params: QueryWorkflowProcessListReq) {
     },
   });
 }
+
+export interface getWorkflowProcessDetailReq {
+  process_id: string;
+}
+
+export interface NodeTask {
+  id: number;
+  process_id: string;
+  node_id: string;
+  run_id: string;
+  task_status: string;
+  bind_ip: string;
+  exit_code: number;
+  exit_status: string;
+  output: string;
+  restart_num: number;
+  dispatch_result: null;
+  created_user: string;
+  created_time: string;
+  updated_time: string;
+}
+export interface CompletedNode {
+  base: {
+    id: number;
+    process_id: string;
+    run_id: string;
+    node_id: string;
+    node_status: string;
+    created_user: string;
+    created_time: string;
+    updated_time: string;
+  };
+  tasks: NodeTask[];
+}
+
+export interface CompletedEdge {
+  base: {
+    id: number;
+    process_id: string;
+    run_id: string;
+    edge_id: string;
+    edge_type: string;
+    eval_val: string;
+    props: any;
+    source_node_id: string;
+    target_node_id: string;
+    created_user: string;
+    created_time: string;
+  };
+}
+
+export interface getWorkflowProcessDetailResp {
+  process_id: string;
+  process_name: string;
+  created_user: string;
+  current_run_id: string;
+  current_node_id: string;
+  current_node_status: string;
+  process_status: string;
+  process_args: any;
+  completed_nodes: CompletedNode[];
+  completed_edges: CompletedEdge[];
+  origin_nodes: NodeConfig[];
+  origin_edges: EdgeConfig[];
+}
+export function getWorkflowProcessDetail(params: getWorkflowProcessDetailReq) {
+  return axios.get<getWorkflowProcessDetailResp>(
+    '/api/workflow/process/detail',
+    {
+      params,
+      paramsSerializer: (obj) => {
+        return qs.stringify(obj);
+      },
+    }
+  );
+}

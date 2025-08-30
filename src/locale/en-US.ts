@@ -209,6 +209,11 @@ const localeWorkflow = {
   'workflow.nodeConfig.TaskType': 'Task Type',
   'workflow.nodeConfig.TaskType.job': 'Job',
   'workflow.nodeConfig.TaskType.custom': 'Custom',
+  'workflow.processName': 'Process Name',
+  'workflow.processStatus': 'Process Status',
+  'workflow.node': 'Node',
+  'workflow.nodeStatus': 'Node Status',
+  'workflow.process.detail': '流程详情',
 };
 
 const localeBase = {

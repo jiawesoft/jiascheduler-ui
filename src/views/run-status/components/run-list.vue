@@ -9,6 +9,9 @@
     <a-tab-pane key="daemon" :title="$t('job.scheduleType.daemon')">
       <daemon-run-list v-if="currentTab == 'daemon'" />
     </a-tab-pane>
+    <a-tab-pane key="workflow" :title="$t('job.scheduleType.workflow')">
+      <workflow-run-list v-if="currentTab == 'workflow'" />
+    </a-tab-pane>
   </a-tabs>
 </template>
 
@@ -19,13 +22,14 @@
   import OnceRunList from './once-run-list.vue';
   import TimerRunList from './timer-run-list.vue';
   import DaemonRunList from './daemon-run-list.vue';
+  import WorkflowRunList from './workflow-run-list.vue';
 
   const router = useRouter();
   const route = useRoute();
   const { t } = useI18n();
 
   const props = defineProps<{
-    scheduleType?: 'flow' | 'timer' | 'once' | 'daemon';
+    scheduleType?: 'workflow' | 'timer' | 'once' | 'daemon';
     jobType?: string;
   }>();
 
