@@ -155,7 +155,7 @@
               <a-space>
                 <a-button
                   size="mini"
-                  @click="router.push('workflow/edit?id=' + record.id)"
+                  @click="router.push('define/edit?id=' + record.id)"
                 >
                   {{ $t('operations.edit') }}
                 </a-button>
@@ -322,7 +322,6 @@
   const workflowVersionListModalVisible = ref(false);
   const saveWorkflowRef = ref();
   const dispatchJobRef = ref();
-  const workflowVersionListRef = ref();
   const tagList = ref<TagRecord[]>([]);
   const tagIds = ref<number[]>([]);
   const router = useRouter();
@@ -603,10 +602,7 @@
 
     setTimeout(() => {
       router.push({
-        path: '/run-status/run-list',
-        query: {
-          scheduleType: 'workflow',
-        },
+        path: '/workflow/process',
       });
     }, 200);
 

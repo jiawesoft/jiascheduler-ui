@@ -187,6 +187,7 @@ const localeJob = {
 const localeWorkflow = {
   'menu.workflow': '工作流',
   'menu.workflow.define': '流程定义',
+  'menu.workflow.edit': '编辑流程',
 
   'workflow.name': '流程名',
   'workflow.info': '描述',
@@ -206,7 +207,7 @@ const localeWorkflow = {
   'workflow.nodeConfig.TaskType.job': '作业',
   'workflow.nodeConfig.TaskType.custom': '自定义',
   'workflow.processName': '流程名',
-  'workflow.processStatus': '状态',
+  'workflow.processStatus': '流程状态',
   'workflow.node': '节点',
   'workflow.nodeStatus': '节点状态',
   'workflow.process.detail': '流程详情',

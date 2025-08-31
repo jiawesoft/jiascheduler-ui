@@ -34,7 +34,7 @@ const REPOSITORY: AppRouteRecordRaw = {
           name: 'editWorkflow',
           component: () => import('@/views/workflow/define/edit.vue'),
           meta: {
-            locale: 'menu.workflow.editWorkflow',
+            locale: 'menu.workflow.edit',
             requiresAuth: true,
             hideInMenu: true,
             activeMenu: 'workflowIndex',

@@ -192,6 +192,7 @@ const localeJob = {
 const localeWorkflow = {
   'menu.workflow': 'Workflow',
   'menu.workflow.define': 'Workflow Define',
+  'menu.workflow.edit': 'Workflow Edit',
 
   'workflow.name': 'Name',
   'workflow.info': 'Info',

@@ -220,11 +220,6 @@
     view: CurvedEdge,
   };
 
-  interface GraphConfig {
-    nodes: NodeConfig[];
-    edges: EdgeConfig[];
-  }
-
   const nodeConfig = ref<NodeConfig>({
     id: '',
     name: '',
