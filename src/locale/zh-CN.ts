@@ -211,6 +211,7 @@ const localeWorkflow = {
   'workflow.node': '节点',
   'workflow.nodeStatus': '节点状态',
   'workflow.process.detail': '流程详情',
+  'workflow.condition': '条件配置',
 };
 
 const localeBase = {

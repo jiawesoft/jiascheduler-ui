@@ -216,6 +216,7 @@ const localeWorkflow = {
   'workflow.node': 'Node',
   'workflow.nodeStatus': 'Node Status',
   'workflow.process.detail': 'Process Detail',
+  'workflow.condition': 'Condition',
 };
 
 const localeBase = {

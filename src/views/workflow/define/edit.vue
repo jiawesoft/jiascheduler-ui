@@ -42,6 +42,36 @@
 
   <a-drawer
     width="40%"
+    :visible="editEdgeModalVisible"
+    placement="right"
+    @before-ok="saveNodeConfig"
+    @cancel="editEdgeModalVisible = false"
+    unmountOnClose
+  >
+    <template #title> {{ $t('workflow.condition') }} </template>
+
+    <a-form :key="edgeConfig.id" :model="edgeConfig" :auto-label-width="true">
+      <a-form-item
+        v-for="(rule, index) of edgeConfig.condition?.rules"
+        :field="`condition.rules[${index}]`"
+        :label="`Post-${index}`"
+        :key="index"
+      >
+        <a-input v-model="rule.name" placeholder="please enter your post..." />
+        <a-button
+          @click="handleDeleteConditionRule(index)"
+          :style="{ marginLeft: '10px' }"
+          >Delete</a-button
+        >
+        <div>
+          <a-button @click="handleAddConditionRule">Add Post</a-button>
+        </div>
+      </a-form-item>
+    </a-form>
+  </a-drawer>
+
+  <a-drawer
+    width="40%"
     :visible="editNodeModalVisible"
     placement="right"
     @before-ok="saveNodeConfig"
@@ -146,7 +176,7 @@
     unmount-on-close
     width="500px"
     @before-ok="handleReleaseWorkflowVersion"
-    @cancel="handleCancel"
+    @cancel="handleCancelReleaseModal"
   >
     <template #title> {{ $t('workflow.saveVersion') }}</template>
     <a-form
@@ -210,6 +240,7 @@
   import { FileItem, Message } from '@arco-design/web-vue';
   import useLoading from '@/hooks/loading';
   import {
+    Condition,
     EdgeConfig,
     getWorkflowDetail,
     NodeConfig,
@@ -236,6 +267,7 @@
   const minimapVisible = ref(false);
   const gridVisible = ref(false);
   const editNodeModalVisible = ref(false);
+  const editEdgeModalVisible = ref(false);
   const workflowVersionModalVisible = ref(false);
   const saveNodeConfigRef = ref();
   const lf = ref<LogicFlow>();
@@ -292,42 +324,6 @@
     view: CurvedEdge,
   };
 
-  // interface NodeConfig {
-  //   id: string;
-  //   name: string;
-  //   node_type: string;
-  //   task_type: string;
-  //   task: {
-  //     custom?: {
-  //       work_dir: string;
-  //       work_user: string;
-  //       timeout: number;
-  //       upload_file: string;
-  //       code: string;
-  //       executor_id: number;
-  //     };
-  //     standard?: {
-  //       eid: string;
-  //     };
-  //   };
-
-  //   eid?: string;
-  //   data: {
-  //     [key: string]: any;
-  //   };
-  // }
-
-  // interface EdgeConfig {
-  //   id: string;
-  //   name: string;
-  //   condition: string;
-  //   source_node_id: string;
-  //   target_node_id: string;
-  //   data: {
-  //     [key: string]: any;
-  //   };
-  // }
-
   interface GraphConfig {
     nodes: NodeConfig[];
     edges: EdgeConfig[];
@@ -348,117 +344,13 @@
   });
   const nodeConfigs = ref<NodeConfig[]>([]);
   const edgeConfigs = ref<EdgeConfig[]>([]);
-
-  const colorfulTheme = {
-    baseNode: {
-      fill: '#fefaec',
-      stroke: '#625772',
-      strokeWidth: 2,
-    },
-    baseEdge: {
-      stroke: '#625772',
-      strokeWidth: 2,
-    },
-    rect: {
-      fill: '#fefaec',
-      stroke: '#f38181',
-      strokeWidth: 2,
-    },
-    circle: {
-      fill: '#fefaec',
-      stroke: '#a9eee6',
-      properties: {
-        r: 20,
-      },
-      strokeWidth: 2,
-    },
-    diamond: {
-      fill: '#fefaec',
-      stroke: '#fce38a',
-      strokeWidth: 2,
-    },
-    ellipse: {
-      fill: '#eaffd0',
-      stroke: '#95e1d3',
-      strokeWidth: 2,
-    },
-    polygon: {
-      fill: '#fce38a',
-      stroke: '#f38181',
-      strokeWidth: 2,
-    },
-    line: {
-      stroke: '#2d4059',
-      strokeWidth: 2,
-    },
-    polyline: {
-      stroke: '#ff7e67',
-      strokeWidth: 2,
-    },
-    bezier: {
-      stroke: '#c86b85',
-      strokeWidth: 2,
-      // strokeDasharray: '10,10',
-    },
-    anchorLine: {
-      stroke: '#ffc93c',
-      strokeWidth: 2,
-      // strokeDasharray: '15,15',
-    },
-    text: {
-      color: '#ff6f3c',
-      fontSize: 14,
-    },
-    nodeText: {
-      color: '#7e6bc4',
-      fontSize: 14,
-      fontWeight: 800,
-    },
-    edgeText: {
-      color: '#ffaa64',
-      fontSize: 14,
-    },
-    inputText: {
-      color: '#ffaa64',
-      background: 'transparent',
-      fontSize: 14,
-    },
-    anchor: {
-      fill: '#ffaa64',
-      stroke: '#fff5a5',
-    },
-    arrow: {
-      stroke: '#f8b595',
-      strokeWidth: 1,
-    },
-    snapline: {
-      stroke: '#f67280',
-      strokeWidth: 1,
-    },
-    rotateControl: {
-      fill: '#f8b595',
-      stroke: '#6c5b7c',
-    },
-    resizeControl: {
-      fill: '#a4e5d9',
-      stroke: '#649dad',
-    },
-    resizeOutline: {
-      stroke: '#a4e5d9',
-    },
-    edgeAdjust: {
-      fill: '#fb929e',
-      stroke: '#fff6f6',
-    },
-    outline: {
-      hover: {
-        stroke: '#7098da',
-      },
-      stroke: '#a393eb',
-      strokeWidth: 2,
-    },
-    edgeAnimation: {},
-  };
+  const edgeConfig = ref<EdgeConfig>({
+    id: '',
+    name: '',
+    source_node_id: '',
+    target_node_id: '',
+    data: {},
+  });
 
   const theme = computed(() => {
     return useAppStore().theme;
@@ -516,7 +408,7 @@
       ...nodeConfig.value,
       data: { ...nodeData },
     });
-    console.log('val:', nodeConfig.value);
+
     editNodeModalVisible.value = false;
     return true;
   };
@@ -662,7 +554,7 @@
     return true;
   };
 
-  const handleCancel = () => {
+  const handleCancelReleaseModal = () => {
     workflowVersionModalVisible.value = false;
   };
 
@@ -694,6 +586,25 @@
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleAddConditionRule = () => {
+    edgeConfig.value.condition?.rules.push({
+      name: '',
+      left_val: {
+        val: '',
+        val_type: 'custom',
+      },
+      op: '',
+      right_val: {
+        val: '',
+        val_type: 'custom',
+      },
+      compute_type: '',
+    });
+  };
+  const handleDeleteConditionRule = (index) => {
+    edgeConfig.value.condition?.rules.splice(index, 1);
   };
 
   onMounted(() => {
@@ -740,16 +651,8 @@
 
       lf.value.register(CustomCurved);
 
-      // lf.value?.setTheme(colorfulTheme as any);
-
       (lf.value?.extension.menu as any).addMenuConfig({
         nodeMenu: [
-          {
-            text: '分享',
-            callback() {
-              alert('分享成功！');
-            },
-          },
           {
             text: '属性',
             callback(node: any) {
@@ -973,8 +876,32 @@
       });
 
       lf.value?.on('edge:click', (e) => {
-        console.log('edge:click', e.data);
-        // editNodeModalVisible.value = true;
+        const selectEdge = edgeConfigs.value.find((v) => v.id === e.data.id)!;
+        edgeConfig.value = {
+          ...selectEdge,
+        };
+        if (!edgeConfig.value.condition) {
+          edgeConfig.value.condition = {
+            rules: [
+              {
+                name: '',
+                left_val: {
+                  val: '',
+                  val_type: 'custom',
+                },
+                op: '',
+                right_val: {
+                  val: '',
+                  val_type: 'custom',
+                },
+                compute_type: '',
+              },
+            ],
+            expr: '',
+          };
+        }
+
+        editEdgeModalVisible.value = true;
       });
 
       lf.value?.on('edge:add', (e) => {
