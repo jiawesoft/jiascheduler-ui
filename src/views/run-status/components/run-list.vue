@@ -9,9 +9,6 @@
     <a-tab-pane key="daemon" :title="$t('job.scheduleType.daemon')">
       <daemon-run-list v-if="currentTab == 'daemon'" />
     </a-tab-pane>
-    <a-tab-pane key="workflow" :title="$t('job.scheduleType.workflow')">
-      <workflow-run-list v-if="currentTab == 'workflow'" />
-    </a-tab-pane>
   </a-tabs>
 </template>
 
@@ -29,7 +26,7 @@
   const { t } = useI18n();
 
   const props = defineProps<{
-    scheduleType?: 'workflow' | 'timer' | 'once' | 'daemon';
+    scheduleType?: 'timer' | 'once' | 'daemon';
     jobType?: string;
   }>();
 

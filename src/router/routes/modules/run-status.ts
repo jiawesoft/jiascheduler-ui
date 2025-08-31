@@ -45,17 +45,6 @@ const RUN_STATUS: AppRouteRecordRaw = {
         roles: ['*'],
       },
     },
-    {
-      path: 'process-list', // The midline path complies with SEO specifications
-      name: 'ProcessList',
-      component: () => import('@/views/run-status/process-list/index.vue'),
-      meta: {
-        locale: 'menu.runStatus.processList',
-        requiresAuth: true,
-        ignoreCache: true,
-        roles: ['*'],
-      },
-    },
   ],
 };
 

@@ -43,8 +43,6 @@ const localeExecutor = {
 
 const localeJob = {
   'menu.repository.jobList': 'Job',
-  'menu.repository.workflow': 'Workflow',
-  'menu.repository.editWorkflow': 'WorkflowEdit',
   'menu.repository.jobTimer': 'Timer',
   'menu.repository.jobBundleScript': 'Batch Task',
   'menu.repository.daemonJob': 'Daemon Job',
@@ -192,6 +190,9 @@ const localeJob = {
 };
 
 const localeWorkflow = {
+  'menu.workflow': 'Workflow',
+  'menu.workflow.define': 'Workflow Define',
+
   'workflow.name': 'Name',
   'workflow.info': 'Info',
   'workflow.version': 'Version',
@@ -213,7 +214,7 @@ const localeWorkflow = {
   'workflow.processStatus': 'Process Status',
   'workflow.node': 'Node',
   'workflow.nodeStatus': 'Node Status',
-  'workflow.process.detail': '流程详情',
+  'workflow.process.detail': 'Process Detail',
 };
 
 const localeBase = {

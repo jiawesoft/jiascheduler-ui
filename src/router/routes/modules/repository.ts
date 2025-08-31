@@ -23,42 +23,6 @@ const REPOSITORY: AppRouteRecordRaw = {
       },
     },
     {
-      path: '/repository/workflow', // The midline path complies with SEO specifications
-      name: 'workflowIndex',
-      component: () => import('@/views/respository/workflow/layout.vue'),
-      children: [
-        {
-          path: '',
-          name: 'workflowList',
-          component: () => import('@/views/respository/workflow/index.vue'),
-          meta: {
-            locale: 'menu.repository.workflow',
-            requiresAuth: true,
-            hideInMenu: true,
-            activeMenu: 'workflowIndex',
-            roles: ['*'],
-          },
-        },
-        {
-          path: 'edit',
-          name: 'editWorkflow',
-          component: () => import('@/views/respository/workflow/edit.vue'),
-          meta: {
-            locale: 'menu.repository.editWorkflow',
-            requiresAuth: true,
-            hideInMenu: true,
-            activeMenu: 'workflowIndex',
-            roles: ['*'],
-          },
-        },
-      ],
-      meta: {
-        locale: 'menu.repository.workflow',
-        requiresAuth: true,
-        roles: ['*'],
-      },
-    },
-    {
       path: 'job-timer-list', // The midline path complies with SEO specifications
       name: 'jobTimerList',
       component: () => import('@/views/respository/job-timer-list/index.vue'),

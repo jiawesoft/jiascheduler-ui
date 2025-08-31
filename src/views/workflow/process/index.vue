@@ -11,9 +11,8 @@
   import { ref } from 'vue';
   import { useI18n } from 'vue-i18n';
 
-  import WorkflowProcessList from '../components/process-list.vue';
+  import WorkflowProcessList from './process-list.vue';
 
-  const currentTab = ref('once');
   const { t } = useI18n();
 </script>
 

@@ -218,8 +218,8 @@
     Task,
   } from '@/api/workflow';
   import { genVersionFromTime } from '@/utils/time';
-  import SelectJob from '../components/select-job.vue';
-  import SelectExecutor from '../components/select-executor.vue';
+  import SelectJob from '@/views/respository/components/select-job.vue';
+  import SelectExecutor from '@/views/respository//components/select-executor.vue';
 
   const { t } = useI18n();
   const route = useRoute();
@@ -657,9 +657,7 @@
     }
     Message.success(t('form.submit.success'));
     if (workflowVersionForm.value.version_id) {
-      router.push(
-        `/repository/workflow/edit?id=${workflowBasicInfoForm.value.id}`
-      );
+      router.push(`/workflow/define/edit?id=${workflowBasicInfoForm.value.id}`);
     }
     return true;
   };

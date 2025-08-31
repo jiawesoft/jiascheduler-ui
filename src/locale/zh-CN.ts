@@ -44,8 +44,6 @@ const localeExecutor = {
 
 const localeJob = {
   'menu.repository.jobList': '作业',
-  'menu.repository.workflow': '工作流',
-  'menu.repository.editWorkflow': '工作流编辑',
   'menu.repository.jobTimer': '定时器',
   'menu.repository.jobBundleScript': '脚本',
   'menu.repository.daemonJob': '常驻任务',
@@ -187,6 +185,9 @@ const localeJob = {
 };
 
 const localeWorkflow = {
+  'menu.workflow': '工作流',
+  'menu.workflow.define': '流程定义',
+
   'workflow.name': '流程名',
   'workflow.info': '描述',
   'workflow.version': '版本',

@@ -206,7 +206,7 @@
     WorkflowProcessArgs,
     WorkflowVersionRecord,
   } from '@/api/workflow';
-  import SelectInstance from '../../components/select-instance.vue';
+  import SelectInstance from '@/views/respository/components/select-instance.vue';
 
   const props = defineProps<{
     workflowId: number;
