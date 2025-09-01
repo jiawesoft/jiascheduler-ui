@@ -19,7 +19,6 @@
   import OnceRunList from './once-run-list.vue';
   import TimerRunList from './timer-run-list.vue';
   import DaemonRunList from './daemon-run-list.vue';
-  import WorkflowRunList from './workflow-run-list.vue';
 
   const router = useRouter();
   const route = useRoute();

@@ -51,21 +51,50 @@
     <template #title> {{ $t('workflow.condition') }} </template>
 
     <a-form :key="edgeConfig.id" :model="edgeConfig" :auto-label-width="true">
+      <a-form-item field="name" label="名称">
+        <a-input v-model="edgeConfig.name" />
+      </a-form-item>
       <a-form-item
         v-for="(rule, index) of edgeConfig.condition?.rules"
         :field="`condition.rules[${index}]`"
-        :label="`Post-${index}`"
+        :label="`C${index}`"
         :key="index"
       >
-        <a-input v-model="rule.name" placeholder="please enter your post..." />
-        <a-button
-          @click="handleDeleteConditionRule(index)"
-          :style="{ marginLeft: '10px' }"
-          >Delete</a-button
-        >
-        <div>
-          <a-button @click="handleAddConditionRule">Add Post</a-button>
-        </div>
+        <a-space direction="horizontal" size="mini">
+          <a-select allow-search default-value="Beijing">
+            <a-option>Beijing</a-option>
+            <a-option>Shanghai</a-option>
+            <a-option>Guangzhou</a-option>
+            <a-option disabled>Disabled</a-option>
+            <a-option>Shenzhen</a-option>
+            <a-option>Chengdu</a-option>
+            <a-option>Wuhan</a-option>
+          </a-select>
+          <a-input v-model="rule.name" />
+          <a-select style="width: 50px" default-value="great" allow-search>
+            <a-option>great</a-option>
+            <a-option>less</a-option>
+            <a-option>geq</a-option>
+            <a-option>leq</a-option>
+            <a-option>contains</a-option>
+            <a-option>in</a-option>
+            <a-option>=</a-option>
+          </a-select>
+          <a-select default-value="Beijing" allow-search>
+            <a-option>Beijing</a-option>
+            <a-option>Shanghai</a-option>
+            <a-option>Guangzhou</a-option>
+            <a-option disabled>Disabled</a-option>
+            <a-option>Shenzhen</a-option>
+            <a-option>Chengdu</a-option>
+            <a-option>Wuhan</a-option>
+          </a-select>
+          <a-input v-model="rule.name" />
+          <a-button v-if="index > 0" @click="handleDeleteConditionRule(index)">
+            -
+          </a-button>
+          <a-button @click="handleAddConditionRule">+</a-button>
+        </a-space>
       </a-form-item>
     </a-form>
   </a-drawer>
