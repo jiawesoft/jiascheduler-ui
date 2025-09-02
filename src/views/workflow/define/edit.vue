@@ -57,43 +57,101 @@
       <a-form-item
         v-for="(rule, index) of edgeConfig.condition?.rules"
         :field="`condition.rules[${index}]`"
-        :label="`C${index}`"
+        :label="`C${index + 1}`"
         :key="index"
       >
         <a-space direction="horizontal" size="mini">
-          <a-select allow-search default-value="Beijing">
-            <a-option>Beijing</a-option>
-            <a-option>Shanghai</a-option>
-            <a-option>Guangzhou</a-option>
-            <a-option disabled>Disabled</a-option>
-            <a-option>Shenzhen</a-option>
-            <a-option>Chengdu</a-option>
-            <a-option>Wuhan</a-option>
+          <a-select v-model="rule.left_val.val_type">
+            <a-option value="exit_code">节点退出码</a-option>
+            <a-option value="output">节点输出</a-option>
+            <a-option value="user_variables">用户变量</a-option>
+            <a-option value="custom">自定义</a-option>
           </a-select>
-          <a-input v-model="rule.name" />
-          <a-select style="width: 50px" default-value="great" allow-search>
-            <a-option>great</a-option>
-            <a-option>less</a-option>
-            <a-option>geq</a-option>
-            <a-option>leq</a-option>
-            <a-option>contains</a-option>
-            <a-option>in</a-option>
-            <a-option>=</a-option>
+          <a-input
+            v-if="
+              rule.left_val.val_type == 'custom' ||
+              rule.left_val.val_type == 'user_variables'
+            "
+            placeholder="请输入数据"
+            v-model="rule.left_val.val"
+          />
+
+          <a-select
+            v-else
+            v-model="rule.left_val.val"
+            placeholder="选择节点"
+            allow-search
+          >
+            <a-option
+              v-for="(node, index) of nodeConfigs.filter((v) => {
+                return v.node_type === 'bpmn:serviceTask';
+              })"
+              :key="index"
+              :value="node.id"
+            >
+              {{ node.name }}
+            </a-option>
           </a-select>
-          <a-select default-value="Beijing" allow-search>
-            <a-option>Beijing</a-option>
-            <a-option>Shanghai</a-option>
-            <a-option>Guangzhou</a-option>
-            <a-option disabled>Disabled</a-option>
-            <a-option>Shenzhen</a-option>
-            <a-option>Chengdu</a-option>
-            <a-option>Wuhan</a-option>
+
+          <a-select style="width: 83px" v-model="rule.op">
+            <a-option value=">">{{ '>' }}</a-option>
+            <a-option value=">=">{{ '>=' }}</a-option>
+            <a-option value="<">{{ '<' }}</a-option>
+            <a-option value="<=">{{ '<=' }}</a-option>
+            <a-option value="contains">contains</a-option>
+            <a-option value="!=">{{ '!=' }}</a-option>
+            <a-option value="==">{{ '==' }}</a-option>
           </a-select>
-          <a-input v-model="rule.name" />
+          <a-select v-model="rule.right_val.val_type">
+            <a-option value="exit_code">节点退出码</a-option>
+            <a-option value="output">节点输出</a-option>
+            <a-option value="user_variables">用户变量</a-option>
+            <a-option value="custom">自定义</a-option>
+          </a-select>
+          <a-input
+            v-if="
+              rule.right_val.val_type == 'custom' ||
+              rule.right_val.val_type == 'user_variables'
+            "
+            placeholder="请输入数据"
+            v-model="rule.right_val.val"
+          />
+
+          <a-select
+            v-else
+            v-model="rule.right_val.val"
+            placeholder="选择节点"
+            allow-search
+          >
+            <a-option
+              v-for="(node, index) of nodeConfigs.filter((v) => {
+                return v.node_type === 'bpmn:serviceTask';
+              })"
+              :key="index"
+              :value="node.id"
+            >
+              {{ node.name }}
+            </a-option>
+          </a-select>
           <a-button v-if="index > 0" @click="handleDeleteConditionRule(index)">
             -
           </a-button>
           <a-button @click="handleAddConditionRule">+</a-button>
+        </a-space>
+      </a-form-item>
+      <a-form-item label="运算">
+        <a-space direction="vertical" style="width: 100%">
+          <a-radio-group type="button">
+            <a-radio value="validating">并且</a-radio>
+            <a-radio value="success">或者</a-radio>
+            <a-radio value="error">自定义</a-radio>
+          </a-radio-group>
+          <a-input
+            v-model="edgeConfig.condition!.expr"
+            size="large"
+            style="height: 100px"
+            allow-clear
+          />
         </a-space>
       </a-form-item>
     </a-form>
@@ -280,6 +338,7 @@
   import { genVersionFromTime } from '@/utils/time';
   import SelectJob from '@/views/respository/components/select-job.vue';
   import SelectExecutor from '@/views/respository//components/select-executor.vue';
+  import { RuleTester } from 'eslint';
 
   const { t } = useI18n();
   const route = useRoute();
@@ -618,22 +677,40 @@
   };
 
   const handleAddConditionRule = () => {
-    edgeConfig.value.condition?.rules.push({
+    if (!edgeConfig.value.condition) {
+      edgeConfig.value.condition = { rules: [], expr: '' };
+    }
+
+    edgeConfig.value.condition.rules.push({
       name: '',
       left_val: {
         val: '',
-        val_type: 'custom',
+        val_type: 'exit_code',
       },
-      op: '',
+      op: '>',
       right_val: {
         val: '',
         val_type: 'custom',
       },
       compute_type: '',
     });
+    edgeConfig.value.condition?.rules.forEach((v, i) => {
+      v.name = `C${i + 1}`;
+    });
+    const names = edgeConfig.value.condition.rules.map((v) => v.name);
+    edgeConfig.value.condition.expr = names.join(' && ');
   };
-  const handleDeleteConditionRule = (index) => {
+
+  const handleDeleteConditionRule = (index: number) => {
     edgeConfig.value.condition?.rules.splice(index, 1);
+    edgeConfig.value.condition?.rules.forEach((v, i) => {
+      v.name = `C${i + 1}`;
+    });
+    if (!edgeConfig.value.condition) {
+      return;
+    }
+    const names = edgeConfig.value.condition.rules.map((v) => v.name);
+    edgeConfig.value.condition.expr = names.join(' && ');
   };
 
   onMounted(() => {
@@ -916,9 +993,9 @@
                 name: '',
                 left_val: {
                   val: '',
-                  val_type: 'custom',
+                  val_type: 'exit_code',
                 },
-                op: '',
+                op: '>',
                 right_val: {
                   val: '',
                   val_type: 'custom',
