@@ -41,16 +41,22 @@
   </div>
 
   <a-drawer
-    width="40%"
+    width="50%"
     :visible="editEdgeModalVisible"
     placement="right"
-    @before-ok="saveNodeConfig"
+    @before-ok="saveEdgeConfig"
     @cancel="editEdgeModalVisible = false"
     unmountOnClose
   >
     <template #title> {{ $t('workflow.condition') }} </template>
 
-    <a-form :key="edgeConfig.id" :model="edgeConfig" :auto-label-width="true">
+    <a-form
+      ref="saveEdgeConfigRef"
+      :rules="edgeConfigCheckRules"
+      :key="edgeConfig.id"
+      :model="edgeConfig"
+      :auto-label-width="true"
+    >
       <a-form-item field="name" label="名称">
         <a-input v-model="edgeConfig.name" />
       </a-form-item>
@@ -141,10 +147,14 @@
       </a-form-item>
       <a-form-item label="运算">
         <a-space direction="vertical" style="width: 100%">
-          <a-radio-group type="button">
-            <a-radio value="validating">并且</a-radio>
-            <a-radio value="success">或者</a-radio>
-            <a-radio value="error">自定义</a-radio>
+          <a-radio-group
+            type="button"
+            v-model="edgeConfig.condition!.logical_op"
+            @change="handleChangeLogicalOperation"
+          >
+            <a-radio value="and">并且</a-radio>
+            <a-radio value="or">或者</a-radio>
+            <a-radio value="custom">自定义</a-radio>
           </a-radio-group>
           <a-input
             v-model="edgeConfig.condition!.expr"
@@ -358,6 +368,7 @@
   const editEdgeModalVisible = ref(false);
   const workflowVersionModalVisible = ref(false);
   const saveNodeConfigRef = ref();
+  const saveEdgeConfigRef = ref();
   const lf = ref<LogicFlow>();
   const uploadFileList = ref<FileItem[]>([]);
 
@@ -452,6 +463,12 @@
     },
   };
 
+  const edgeConfigCheckRules = {
+    expr: {
+      required: true,
+    },
+  };
+
   const executorOptions = ref<ExecutorRecord[]>([]);
 
   const fetchExecutorData = async (params: {
@@ -498,6 +515,34 @@
     });
 
     editNodeModalVisible.value = false;
+    return true;
+  };
+
+  const saveEdgeConfig = async () => {
+    const ret = await saveEdgeConfigRef.value.validate();
+    if (ret) {
+      return false;
+    }
+
+    const originEdgeId: string = edgeConfig.value.data.id;
+
+    lf.value
+      ?.getEdgeModelById(edgeConfig.value.id)
+      ?.updateText(edgeConfig.value.name);
+
+    if (originEdgeId !== edgeConfig.value.id) {
+      lf.value?.changeEdgeId(originEdgeId, edgeConfig.value.id);
+    }
+
+    const edgeData = lf.value?.getEdgeDataById(edgeConfig.value.id);
+
+    edgeConfigs.value = edgeConfigs.value.filter((v) => v.id !== originEdgeId);
+    edgeConfigs.value.push({
+      ...edgeConfig.value,
+      data: { ...edgeData },
+    });
+
+    editEdgeModalVisible.value = false;
     return true;
   };
 
@@ -678,7 +723,7 @@
 
   const handleAddConditionRule = () => {
     if (!edgeConfig.value.condition) {
-      edgeConfig.value.condition = { rules: [], expr: '' };
+      edgeConfig.value.condition = { rules: [], expr: '', logical_op: 'and' };
     }
 
     edgeConfig.value.condition.rules.push({
@@ -711,6 +756,22 @@
     }
     const names = edgeConfig.value.condition.rules.map((v) => v.name);
     edgeConfig.value.condition.expr = names.join(' && ');
+  };
+
+  const handleChangeLogicalOperation = (val: any) => {
+    if (!edgeConfig.value.condition) {
+      return;
+    }
+    edgeConfig.value.condition.rules.forEach((v, i) => {
+      v.name = `C${i + 1}`;
+    });
+    let op = '&&';
+    if (val === 'or') {
+      op = '||';
+    }
+
+    const names = edgeConfig.value.condition.rules.map((v) => v.name);
+    edgeConfig.value.condition.expr = names.join(` ${op} `);
   };
 
   onMounted(() => {
@@ -915,7 +976,6 @@
       ]);
 
       lf.value.adapterOut = (data) => {
-        console.log('adapterOut', data);
         const convertData: GraphConfig = {
           nodes: data.nodes.map((data1) => {
             const v = nodeConfigs.value.find((data2) => data1.id === data2.id);
@@ -983,6 +1043,14 @@
 
       lf.value?.on('edge:click', (e) => {
         const selectEdge = edgeConfigs.value.find((v) => v.id === e.data.id)!;
+
+        if (
+          lf.value?.getNodeDataById(e.data.sourceNodeId)?.type !==
+          'bpmn:exclusiveGateway'
+        ) {
+          return;
+        }
+
         edgeConfig.value = {
           ...selectEdge,
         };
@@ -1004,6 +1072,7 @@
               },
             ],
             expr: '',
+            logical_op: 'and',
           };
         }
 

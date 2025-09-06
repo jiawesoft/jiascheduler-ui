@@ -52,6 +52,7 @@ export interface Condition {
     compute_type: string;
   }[];
   expr: string;
+  logical_op: string;
 }
 export interface EdgeConfig {
   id: string;

@@ -274,6 +274,7 @@
       updated_user: 'string',
       created_time: 'string',
       updated_time: 'string',
+      actual_args: {},
       executor_id: 1,
     },
   });
