@@ -226,43 +226,6 @@
         </a-form>
       </a-modal>
 
-      <a-modal
-        v-model:visible="dispatchJobModalVisible"
-        title-align="start"
-        :draggable="true"
-        :ok-text="$t('job.dispatch')"
-        width="60%"
-        @before-ok="handleDispatchJob"
-        @cancel="handleCancel"
-      >
-        <template #title> {{ $t('job.schedule') }}</template>
-        <a-form
-          ref="dispatchJobRef"
-          :model="dispatchJobForm"
-          :rules="dispatchJobFormValidateRules"
-          :auto-label-width="true"
-        >
-          <a-form-item
-            field="schedule_name"
-            validate-trigger="blur"
-            :label="$t('job.schedule.name')"
-          >
-            <a-input v-model="dispatchJobForm.schedule_name" />
-          </a-form-item>
-
-          <a-form-item
-            field="endpoints"
-            validate-trigger="blur"
-            :label="$t('job.endpoint')"
-          >
-            <SelectInstance
-              v-if="dispatchJobModalVisible"
-              v-model="dispatchJobForm.endpoints"
-            />
-          </a-form-item>
-        </a-form>
-      </a-modal>
-
       <a-drawer
         :title="$t('workflow.version')"
         :visible="workflowVersionListModalVisible"
@@ -452,14 +415,6 @@
       required: true,
     },
   };
-  const dispatchJobFormValidateRules = {
-    schedule_name: {
-      required: true,
-    },
-    endpoints: {
-      required: true,
-    },
-  };
 
   const fetchData = async (
     params: QueryWorkflowListReq = {
@@ -578,34 +533,6 @@
 
     Message.success(t('form.submit.success'));
     search();
-    return true;
-  };
-
-  const handleDispatchJob = async () => {
-    const ret = await dispatchJobRef.value.validate();
-    if (ret) {
-      return false;
-    }
-    try {
-      await dispatchJob({
-        schedule_type: dispatchJobForm.value.schedule_type as ScheduleType,
-        eid: dispatchJobForm.value.eid,
-        schedule_name: dispatchJobForm.value.schedule_name,
-        action: dispatchJobForm.value.action as JobAction,
-        is_sync: false,
-        endpoints: dispatchJobForm.value.endpoints,
-      });
-    } catch (err) {
-      return false;
-    }
-    Message.success(t('form.submit.success'));
-
-    setTimeout(() => {
-      router.push({
-        path: '/workflow/process',
-      });
-    }, 200);
-
     return true;
   };
 

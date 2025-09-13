@@ -179,6 +179,8 @@ const localeJob = {
 
   'job.runDetail': '运行详情',
   'job.output': '输出',
+  'job.elapsed': '耗时',
+  'job.execResult': '执行结果',
 
   'job.scheduleName.placeholder': '请输入名称',
 };
@@ -212,6 +214,7 @@ const localeWorkflow = {
   'workflow.nodeStatus': '节点状态',
   'workflow.process.detail': '流程详情',
   'workflow.condition': '条件配置',
+  'workflow.bindIp': '执行ip',
 };
 
 const localeBase = {

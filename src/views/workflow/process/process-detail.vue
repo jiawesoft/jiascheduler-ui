@@ -4,7 +4,7 @@
       <a-tab-pane key="basicInfo" :title="$t('workflow.basicInfo')">
         <a-timeline :style="{ marginRight: '40px' }">
           <a-timeline-item
-            v-for="item in completedNode"
+            v-for="item in completedNodes"
             :key="item.base.node_id"
             :label="item.base.created_time"
           >
@@ -25,6 +25,22 @@
               />
             </template>
             {{ getNode(nodeConfigs, item.base.node_id)?.name }}
+            <template v-if="item.tasks.length > 0">
+              <br />
+              <a-typography-text
+                type="secondary"
+                :style="{
+                  fontSize: '12px',
+                  marginTop: '4px',
+                  color: value.exit_code !== 0 ? 'brown' : 'darkgreen',
+                }"
+                :key="value.id"
+                style="color: darkgreen"
+                v-for="value in item.tasks"
+              >
+                {{ value.bind_ip }}
+              </a-typography-text>
+            </template>
           </a-timeline-item>
         </a-timeline>
       </a-tab-pane>
@@ -35,7 +51,129 @@
   </div>
 
   <a-drawer
-    width="40%"
+    width="50%"
+    :visible="editEdgeModalVisible"
+    placement="right"
+    @cancel="editEdgeModalVisible = false"
+    unmountOnClose
+  >
+    <template #title> {{ $t('workflow.condition') }} </template>
+
+    <a-form
+      :key="edgeConfig.id"
+      :model="edgeConfig"
+      :auto-label-width="true"
+      disabled
+    >
+      <a-form-item field="name" label="名称">
+        <a-input v-model="edgeConfig.name" />
+      </a-form-item>
+      <a-form-item
+        v-for="(rule, index) of edgeConfig.condition?.rules"
+        :field="`condition.rules[${index}]`"
+        :label="`C${index + 1}`"
+        :key="index"
+      >
+        <a-space direction="horizontal" size="mini">
+          <a-select v-model="rule.left_val.val_type">
+            <a-option value="exit_code">节点退出码</a-option>
+            <a-option value="output">节点输出</a-option>
+            <a-option value="user_variables">用户变量</a-option>
+            <a-option value="custom">自定义</a-option>
+          </a-select>
+          <a-input
+            v-if="
+              rule.left_val.val_type == 'custom' ||
+              rule.left_val.val_type == 'user_variables'
+            "
+            placeholder="请输入数据"
+            v-model="rule.left_val.val"
+          />
+
+          <a-select
+            v-else
+            v-model="rule.left_val.val"
+            placeholder="选择节点"
+            allow-search
+          >
+            <a-option
+              v-for="(node, index) of nodeConfigs.filter((v) => {
+                return v.node_type === 'bpmn:serviceTask';
+              })"
+              :key="index"
+              :value="node.id"
+            >
+              {{ node.name }}
+            </a-option>
+          </a-select>
+
+          <a-select style="width: 83px" v-model="rule.op">
+            <a-option value=">">{{ '>' }}</a-option>
+            <a-option value=">=">{{ '>=' }}</a-option>
+            <a-option value="<">{{ '<' }}</a-option>
+            <a-option value="<=">{{ '<=' }}</a-option>
+            <a-option value="contains">contains</a-option>
+            <a-option value="!=">{{ '!=' }}</a-option>
+            <a-option value="==">{{ '==' }}</a-option>
+          </a-select>
+          <a-select v-model="rule.right_val.val_type">
+            <a-option value="exit_code">节点退出码</a-option>
+            <a-option value="output">节点输出</a-option>
+            <a-option value="user_variables">用户变量</a-option>
+            <a-option value="custom">自定义</a-option>
+          </a-select>
+          <a-input
+            v-if="
+              rule.right_val.val_type == 'custom' ||
+              rule.right_val.val_type == 'user_variables'
+            "
+            placeholder="请输入数据"
+            v-model="rule.right_val.val"
+          />
+
+          <a-select
+            v-else
+            v-model="rule.right_val.val"
+            placeholder="选择节点"
+            allow-search
+          >
+            <a-option
+              v-for="(node, index) of nodeConfigs.filter((v) => {
+                return v.node_type === 'bpmn:serviceTask';
+              })"
+              :key="index"
+              :value="node.id"
+            >
+              {{ node.name }}
+            </a-option>
+          </a-select>
+          <a-button v-if="index > 0"> - </a-button>
+          <a-button>+</a-button>
+        </a-space>
+      </a-form-item>
+      <a-form-item label="运算">
+        <a-space direction="vertical" style="width: 100%">
+          <a-radio-group
+            type="button"
+            v-model="edgeConfig.condition!.logical_op"
+          >
+            <a-radio value="and">并且</a-radio>
+            <a-radio value="or">或者</a-radio>
+            <a-radio value="custom">自定义</a-radio>
+          </a-radio-group>
+          <a-input
+            v-model="edgeConfig.condition!.expr"
+            size="large"
+            style="height: 100px"
+            allow-clear
+          />
+        </a-space>
+      </a-form-item>
+    </a-form>
+  </a-drawer>
+
+  <a-drawer
+    width="50%"
     :visible="editNodeModalVisible"
     placement="right"
     @before-ok="saveNodeConfig"
@@ -128,6 +266,12 @@
         </a-form-item>
       </template>
     </a-form>
+
+    <a-typography-title :heading="6">
+      {{ t('job.execResult') }}</a-typography-title
+    >
+    <a-divider />
+    <TaskResults v-if="completedNode" :data="completedNode" />
   </a-drawer>
 </template>
 
@@ -178,6 +322,7 @@
 
   import SelectJob from '@/views/respository/components/select-job.vue';
   import SelectExecutor from '@/views/respository/components/select-executor.vue';
+  import TaskResults from '../components/task-results.vue';
 
   const props = defineProps({
     processId: {
@@ -199,6 +344,7 @@
   const minimapVisible = ref(false);
   const gridVisible = ref(false);
   const editNodeModalVisible = ref(false);
+  const editEdgeModalVisible = ref(false);
   const saveNodeConfigRef = ref();
   const lf = ref<LogicFlow>();
   const uploadFileList = ref<FileItem[]>([]);
@@ -235,7 +381,16 @@
   });
   const nodeConfigs = ref<NodeConfig[]>([]);
   const edgeConfigs = ref<EdgeConfig[]>([]);
-  const completedNode = ref<CompletedNode[]>([]);
+  const edgeConfig = ref<EdgeConfig>({
+    id: '',
+    name: '',
+    source_node_id: '',
+    target_node_id: '',
+    data: {},
+  });
+
+  const completedNodes = ref<CompletedNode[]>([]);
+  const completedNode = ref<CompletedNode | undefined>();
 
   const theme = computed(() => {
     return useAppStore().theme;
@@ -293,7 +448,7 @@
       ...nodeConfig.value,
       data: { ...nodeData },
     });
-    console.log('val:', nodeConfig.value);
+
     editNodeModalVisible.value = false;
     return true;
   };
@@ -345,7 +500,7 @@
       });
       nodeConfigs.value = data.origin_nodes;
       edgeConfigs.value = data.origin_edges;
-      completedNode.value = data.completed_nodes;
+      completedNodes.value = data.completed_nodes;
       const graphData = {
         nodes: nodeConfigs.value.map((v) => {
           return v.data;
@@ -469,16 +624,55 @@
       };
 
       lf.value?.on('node:click', (e) => {
-        console.log('node:click', e.data);
+        if (e.data.type !== 'bpmn:serviceTask') {
+          return;
+        }
         editNodeModalVisible.value = true;
         const selectNode = nodeConfigs.value.find((v) => v.id === e.data.id)!;
         nodeConfig.value = {
           ...selectNode,
         };
+        completedNode.value = completedNodes.value.find(
+          (v) => v.base.node_id === e.data.id
+        );
       });
 
       lf.value?.on('edge:click', (e) => {
-        console.log('edge:click', e.data);
+        const selectEdge = edgeConfigs.value.find((v) => v.id === e.data.id)!;
+
+        if (
+          lf.value?.getNodeDataById(e.data.sourceNodeId)?.type !==
+          'bpmn:exclusiveGateway'
+        ) {
+          return;
+        }
+
+        edgeConfig.value = {
+          ...selectEdge,
+        };
+        if (!edgeConfig.value.condition) {
+          edgeConfig.value.condition = {
+            rules: [
+              {
+                name: '',
+                left_val: {
+                  val: '',
+                  val_type: 'exit_code',
+                },
+                op: '>',
+                right_val: {
+                  val: '',
+                  val_type: 'custom',
+                },
+                compute_type: '',
+              },
+            ],
+            expr: '',
+            logical_op: 'and',
+          };
+        }
+
+        editEdgeModalVisible.value = true;
       });
 
       fetchWorkflowProcessDetail(props.processId);

@@ -337,7 +337,6 @@
   import { FileItem, Message } from '@arco-design/web-vue';
   import useLoading from '@/hooks/loading';
   import {
-    Condition,
     EdgeConfig,
     getWorkflowDetail,
     NodeConfig,
@@ -348,7 +347,6 @@
   import { genVersionFromTime } from '@/utils/time';
   import SelectJob from '@/views/respository/components/select-job.vue';
   import SelectExecutor from '@/views/respository//components/select-executor.vue';
-  import { RuleTester } from 'eslint';
 
   const { t } = useI18n();
   const route = useRoute();
@@ -1000,7 +998,9 @@
       };
 
       lf.value?.on('node:click', (e) => {
-        console.log('node:click', e.data);
+        if (e.data.type !== 'bpmn:serviceTask') {
+          return;
+        }
         editNodeModalVisible.value = true;
         const selectNode = nodeConfigs.value.find((v) => v.id === e.data.id)!;
         nodeConfig.value = {
@@ -1009,7 +1009,6 @@
       });
 
       lf.value?.on('node:dnd-add', (e) => {
-        console.log('node:dnd-add', e.data);
         let taskType: 'standard' | 'custom' | 'none';
         const task: Task = {};
         switch (e.data.type) {
@@ -1058,7 +1057,7 @@
           edgeConfig.value.condition = {
             rules: [
               {
-                name: '',
+                name: 'C1',
                 left_val: {
                   val: '',
                   val_type: 'exit_code',
@@ -1071,7 +1070,7 @@
                 compute_type: '',
               },
             ],
-            expr: '',
+            expr: 'C1',
             logical_op: 'and',
           };
         }

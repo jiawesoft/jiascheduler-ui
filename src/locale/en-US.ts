@@ -184,6 +184,8 @@ const localeJob = {
 
   'job.runDetail': 'Run Details',
   'job.output': 'Output',
+  'job.elapsed': 'Elapsed',
+  'job.execResult': 'Execution Results',
 
   'job.scheduleName.placeholder': 'Please enter the name',
 };
@@ -217,6 +219,7 @@ const localeWorkflow = {
   'workflow.nodeStatus': 'Node Status',
   'workflow.process.detail': 'Process Detail',
   'workflow.condition': 'Condition',
+  'workflow.bindIp': 'IP',
 };
 
 const localeBase = {

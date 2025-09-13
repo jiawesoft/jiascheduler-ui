@@ -317,12 +317,12 @@
     {
       title: t('workflow.node'),
       dataIndex: 'current_node_name',
-      width: 150,
+      width: 100,
     },
     {
       title: t('workflow.nodeStatus'),
       dataIndex: 'current_node_status',
-      width: 170,
+      width: 80,
     },
     {
       title: t('tag.name'),
@@ -339,7 +339,12 @@
     {
       title: t('columns.createdUser'),
       dataIndex: 'created_user',
-      width: 120,
+      width: 100,
+    },
+    {
+      title: t('columns.createdUser'),
+      dataIndex: 'created_time',
+      width: 140,
     },
     {
       title: t('operations'),

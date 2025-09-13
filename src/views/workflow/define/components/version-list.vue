@@ -364,7 +364,7 @@
         },
       };
     }
-    console.log('record:', record);
+
     startProcessModalVisible.value = true;
   };
 
@@ -461,16 +461,13 @@
     } catch (err) {
       return false;
     }
-    Message.success(t('form.submit.success'));
+    // Message.success(t('form.submit.success'));
 
-    // setTimeout(() => {
-    //   router.push({
-    //     path: '/run-status/run-list',
-    //     query: {
-    //       scheduleType: 'workflow',
-    //     },
-    //   });
-    // }, 200);
+    setTimeout(() => {
+      router.push({
+        path: '/workflow/process',
+      });
+    }, 200);
 
     return true;
   };

@@ -11,3 +11,9 @@ export const getFormatTimeVersion = () => {
 };
 
 export const getTimestamp = () => {};
+
+export const getSecondDiffNow = (prev: string, next: string) => {
+  console.log('here prev:', prev, next);
+  const now = dayjs(next);
+  return now.diff(prev, 'second');
+};
