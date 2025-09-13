@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="container">
-      <Breadcrumb :items="['menu.repository', 'menu.repository.jobList']" />
+      <Breadcrumb :items="['menu.workflow', 'menu.workflow.define']" />
       <a-card class="general-card">
         <a-row>
           <a-col flex="auto">

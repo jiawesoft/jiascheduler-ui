@@ -49,7 +49,6 @@ const localeJob = {
   'menu.runStatus.runList': 'Run List',
   'menu.runStatus.scheduleList': 'Schedule List',
   'menu.runStatus.execList': 'Execution List',
-  'menu.runStatus.processList': 'Process List',
 
   'job': 'Job',
   'job.eid': 'Execution ID',
@@ -193,6 +192,7 @@ const localeWorkflow = {
   'menu.workflow': 'Workflow',
   'menu.workflow.define': 'Workflow Define',
   'menu.workflow.edit': 'Workflow Edit',
+  'menu.workflow.processList': 'Process List',
 
   'workflow.name': 'Name',
   'workflow.info': 'Info',

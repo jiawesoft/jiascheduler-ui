@@ -50,7 +50,6 @@ const localeJob = {
   'menu.runStatus.runList': '运行列表',
   'menu.runStatus.scheduleList': '调度记录',
   'menu.runStatus.execList': '执行记录',
-  'menu.runStatus.processList': '流程记录',
 
   'job': '作业',
   'job.eid': '执行id',
@@ -188,6 +187,7 @@ const localeWorkflow = {
   'menu.workflow': '工作流',
   'menu.workflow.define': '流程定义',
   'menu.workflow.edit': '编辑流程',
+  'menu.workflow.processList': '流程记录',
 
   'workflow.name': '流程名',
   'workflow.info': '描述',

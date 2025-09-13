@@ -1,6 +1,6 @@
 <template>
   <div class="container">
-    <Breadcrumb :items="['menu.runStatus', 'menu.runStatus.processList']" />
+    <Breadcrumb :items="['menu.workflow', 'menu.workflow.processList']" />
     <a-card class="general-card">
       <WorkflowProcessList />
     </a-card>

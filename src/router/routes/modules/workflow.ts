@@ -53,7 +53,7 @@ const REPOSITORY: AppRouteRecordRaw = {
       name: 'ProcessList',
       component: () => import('@/views/workflow/process/index.vue'),
       meta: {
-        locale: 'menu.runStatus.processList',
+        locale: 'menu.workflow.processList',
         requiresAuth: true,
         ignoreCache: true,
         roles: ['*'],

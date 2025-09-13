@@ -315,13 +315,6 @@
       fixed: 'left',
     },
     {
-      title: t('workflow.processStatus'),
-      dataIndex: 'process_status',
-      ellipsis: true,
-      width: 150,
-      fixed: 'left',
-    },
-    {
       title: t('workflow.node'),
       dataIndex: 'current_node_name',
       width: 150,
