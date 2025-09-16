@@ -180,7 +180,7 @@ const localeJob = {
   'job.action.confirm.deleteBundleScript':
     'Are you sure you want to delete the bundle script? ',
   'job.action': 'Action',
-  'job.schedule.dispatchResult': 'Dispatch Status',
+  'job.schedule.dispatchResult': 'Dispatch Result',
 
   'job.runDetail': 'Run Details',
   'job.output': 'Output',

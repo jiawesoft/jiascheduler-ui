@@ -1,6 +1,6 @@
 <template>
   <a-table size="small" :columns="columns" :data="$props.data.tasks">
-    <template #dispathResult="{ record }">
+    <template #dispatchResult="{ record }">
       <a-tag color="red" v-if="record.dispatch_result.has_err">
         {{ record.dispatch_result.err }}
       </a-tag>
@@ -75,7 +75,11 @@
     {
       title: t('job.schedule.dispatchResult'),
       dataIndex: 'dispatch_result',
-      slotName: 'dispathResult',
+      slotName: 'dispatchResult',
+    },
+    {
+      title: t('job.runStatus'),
+      dataIndex: 'task_status',
     },
     {
       title: t('job.exitStatus'),

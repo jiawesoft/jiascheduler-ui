@@ -175,7 +175,7 @@ const localeJob = {
   'job.action.confirm.deleteJobSupervisor': '确认要删除该常驻任务么? ',
   'job.action.confirm.deleteBundleScript': '确认要删除该脚本? ',
   'job.action': '动作',
-  'job.schedule.dispatchResult': '推送状态',
+  'job.schedule.dispatchResult': '推送结果',
 
   'job.runDetail': '运行详情',
   'job.output': '输出',

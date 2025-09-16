@@ -27,19 +27,33 @@
             {{ getNode(nodeConfigs, item.base.node_id)?.name }}
             <template v-if="item.tasks.length > 0">
               <br />
-              <a-typography-text
-                type="secondary"
-                :style="{
-                  fontSize: '12px',
-                  marginTop: '4px',
-                  color: value.exit_code !== 0 ? 'brown' : 'darkgreen',
-                }"
-                :key="value.id"
-                style="color: darkgreen"
-                v-for="value in item.tasks"
-              >
-                {{ value.bind_ip }}
-              </a-typography-text>
+              <a-space wrap>
+                <a-typography-text
+                  type="secondary"
+                  :key="value.id"
+                  v-for="value in item.tasks"
+                >
+                  <a-popover title="Title" trigger="click">
+                    <a-button size="mini">
+                      <a-space direction="horizontal" size="mini">
+                        <a-badge
+                          v-if="value.task_status == 'running'"
+                          status="processing"
+                        />
+                        <a-badge
+                          v-else
+                          :status="value.exit_code !== 0 ? 'danger' : 'success'"
+                        />
+
+                        {{ value.bind_ip }}
+                      </a-space>
+                    </a-button>
+                    <template #content>
+                      <TaskResults v-if="completedNode" :data="completedNode" />
+                    </template>
+                  </a-popover>
+                </a-typography-text>
+              </a-space>
             </template>
           </a-timeline-item>
         </a-timeline>
