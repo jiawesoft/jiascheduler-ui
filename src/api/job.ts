@@ -351,6 +351,7 @@ export interface JobSupervisorRecord {
   code: string;
   eid: string;
   info: string;
+  job_args?: JobArg[];
   restart_interval: string;
   executor_id: number;
   executor_name: string;

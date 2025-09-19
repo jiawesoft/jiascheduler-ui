@@ -284,6 +284,15 @@
             </a-input-group>
           </a-form-item>
 
+          <a-form-item
+            v-if="jobTimerForm.args?.length > 0"
+            field="args"
+            :label="$t('job.arg')"
+            :tooltip="$t('job.arg.tips', { name: '{{name}}' })"
+          >
+            <job-args :args="jobTimerForm.args" />
+          </a-form-item>
+
           <a-form-item field="eid" validate-trigger="blur" :label="$t('job')">
             <select-job
               v-if="jobTimerModalVisible"
@@ -395,6 +404,7 @@
 
   interface JobTimerForm {
     id: number;
+    args: JobArg[];
     job_type: string;
     name: string;
     timer_expr: TimerExpr;
@@ -451,6 +461,7 @@
       executor_id: 0,
       timer_expr: defaultTimerExpr,
       eid: '',
+      args: [],
       info: '',
     },
     dispatchJobTimerForm: {
@@ -635,9 +646,11 @@
   };
 
   const changeJob = (v: JobRecord) => {
+    console.log('change-job:', v);
     if (v && !jobTimerForm.value.name) {
       jobTimerForm.value.name = v?.name || '';
     }
+    jobTimerForm.value.args = v.args ?? [];
   };
 
   const changeTimer = (v: JobTimerRecord) => {
@@ -649,6 +662,7 @@
   const handleOpenJobTimerModal = (e: any, record: any) => {
     saveJobTimerRef.value.clearValidate();
     if (record) {
+      console.log('record:', record);
       jobTimerForm.value = { ...record };
     } else {
       jobTimerForm.value = {
@@ -656,6 +670,7 @@
         job_type: formModel.value.job_type,
         name: '',
         eid: '',
+        args: [],
         timer_expr: defaultTimerExpr,
         executor_id: 1,
         info: '',

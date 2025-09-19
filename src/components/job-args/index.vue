@@ -31,7 +31,7 @@
             :disabled="!props.controlled"
           />
         </template>
-        <template #operations="{ rowIndex }">
+        <template v-if="props.controlled" #operations="{ rowIndex }">
           <a-button size="mini" @click="deleteJobArg(rowIndex)">
             {{ $t('operations.delete') }}
           </a-button>
@@ -43,7 +43,7 @@
 <script lang="ts" setup>
   import { useI18n } from 'vue-i18n';
   import { JobArg } from '@/api/job';
-  import { PropType, ref } from 'vue';
+  import { computed, PropType, ref } from 'vue';
 
   const props = defineProps({
     args: {
@@ -62,28 +62,34 @@
   const emit = defineEmits(['update:args']);
   const args = ref(props.args);
 
-  const columns = [
-    {
-      title: t('job.arg.name'),
-      dataIndex: 'name',
-      slotName: 'name',
-    },
-    {
-      title: t('job.arg.defaultVal'),
-      dataIndex: 'val',
-      slotName: 'val',
-    },
-    {
-      title: t('job.arg.info'),
-      dataIndex: 'info',
-      slotName: 'info',
-    },
-    {
-      title: t('operations'),
-      dataIndex: 'operations',
-      slotName: 'operations',
-    },
-  ];
+  const columns = computed(() => {
+    const cols = [
+      {
+        title: t('job.arg.name'),
+        dataIndex: 'name',
+        slotName: 'name',
+      },
+      {
+        title: t('job.arg.defaultVal'),
+        dataIndex: 'val',
+        slotName: 'val',
+      },
+      {
+        title: t('job.arg.info'),
+        dataIndex: 'info',
+        slotName: 'info',
+      },
+    ];
+    if (props.controlled) {
+      cols.push({
+        title: t('operations'),
+        dataIndex: 'operations',
+        slotName: 'operations',
+      });
+    }
+
+    return cols;
+  });
 
   const changeValue = () => {
     emit('update:args', args.value);
