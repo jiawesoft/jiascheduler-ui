@@ -340,6 +340,7 @@
           v-if="dispatchJobTimerForm.args"
           field="args"
           :label="$t('job.arg')"
+          :tooltip="$t('job.arg.tips', { name: '{{name}}' })"
         >
           <job-args :args="dispatchJobTimerForm.args" />
         </a-form-item>
@@ -646,7 +647,6 @@
   };
 
   const changeJob = (v: JobRecord) => {
-    console.log('change-job:', v);
     if (v && !jobTimerForm.value.name) {
       jobTimerForm.value.name = v?.name || '';
     }
@@ -662,7 +662,6 @@
   const handleOpenJobTimerModal = (e: any, record: any) => {
     saveJobTimerRef.value.clearValidate();
     if (record) {
-      console.log('record:', record);
       jobTimerForm.value = { ...record };
     } else {
       jobTimerForm.value = {

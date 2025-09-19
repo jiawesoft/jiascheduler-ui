@@ -62,7 +62,9 @@
           <a-input-number
             mode="button"
             :default-value="
-              $props.value.dispatch_data.params.restart_interval ?? 0
+              $props.value.dispatch_data.params.restart_interval
+                ? $props.value.dispatch_data.params.restart_interval.secs
+                : 0
             "
           />
         </a-form-item>
