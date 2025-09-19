@@ -6,12 +6,13 @@
       </a-button>
     </a-row>
 
-    <a-row>
+    <a-row v-if="args.length > 0">
       <a-table
         :data="args"
         :columns="columns"
         style="margin-top: 5px"
         size="small"
+        :pagination="false"
       >
         <template #name="{ rowIndex }">
           <a-input
@@ -29,6 +30,11 @@
             @change="changeValue"
             :disabled="!props.controlled"
           />
+        </template>
+        <template #operations="{ rowIndex }">
+          <a-button size="mini" @click="deleteJobArg(rowIndex)">
+            {{ $t('operations.delete') }}
+          </a-button>
         </template>
       </a-table>
     </a-row>
@@ -72,6 +78,11 @@
       dataIndex: 'info',
       slotName: 'info',
     },
+    {
+      title: t('operations'),
+      dataIndex: 'operations',
+      slotName: 'operations',
+    },
   ];
 
   const changeValue = () => {
@@ -80,6 +91,11 @@
 
   const addJobArg = () => {
     args.value.push({ name: '', val: '', info: '' });
+    emit('update:args', args.value);
+  };
+
+  const deleteJobArg = (i: number) => {
+    args.value.splice(i, 1);
     emit('update:args', args.value);
   };
 </script>

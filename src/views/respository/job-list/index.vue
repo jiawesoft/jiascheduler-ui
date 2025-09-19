@@ -217,12 +217,11 @@
       :draggable="true"
       :ok-text="$t('form.save')"
       unmount-on-close
-      width="60%"
+      width="auto"
       @before-ok="handleSubmitJob"
       @cancel="handleCancel"
     >
       <template #title> {{ $t('job.save') }}</template>
-
       <a-form
         ref="saveJobRef"
         :key="jobForm.id"
@@ -433,12 +432,12 @@
                 v-model="jobForm.completed_callback.trigger_on"
                 :placeholder="$t('job.completedCallback.triggerOn')"
               >
-                <a-option value="all">{{
-                  $t('job.completedCallback.triggerOn.all')
-                }}</a-option>
-                <a-option value="error">{{
-                  $t('job.completedCallback.triggerOn.error')
-                }}</a-option>
+                <a-option value="all">
+                  {{ $t('job.completedCallback.triggerOn.all') }}
+                </a-option>
+                <a-option value="error">
+                  {{ $t('job.completedCallback.triggerOn.error') }}
+                </a-option>
               </a-select>
             </a-form-item>
           </a-tab-pane>
