@@ -33,25 +33,23 @@
                   :key="value.id"
                   v-for="value in item.tasks"
                 >
-                  <a-popover title="Title" trigger="click">
-                    <a-button size="mini">
-                      <a-space direction="horizontal" size="mini">
-                        <a-badge
-                          v-if="value.task_status == 'running'"
-                          status="processing"
-                        />
-                        <a-badge
-                          v-else
-                          :status="value.exit_code !== 0 ? 'danger' : 'success'"
-                        />
+                  <a-button
+                    size="mini"
+                    @click="handleOpenTaskResults(value.node_id)"
+                  >
+                    <a-space direction="horizontal" size="mini">
+                      <a-badge
+                        v-if="value.task_status == 'running'"
+                        status="processing"
+                      />
+                      <a-badge
+                        v-else
+                        :status="value.exit_code !== 0 ? 'danger' : 'success'"
+                      />
 
-                        {{ value.bind_ip }}
-                      </a-space>
-                    </a-button>
-                    <template #content>
-                      <TaskResults v-if="completedNode" :data="completedNode" />
-                    </template>
-                  </a-popover>
+                      {{ value.bind_ip }}
+                    </a-space>
+                  </a-button>
                 </a-typography-text>
               </a-space>
             </template>
@@ -63,6 +61,19 @@
       </a-tab-pane>
     </a-tabs>
   </div>
+
+  <a-modal
+    v-if="completedNode"
+    v-model:visible="taskResultModalVisible"
+    title-align="start"
+    style="width: auto"
+    :draggable="true"
+    unmount-on-close
+    width="auto"
+  >
+    <template #title> {{ $t('job.execResult') }}</template>
+    <TaskResults :data="completedNode" />
+  </a-modal>
 
   <a-drawer
     width="50%"
@@ -349,6 +360,7 @@
   const route = useRoute();
   const router = useRouter();
   const { loading, setLoading } = useLoading(true);
+  const taskResultsContainerRef = ref();
 
   const basePagination: Pagination = {
     page: 1,
@@ -359,6 +371,7 @@
   const gridVisible = ref(false);
   const editNodeModalVisible = ref(false);
   const editEdgeModalVisible = ref(false);
+  const taskResultModalVisible = ref(false);
   const saveNodeConfigRef = ref();
   const lf = ref<LogicFlow>();
   const uploadFileList = ref<FileItem[]>([]);
@@ -504,6 +517,13 @@
     nodeId: string
   ): NodeConfig | undefined => {
     return nodes.find((v) => v.id === nodeId);
+  };
+
+  const handleOpenTaskResults = async (nodeId: string) => {
+    taskResultModalVisible.value = true;
+    completedNode.value = completedNodes.value.find(
+      (v) => v.base.node_id === nodeId
+    );
   };
 
   const fetchWorkflowProcessDetail = async (processId: string) => {
