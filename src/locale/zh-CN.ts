@@ -103,6 +103,8 @@ const localeJob = {
   'job.arg.val': '参数值',
   'job.arg.defaultVal': '默认值',
   'job.arg.info': '描述',
+  'job.arg.tips':
+    '基于"Handlebars templating language" (https://handlebarsjs.com/) 实现参数模板化，你可以在代码中直接使用 {name} 访问定义的参数',
 
   'job.timer': '定时器',
   'job.saveTimer': '保存定时器',

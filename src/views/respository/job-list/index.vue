@@ -364,7 +364,11 @@
                   </a-form-item>
                 </a-col>
               </a-row>
-              <a-form-item field="args" :label="$t('job.arg')">
+              <a-form-item
+                field="args"
+                :label="$t('job.arg')"
+                :tooltip="$t('job.arg.tips', { name: '{{name}}' })"
+              >
                 <job-args :args="jobForm.formal_args" controlled />
               </a-form-item>
               <a-form-item field="code" :label="$t('job.code')">
