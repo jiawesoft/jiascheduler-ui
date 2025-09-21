@@ -225,7 +225,12 @@
           :model="jobTimerForm"
           :auto-label-width="true"
         >
-          <a-form-item field="job_type" required :label="$t('job.type')">
+          <a-form-item
+            field="job_type"
+            required
+            :label="$t('job.type')"
+            disabled
+          >
             <a-radio-group v-model="formModel.job_type" type="button">
               <a-radio value="default">{{ $t('job.type.default') }}</a-radio>
               <a-radio value="bundle">{{ $t('job.type.bundle') }}</a-radio>
@@ -284,15 +289,6 @@
             </a-input-group>
           </a-form-item>
 
-          <a-form-item
-            v-if="jobTimerForm.args?.length > 0"
-            field="args"
-            :label="$t('job.arg')"
-            :tooltip="$t('job.arg.tips', { name: '{{name}}' })"
-          >
-            <job-args :args="jobTimerForm.args" />
-          </a-form-item>
-
           <a-form-item field="eid" validate-trigger="blur" :label="$t('job')">
             <select-job
               v-if="jobTimerModalVisible"
@@ -300,6 +296,14 @@
               v-model:job-type="formModel.job_type"
               @change-job="changeJob"
             />
+          </a-form-item>
+          <a-form-item
+            v-if="jobTimerForm.args?.length > 0"
+            field="args"
+            :label="$t('job.arg')"
+            :tooltip="$t('job.arg.tips', { name: '{{name}}' })"
+          >
+            <job-args :args="jobTimerForm.args" />
           </a-form-item>
         </a-form>
       </a-space>

@@ -4,11 +4,8 @@ import qs from 'query-string';
 export interface WorkflowJobArgs {
   name: string;
   val: string;
-  node_assignment?: {
-    source_node_id: string;
-    is_first_instance_result: boolean;
-    is_completed_result: boolean;
-  };
+  info?: string;
+  val_type: string;
 }
 
 export interface Task {
@@ -24,6 +21,7 @@ export interface Task {
     work_user?: string;
     code: string;
     upload_file: string;
+    target?: string[];
   };
 }
 

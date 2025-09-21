@@ -167,8 +167,9 @@
     </a-form>
   </a-drawer>
 
+  <!-- node config -->
   <a-drawer
-    width="40%"
+    width="60%"
     :visible="editNodeModalVisible"
     placement="right"
     @before-ok="saveNodeConfig"
@@ -224,7 +225,36 @@
           <SelectJob
             v-model:eid="nodeConfig.task.standard!.eid"
             job-type="default"
+            @change-job="handleChangeJob"
           />
+        </a-form-item>
+        <a-form-item
+          v-if="
+            nodeConfig.task.standard?.formal_args &&
+            nodeConfig.task.standard?.formal_args.length > 0
+          "
+          field="args"
+          :label="$t('job.arg')"
+          :tooltip="$t('job.arg.tips', { name: '{{name}}' })"
+        >
+          <workflow-node-args
+            :args="nodeConfig.task.standard.formal_args"
+            :tasks="
+              nodeConfigs.filter((v) => {
+                return (
+                  v.node_type === 'bpmn:serviceTask' && v.id !== nodeConfig.id
+                );
+              })
+            "
+          />
+        </a-form-item>
+
+        <a-form-item
+          field="endpoints"
+          validate-trigger="blur"
+          :label="$t('job.endpoint')"
+        >
+          <SelectInstanceId v-model="nodeConfig.task.standard!.target" />
         </a-form-item>
       </template>
 
@@ -260,10 +290,17 @@
             />
           </a-space>
         </a-form-item>
+        <a-form-item
+          field="endpoints"
+          validate-trigger="blur"
+          :label="$t('job.endpoint')"
+        >
+          <SelectInstanceId v-model="nodeConfig.task.custom!.target" />
+        </a-form-item>
       </template>
     </a-form>
   </a-drawer>
-
+  <!-- edge config -->
   <a-modal
     v-model:visible="workflowVersionModalVisible"
     title-align="start"
@@ -345,8 +382,11 @@
     Task,
   } from '@/api/workflow';
   import { genVersionFromTime } from '@/utils/time';
+  import WorkflowNodeArgs from '@/components/workflow-node-args/index.vue';
   import SelectJob from '@/views/respository/components/select-job.vue';
   import SelectExecutor from '@/views/respository//components/select-executor.vue';
+  import { JobArg, JobRecord } from '@/api/job';
+  import SelectInstanceId from '../components/select-instance-id.vue';
 
   const { t } = useI18n();
   const route = useRoute();
@@ -772,6 +812,20 @@
     edgeConfig.value.condition.expr = names.join(` ${op} `);
   };
 
+  const handleChangeJob = (v: JobRecord) => {
+    if (v.args) {
+      nodeConfig.value.task.standard!.formal_args = v.args.map((v) => {
+        return {
+          name: v.name,
+          val: v.val,
+          val_type: 'default',
+        };
+      });
+    } else {
+      nodeConfig.value.task.standard!.formal_args = [];
+    }
+  };
+
   onMounted(() => {
     nextTick(() => {
       lf.value = new LogicFlow({
@@ -822,10 +876,10 @@
             text: '属性',
             callback(node: any) {
               alert(`
-                节点id：${node.id}
-                节点类型：${node.type}
-                节点坐标：(x: ${node.x}, y: ${node.y})
-              `);
+                 节点id：${node.id}
+                 节点类型：${node.type}
+                 节点坐标：(x: ${node.x}, y: ${node.y})
+               `);
             },
           },
         ],
@@ -842,13 +896,13 @@
                 targetNodeId,
               } = edge;
               alert(`
-                边id：${id}
-                边类型：${type}
-                边起点坐标：(startPoint: [${startPoint.x}, ${startPoint.y}])
-                边终点坐标：(endPoint: [${endPoint.x}, ${endPoint.y}])
-                源节点id：${sourceNodeId}
-                目标节点id：${targetNodeId}
-              `);
+                 边id：${id}
+                 边类型：${type}
+                 边起点坐标：(startPoint: [${startPoint.x}, ${startPoint.y}])
+                 边终点坐标：(endPoint: [${endPoint.x}, ${endPoint.y}])
+                 源节点id：${sourceNodeId}
+                 目标节点id：${targetNodeId}
+               `);
             },
           },
         ],

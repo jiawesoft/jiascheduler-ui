@@ -102,6 +102,16 @@
     };
   };
   const formModel = ref(generateFormModel());
+  const props = defineProps({
+    modelValue: {
+      type: Array as PropType<string[]>,
+      default() {
+        return [];
+      },
+    },
+  });
+
+  const selectedKeys = ref<string[]>(props.modelValue);
 
   const basePagination: Pagination = {
     page: 1,
@@ -111,24 +121,7 @@
     ...basePagination,
   });
 
-  const props = defineProps({
-    modelValue: {
-      type: Object as PropType<
-        {
-          instance_id: string;
-          [key: string]: string;
-        }[]
-      >,
-      default() {
-        return [];
-      },
-    },
-  });
   const emit = defineEmits(['update:modelValue']);
-
-  const selectedKeys = ref<string[]>(
-    props.modelValue.map((v) => v.instance_id)
-  );
 
   const columns = computed<TableColumnData[]>(() => [
     {
@@ -216,10 +209,7 @@
   watch(
     () => selectedKeys.value,
     (val) => {
-      const list = instanceList.value.filter((item) =>
-        val.includes(item.instance_id)
-      );
-      emit('update:modelValue', list);
+      emit('update:modelValue', val);
     },
     { deep: true, immediate: true }
   );

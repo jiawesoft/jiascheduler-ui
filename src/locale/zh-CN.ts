@@ -217,6 +217,9 @@ const localeWorkflow = {
   'workflow.process.detail': '流程详情',
   'workflow.condition': '条件配置',
   'workflow.bindIp': '执行ip',
+  'workflow.nodeConfig.static': '静态',
+  'workflow.nodeConfig.dynamic': '动态',
+  'workflow.nodeConfig.selectTasks.tips': '请选择任务',
 };
 
 const localeBase = {

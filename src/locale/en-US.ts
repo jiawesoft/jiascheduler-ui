@@ -222,6 +222,9 @@ const localeWorkflow = {
   'workflow.process.detail': 'Process Detail',
   'workflow.condition': 'Condition',
   'workflow.bindIp': 'IP',
+  'workflow.nodeConfig.static': 'static',
+  'workflow.nodeConfig.dynamic': 'dynamic',
+  'workflow.nodeConfig.selectTasks.tips': 'Please select tasks',
 };
 
 const localeBase = {

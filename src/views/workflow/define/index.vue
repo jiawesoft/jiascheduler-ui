@@ -192,6 +192,7 @@
         </a-table>
       </a-card>
 
+      <!-- save workflow  -->
       <a-modal
         v-model:visible="workflowModalVisible"
         title-align="start"
@@ -226,6 +227,7 @@
         </a-form>
       </a-modal>
 
+      <!-- workflow version list -->
       <a-drawer
         :title="$t('workflow.version')"
         :visible="workflowVersionListModalVisible"
@@ -244,25 +246,16 @@
 </template>
 
 <script lang="ts" setup>
-  import {
-    deleteJob,
-    dispatchJob,
-    endpoint,
-    JobAction,
-    QueryJobReq,
-    ScheduleType,
-  } from '@/api/job';
+  import { deleteJob, endpoint, QueryJobReq } from '@/api/job';
 
   import useLoading from '@/hooks/loading';
 
   import { Pagination } from '@/types/global';
-  import type { SelectOptionData } from '@arco-design/web-vue/es/select/interface';
   import type { TableColumnData } from '@arco-design/web-vue/es/table/interface';
   import cloneDeep from 'lodash/cloneDeep';
   import Sortable from 'sortablejs';
   import { computed, nextTick, reactive, ref, toRefs, watch } from 'vue';
   import { useI18n } from 'vue-i18n';
-  import { genVersionFromTime } from '@/utils/time';
   import { Message } from '@arco-design/web-vue';
 
   import { useRouter } from 'vue-router';

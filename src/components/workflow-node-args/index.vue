@@ -22,7 +22,37 @@
           />
         </template>
         <template #val="{ rowIndex }">
-          <a-input v-model="args[rowIndex].val" @change="changeValue" />
+          <a-input-group>
+            <a-select
+              v-model="args[rowIndex].val_type"
+              @change="args[rowIndex].val = ''"
+              :options="[
+                { label: t('workflow.nodeConfig.static'), value: 'default' },
+                { label: t('workflow.nodeConfig.dynamic'), value: 'dynamic' },
+              ]"
+            />
+            <a-input
+              v-if="args[rowIndex].val_type == 'default'"
+              v-model="args[rowIndex].val"
+              @change="changeValue"
+            />
+            <a-select
+              v-else
+              :placeholder="t('workflow.nodeConfig.selectTasks.tips')"
+              v-model="args[rowIndex].val"
+              allow-search
+            >
+              <a-option
+                v-for="(node, index) of tasks.filter((v) => {
+                  return v.node_type === 'bpmn:serviceTask';
+                })"
+                :key="index"
+                :value="node.id"
+              >
+                {{ node.name }}
+              </a-option>
+            </a-select>
+          </a-input-group>
         </template>
         <template #info="{ rowIndex }">
           <a-input
@@ -42,17 +72,24 @@
 </template>
 <script lang="ts" setup>
   import { useI18n } from 'vue-i18n';
-  import { JobArg } from '@/api/job';
   import { computed, PropType, ref } from 'vue';
-  import { WorkflowJobArgs } from '@/api/workflow';
+  import { NodeConfig, WorkflowJobArgs } from '@/api/workflow';
 
   const props = defineProps({
     args: {
-      type: Array as PropType<JobArg[]>,
+      type: Array as PropType<WorkflowJobArgs[]>,
       default() {
         return [];
       },
     },
+
+    tasks: {
+      type: Array as PropType<NodeConfig[]>,
+      default() {
+        return [];
+      },
+    },
+
     controlled: {
       type: Boolean,
       default: false,
@@ -62,6 +99,7 @@
   const { t } = useI18n();
   const emit = defineEmits(['update:args']);
   const args = ref(props.args);
+  const tasks = ref(props.tasks);
 
   const columns = computed(() => {
     const cols = [
@@ -71,7 +109,7 @@
         slotName: 'name',
       },
       {
-        title: t('job.arg.defaultVal'),
+        title: t('job.arg.val'),
         dataIndex: 'val',
         slotName: 'val',
       },
@@ -97,7 +135,7 @@
   };
 
   const addJobArg = () => {
-    args.value.push({ name: '', val: '', info: '' });
+    args.value.push({ name: '', val: '', info: '', val_type: 'default' });
     emit('update:args', args.value);
   };
 
