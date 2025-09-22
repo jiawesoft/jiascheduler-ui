@@ -665,11 +665,9 @@
 
     Message.success(t('form.submit.success'));
 
-    if (workflowVersionForm.value.version_id) {
-      router.push(
-        `/repository/workflow/edit?id=${workflowBasicInfoForm.value.id}`
-      );
-    }
+    setTimeout(() => {
+      router.push(`/workflow/define`);
+    }, 500);
 
     return true;
   };

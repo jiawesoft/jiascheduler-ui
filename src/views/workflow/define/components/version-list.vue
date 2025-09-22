@@ -123,7 +123,7 @@
             size="mini"
             @click="
               router.push(
-                'workflow/edit?id=' +
+                'define/edit?id=' +
                   record.workflow_id +
                   '&version_id=' +
                   record.id
