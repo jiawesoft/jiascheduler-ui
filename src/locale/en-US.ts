@@ -221,6 +221,8 @@ const localeWorkflow = {
   'workflow.nodeStatus': 'Node Status',
   'workflow.process.detail': 'Process Detail',
   'workflow.condition': 'Condition',
+  'workflow.condition.isJoinAll':
+    'Wait for all prerequisites to be met before executing the current task.',
   'workflow.bindIp': 'IP',
   'workflow.nodeConfig.static': 'static',
   'workflow.nodeConfig.dynamic': 'dynamic',

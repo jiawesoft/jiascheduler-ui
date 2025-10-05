@@ -298,6 +298,12 @@
           <SelectInstanceId v-model="nodeConfig.task.custom!.target" />
         </a-form-item>
       </template>
+
+      <a-form-item field="is_join_all" validate-trigger="blur">
+        <a-checkbox v-model="nodeConfig.is_join_all"
+          >{{ t('workflow.condition.isJoinAll') }}
+        </a-checkbox>
+      </a-form-item>
     </a-form>
   </a-drawer>
   <!-- edge config -->
@@ -470,6 +476,7 @@
     id: '',
     name: '',
     node_type: '',
+    is_join_all: false,
     task_type: 'standard',
     task: {
       standard: {
@@ -1079,6 +1086,7 @@
           id: e.data.id,
           name: e.data.text?.value || '',
           node_type: e.data.type,
+          is_join_all: false,
           task_type: taskType,
           task,
           data: e.data,

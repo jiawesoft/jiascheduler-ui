@@ -216,6 +216,7 @@ const localeWorkflow = {
   'workflow.nodeStatus': '节点状态',
   'workflow.process.detail': '流程详情',
   'workflow.condition': '条件配置',
+  'workflow.condition.isJoinAll': '等待所有前置条件都满足在执行当前任务',
   'workflow.bindIp': '执行ip',
   'workflow.nodeConfig.static': '静态',
   'workflow.nodeConfig.dynamic': '动态',

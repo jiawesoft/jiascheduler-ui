@@ -29,6 +29,7 @@ export interface NodeConfig {
   id: string;
   name: string;
   node_type: string;
+  is_join_all: boolean;
   task_type: 'standard' | 'custom' | 'none';
   task: Task;
   data: {
