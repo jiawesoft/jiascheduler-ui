@@ -403,8 +403,8 @@ export interface DeleteExeHistoryReq {
   eid?: string;
   bind_ip?: string;
 }
-export function deleteExeHistory(data: DeleteExeHistoryReq) {
-  return axios.post<DeleteExeHistoryReq>('/api/job/delete-exec-history', data);
+export function deleteExecHistory(data: DeleteExeHistoryReq) {
+  return axios.post('/api/job/delete-exec-history', data);
 }
 
 export interface DeleteScheduleHistoryReq {
@@ -413,10 +413,7 @@ export interface DeleteScheduleHistoryReq {
 }
 
 export function deleteScheduleHistory(data: DeleteScheduleHistoryReq) {
-  return axios.post<DeleteExeHistoryReq>(
-    '/api/job/delete-schedule-history',
-    data
-  );
+  return axios.post('/api/job/delete-schedule-history', data);
 }
 
 export interface DeleteRunningStatusReq {

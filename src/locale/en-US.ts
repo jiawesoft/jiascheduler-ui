@@ -225,6 +225,11 @@ const localeWorkflow = {
   'workflow.nodeConfig.static': 'static',
   'workflow.nodeConfig.dynamic': 'dynamic',
   'workflow.nodeConfig.selectTasks.tips': 'Please select tasks',
+  'workflow.action.confirm.delete':
+    'Are you sure you want to delete the workflow? ',
+  'workflow.clear.records': 'Clear workflow process records',
+  'workflow.action.confirm.clear.records':
+    'Are you sure you want to clear the workflow process records?',
 };
 
 const localeBase = {

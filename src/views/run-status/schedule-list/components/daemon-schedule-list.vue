@@ -235,7 +235,7 @@
     ScheduleType,
     queryScheduleList,
     redispatchJob,
-    deleteExeHistory,
+    deleteExecHistory,
     deleteScheduleHistory,
   } from '@/api/job';
   import { queryCountResource, TagRecord } from '@/api/tag';

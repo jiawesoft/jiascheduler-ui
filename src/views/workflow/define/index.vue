@@ -163,14 +163,6 @@
               <a-space>
                 <a-button
                   size="mini"
-                  @click="handleOpenWorkflowVersionModal($event, record)"
-                >
-                  {{ $t('workflow.version') }}
-                </a-button>
-              </a-space>
-              <a-space>
-                <a-button
-                  size="mini"
                   status="success"
                   @click="handleOpenWorkflowVersionModal($event, record)"
                 >
@@ -179,7 +171,7 @@
               </a-space>
               <a-space>
                 <a-popconfirm
-                  :content="$t('job.action.confirm.deleteJob')"
+                  :content="$t('workflow.action.confirm.delete')"
                   @before-ok="handleDeleteWorkflow($event, record)"
                 >
                   <a-button type="dashed" size="mini" status="danger">
@@ -264,6 +256,7 @@
     queryWorkflowList,
     WorkflowRecord,
     QueryWorkflowListReq,
+    deleteWorkflow,
   } from '@/api/workflow';
   import { queryCountResource, TagRecord } from '@/api/tag';
   import TableTagItem from '@/components/table-tag-item/index.vue';
@@ -490,8 +483,8 @@
   const handleDeleteWorkflow = async (e: any, record: any) => {
     setLoading(true);
     try {
-      await deleteJob({
-        eid: record.eid,
+      await deleteWorkflow({
+        workflow_id: record.id,
       });
     } finally {
       setLoading(false);

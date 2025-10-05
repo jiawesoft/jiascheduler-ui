@@ -316,3 +316,29 @@ export function getWorkflowProcessDetail(params: getWorkflowProcessDetailReq) {
     }
   );
 }
+
+export interface DeleteWorkflowReq {
+  workflow_id: number;
+}
+
+export function deleteWorkflow(data: DeleteWorkflowReq) {
+  return axios.post('/api/workflow/delete', data);
+}
+
+export interface DeleteWorkflowVersionReq {
+  workflow_id: number;
+  version_id: number;
+}
+
+export function deleteWorkflowVersion(data: DeleteWorkflowVersionReq) {
+  return axios.post('/api/workflow/delete-version', data);
+}
+
+export interface DeleteWorkflowProcessReq {
+  workflow_id?: number;
+  process_id?: string;
+}
+
+export function deleteWorkflowProcess(data: DeleteWorkflowProcessReq) {
+  return axios.post('/api/workflow/delete-process', data);
+}

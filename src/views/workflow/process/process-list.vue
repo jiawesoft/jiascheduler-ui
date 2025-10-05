@@ -60,11 +60,11 @@
       style="display: flex; align-items: center; justify-content: end"
     >
       <a-popconfirm
-        :content="$t('job.action.confirm.clear.records')"
+        :content="$t('workflow.action.confirm.clear.records')"
         @before-ok="handleClearProcessHistory($event)"
       >
         <a-button type="primary" size="mini" plain>
-          {{ $t('job.clear.records') }}
+          {{ $t('workflow.clear.records') }}
         </a-button>
       </a-popconfirm>
     </a-col>
@@ -162,22 +162,6 @@
         {{ $t('operations.view') }}
       </a-button>
     </template>
-
-    <template #exitStatus="{ record }">
-      <a-tooltip :content="record.exit_status">
-        <a-tag v-if="record.exit_status === 'exit status: 0'" color="green">
-          <icon-check />
-        </a-tag>
-        <a-tag v-else-if="record.exit_status === ''" color="orange"> -- </a-tag>
-        <a-tag
-          v-else
-          color="red"
-          style="display: block; text-overflow: ellipsis"
-        >
-          {{ record.exit_status }}
-        </a-tag>
-      </a-tooltip>
-    </template>
   </a-table>
 
   <a-drawer
@@ -196,7 +180,7 @@
 </template>
 
 <script lang="ts" setup>
-  import { deleteExeHistory } from '@/api/job';
+  import { deleteExecHistory } from '@/api/job';
   import { queryCountResource, TagRecord } from '@/api/tag';
 
   import useLoading from '@/hooks/loading';
@@ -209,6 +193,7 @@
   import { computed, nextTick, reactive, ref, toRefs, watch } from 'vue';
   import { useI18n } from 'vue-i18n';
   import {
+    deleteWorkflowProcess,
     queryWorkflowProcessList,
     QueryWorkflowProcessListReq,
     WorkflowProcessRecord,
@@ -454,12 +439,7 @@
 
   const handleClearProcessHistory = async (e: any) => {
     try {
-      await deleteExeHistory({
-        schedule_id: props.scheduleId,
-        schedule_type: 'once',
-        eid: props.eid,
-        bind_ip: props.bindIp,
-      });
+      await deleteWorkflowProcess({});
     } catch (err) {
       return false;
     }

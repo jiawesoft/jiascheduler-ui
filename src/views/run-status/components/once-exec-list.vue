@@ -312,7 +312,7 @@
 
 <script lang="ts" setup>
   import {
-    deleteExeHistory,
+    deleteExecHistory,
     ExecRecord,
     queryExecList,
     QueryExecListReq,
@@ -747,7 +747,7 @@
 
   const handleClearExecHistory = async (e: any) => {
     try {
-      await deleteExeHistory({
+      await deleteExecHistory({
         schedule_id: props.scheduleId,
         schedule_type: 'once',
         eid: props.eid,

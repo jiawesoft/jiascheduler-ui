@@ -220,6 +220,9 @@ const localeWorkflow = {
   'workflow.nodeConfig.static': '静态',
   'workflow.nodeConfig.dynamic': '动态',
   'workflow.nodeConfig.selectTasks.tips': '请选择任务',
+  'workflow.action.confirm.delete': '确认要删除该流程么? ',
+  'workflow.clear.records': '清空流程记录',
+  'workflow.action.confirm.clear.records': '确认要清空流程记录么？',
 };
 
 const localeBase = {

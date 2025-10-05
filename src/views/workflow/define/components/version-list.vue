@@ -143,6 +143,16 @@
             {{ $t('operations.start') }}
           </a-button>
         </a-space>
+        <a-space>
+          <a-popconfirm
+            :content="$t('workflow.action.confirm.delete')"
+            @before-ok="handleDeleteWorkflowVersion($event, record)"
+          >
+            <a-button type="dashed" size="mini" status="danger">
+              {{ $t('operations.delete') }}
+            </a-button>
+          </a-popconfirm>
+        </a-space>
       </a-space>
     </template>
   </a-table>
@@ -195,11 +205,11 @@
   import Sortable from 'sortablejs';
   import { computed, nextTick, reactive, ref, watch } from 'vue';
   import { useI18n } from 'vue-i18n';
-  import { Message } from '@arco-design/web-vue';
   import { useRouter } from 'vue-router';
   import { getFormatTimeVersion } from '@/utils/time';
   import { endpoint } from '@/api/job';
   import {
+    deleteWorkflowVersion,
     queryWorkflowVersionList,
     QueryWorkflowVersionListReq,
     startWorkflowProcess,
@@ -283,7 +293,7 @@
     {
       title: t('columns.index'),
       dataIndex: 'index',
-      width: 30,
+      width: 20,
       slotName: 'index',
       fixed: 'left',
     },
@@ -291,9 +301,9 @@
     {
       title: t('workflow.version'),
       dataIndex: 'version',
-      // ellipsis: true,
-      width: 150,
-      // tooltip: true,
+      ellipsis: true,
+      width: 140,
+      tooltip: true,
       fixed: 'left',
     },
 
@@ -301,7 +311,7 @@
       title: t('workflow.versionInfo'),
       dataIndex: 'version_info',
       ellipsis: true,
-      width: 150,
+      width: 140,
       tooltip: true,
     },
 
@@ -309,20 +319,22 @@
       title: t('columns.createdTime'),
       dataIndex: 'created_time',
       ellipsis: true,
-      width: 170,
+      width: 120,
       tooltip: true,
     },
 
     {
       title: t('columns.createdUser'),
       dataIndex: 'created_user',
-      width: 120,
+      ellipsis: true,
+      width: 60,
+      tooltip: true,
     },
     {
       title: t('operations'),
       dataIndex: 'operations',
       slotName: 'operations',
-      width: 120,
+      width: 140,
       fixed: 'right',
     },
   ]);
@@ -407,6 +419,21 @@
     index: number
   ) => {
     cloneColumns.value = showColumns.value.filter((item) => item.checked);
+  };
+
+  const handleDeleteWorkflowVersion = async (e: any, record: any) => {
+    setLoading(true);
+    try {
+      await deleteWorkflowVersion({
+        workflow_id: record.workflow_id,
+        version_id: record.id,
+      });
+    } finally {
+      setLoading(false);
+    }
+
+    search();
+    return true;
   };
 
   const popupVisibleChange = (val: boolean) => {
