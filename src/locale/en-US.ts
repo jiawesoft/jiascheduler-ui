@@ -79,7 +79,9 @@ const localeJob = {
   'job.endpoint': 'Endpoint',
   'job.dispatch': 'Dispatch',
   'job.workDir': 'Working Directory',
+  'job.workDir.tips': 'Defalt is Jiascheduler agent working directory',
   'job.workUser': 'Working User',
+  'job.workUser.tips': 'Default is Jiascheduler agent working user',
   'job.timeout': 'Execution Timeout',
   'job.timeout.tips':
     'The script process will be automatically killed after the timeout, in seconds',

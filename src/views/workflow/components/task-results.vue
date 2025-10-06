@@ -1,9 +1,9 @@
 <template>
   <a-table size="small" :columns="columns" :data="$props.data.tasks">
     <template #dispatchResult="{ record }">
-      <a-tag color="red" v-if="record.dispatch_result.has_err">
+      <span v-if="record.dispatch_result.has_err" style="color: red">
         {{ record.dispatch_result.err }}
-      </a-tag>
+      </span>
       <a-tag
         color="green"
         v-else-if="record.dispatch_result.response.code === 20000"
@@ -32,7 +32,7 @@
     title-align="start"
     style="width: auto"
     :draggable="true"
-    width="50%"
+    width="61.8%"
     hide-cancel
     @cancel="handleCancel"
   >
@@ -44,10 +44,11 @@
 <script lang="ts" setup>
   import { CompletedNode } from '@/api/workflow';
   import { getSecondDiffNow } from '@/utils/time';
-  import { TableColumnData } from '@arco-design/web-vue';
+  import { TableColumnData, TypographyText } from '@arco-design/web-vue';
   import { computed, reactive, ref } from 'vue';
   import { useI18n } from 'vue-i18n';
   import OutputArea from '@/components/output-area/index.vue';
+  import { template } from 'lodash';
 
   const props = defineProps<{
     data: CompletedNode;
@@ -62,19 +63,14 @@
     {
       title: t('job.bindIp'),
       dataIndex: 'bind_ip',
-    },
-    {
-      title: t('job.startTime'),
-      dataIndex: 'created_time',
-    },
-    {
-      title: t('job.elapsed'),
-      dataIndex: 'elapsed',
-      slotName: 'elapsed',
+      width: 150,
     },
     {
       title: t('job.schedule.dispatchResult'),
       dataIndex: 'dispatch_result',
+      ellipsis: true,
+      width: 170,
+      tooltip: true,
       slotName: 'dispatchResult',
     },
     {
@@ -85,12 +81,21 @@
       title: t('job.exitStatus'),
       dataIndex: 'exit_status',
     },
-
+    {
+      title: t('job.startTime'),
+      dataIndex: 'created_time',
+      width: 165,
+    },
+    {
+      title: t('job.elapsed'),
+      dataIndex: 'elapsed',
+      slotName: 'elapsed',
+    },
     {
       title: t('operations'),
       dataIndex: 'operations',
       slotName: 'operations',
-      width: 50,
+      width: 70,
       fixed: 'right',
     },
   ]);

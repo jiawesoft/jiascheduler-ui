@@ -259,8 +259,60 @@
       </template>
 
       <template v-else>
-        <a-form-item field="executor_id" :label="$t('job.executor')">
-          <SelectExecutor v-model="nodeConfig.task.custom!.executor_id" />
+        <a-row :gutter="6">
+          <a-col :span="6">
+            <a-form-item field="executor_id" :label="$t('job.executor')">
+              <SelectExecutor v-model="nodeConfig.task.custom!.executor_id" />
+            </a-form-item>
+          </a-col>
+          <a-col :span="6">
+            <a-form-item
+              field="work_user"
+              validate-trigger="blur"
+              :label="$t('job.workUser')"
+              :tooltip="$t('job.workUser.tips')"
+            >
+              <a-input v-model="nodeConfig.task.custom!.work_user" />
+            </a-form-item>
+          </a-col>
+          <a-col :span="6">
+            <a-form-item
+              field="work_dir"
+              validate-trigger="blur"
+              :tooltip="$t('job.workDir.tips')"
+              :label="$t('job.workDir')"
+            >
+              <a-input v-model="nodeConfig.task.custom!.work_dir" />
+            </a-form-item>
+          </a-col>
+          <a-col :span="6">
+            <a-form-item
+              field="timeout"
+              :tooltip="$t('job.timeout.tips')"
+              validate-trigger="blur"
+              :label="$t('job.timeout')"
+            >
+              <a-input-number v-model="nodeConfig.task.custom!.timeout" />
+            </a-form-item>
+          </a-col>
+        </a-row>
+
+        <a-form-item
+          field="args"
+          :label="$t('job.arg')"
+          :tooltip="$t('job.arg.tips', { name: '{{name}}' })"
+        >
+          <workflow-node-args
+            :args="nodeConfig.task.custom!.formal_args"
+            controlled
+            :tasks="
+              nodeConfigs.filter((v) => {
+                return (
+                  v.node_type === 'bpmn:serviceTask' && v.id !== nodeConfig.id
+                );
+              })
+            "
+          />
         </a-form-item>
 
         <a-form-item field="code" :label="$t('job.code')">
@@ -627,6 +679,7 @@
           work_user: '',
           timeout: 5,
           upload_file: '',
+          formal_args: [],
           code: '',
           executor_id: 0,
         };
@@ -824,6 +877,7 @@
           name: v.name,
           val: v.val,
           val_type: 'default',
+          info: v.info,
         };
       });
     } else {

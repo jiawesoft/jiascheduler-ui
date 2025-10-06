@@ -298,12 +298,12 @@
             />
           </a-form-item>
           <a-form-item
-            v-if="jobTimerForm.args?.length > 0"
+            v-if="jobTimerForm.job_args?.length > 0"
             field="args"
             :label="$t('job.arg')"
             :tooltip="$t('job.arg.tips', { name: '{{name}}' })"
           >
-            <job-args :args="jobTimerForm.args" />
+            <job-args :args="jobTimerForm.job_args" />
           </a-form-item>
         </a-form>
       </a-space>
@@ -409,7 +409,7 @@
 
   interface JobTimerForm {
     id: number;
-    args: JobArg[];
+    job_args: JobArg[];
     job_type: string;
     name: string;
     timer_expr: TimerExpr;
@@ -466,7 +466,7 @@
       executor_id: 0,
       timer_expr: defaultTimerExpr,
       eid: '',
-      args: [],
+      job_args: [],
       info: '',
     },
     dispatchJobTimerForm: {
@@ -654,7 +654,7 @@
     if (v && !jobTimerForm.value.name) {
       jobTimerForm.value.name = v?.name || '';
     }
-    jobTimerForm.value.args = v.args ?? [];
+    jobTimerForm.value.job_args = v.args ?? [];
   };
 
   const changeTimer = (v: JobTimerRecord) => {
@@ -673,7 +673,7 @@
         job_type: formModel.value.job_type,
         name: '',
         eid: '',
-        args: [],
+        job_args: [],
         timer_expr: defaultTimerExpr,
         executor_id: 1,
         info: '',

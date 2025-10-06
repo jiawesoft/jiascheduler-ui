@@ -232,12 +232,12 @@
           />
         </a-form-item>
         <a-form-item
-          v-if="jobSupervisorForm.args?.length > 0"
+          v-if="jobSupervisorForm.job_args?.length > 0"
           field="args"
           :label="$t('job.arg')"
           :tooltip="$t('job.arg.tips', { name: '{{name}}' })"
         >
-          <job-args :args="jobSupervisorForm.args" />
+          <job-args :args="jobSupervisorForm.job_args" />
         </a-form-item>
         <a-form-item field="eid" validate-trigger="blur" :label="$t('job')">
           <select-job
@@ -355,7 +355,7 @@
     id: number;
     name: string;
     eid: string;
-    args: JobArg[];
+    job_args: JobArg[];
     executor_id: number;
     info: string;
     restart_interval: number;
@@ -398,7 +398,7 @@
       eid: '',
       restart_interval: 1,
       info: '',
-      args: [],
+      job_args: [],
     },
     dispatchJobSupervisorForm: {
       eid: '',
@@ -567,7 +567,7 @@
     if (currentJob && !jobSupervisorForm.value.name) {
       jobSupervisorForm.value.name = currentJob?.name || '';
     }
-    jobSupervisorForm.value.args = currentJob.args ?? [];
+    jobSupervisorForm.value.job_args = currentJob.args ?? [];
   };
 
   const handleDeleteJobSupervisor = async (e: any, record: any) => {
@@ -593,7 +593,7 @@
         id: 0,
         name: '',
         eid: '',
-        args: [],
+        job_args: [],
         executor_id: 1,
         restart_interval: 1,
         info: '',

@@ -284,6 +284,7 @@
               </a-col>
             </a-row>
 
+            <!-- bundle job -->
             <template v-if="formModel.job_type === 'bundle'">
               <a-row :gutter="16">
                 <a-col :span="8">
@@ -336,6 +337,7 @@
               </a-form-item>
             </template>
 
+            <!-- default job -->
             <template v-else-if="formModel.job_type === 'default'">
               <a-row :gutter="16">
                 <a-col :span="8">

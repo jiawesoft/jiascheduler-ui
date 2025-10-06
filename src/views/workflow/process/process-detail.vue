@@ -69,14 +69,15 @@
     style="width: auto"
     :draggable="true"
     unmount-on-close
-    width="auto"
+    width="61.8%"
   >
     <template #title> {{ $t('job.execResult') }}</template>
     <TaskResults :data="completedNode" />
   </a-modal>
 
+  <!-- edge condition config -->
   <a-drawer
-    width="50%"
+    width="61.8%"
     :visible="editEdgeModalVisible"
     placement="right"
     @cancel="editEdgeModalVisible = false"
@@ -197,8 +198,9 @@
     </a-form>
   </a-drawer>
 
+  <!-- node config -->
   <a-drawer
-    width="50%"
+    width="61.8%"
     :visible="editNodeModalVisible"
     placement="right"
     @before-ok="saveNodeConfig"
@@ -260,8 +262,59 @@
       </template>
 
       <template v-else>
-        <a-form-item field="executor_id" :label="$t('job.executor')">
-          <SelectExecutor v-model="nodeConfig.task.custom!.executor_id" />
+        <a-row :gutter="6">
+          <a-col :span="6">
+            <a-form-item field="executor_id" :label="$t('job.executor')">
+              <SelectExecutor v-model="nodeConfig.task.custom!.executor_id" />
+            </a-form-item>
+          </a-col>
+          <a-col :span="6">
+            <a-form-item
+              field="work_user"
+              validate-trigger="blur"
+              :label="$t('job.workUser')"
+              :tooltip="$t('job.workUser.tips')"
+            >
+              <a-input v-model="nodeConfig.task.custom!.work_user" />
+            </a-form-item>
+          </a-col>
+          <a-col :span="6">
+            <a-form-item
+              field="work_dir"
+              validate-trigger="blur"
+              :tooltip="$t('job.workDir.tips')"
+              :label="$t('job.workDir')"
+            >
+              <a-input v-model="nodeConfig.task.custom!.work_dir" />
+            </a-form-item>
+          </a-col>
+          <a-col :span="6">
+            <a-form-item
+              field="timeout"
+              :tooltip="$t('job.timeout.tips')"
+              validate-trigger="blur"
+              :label="$t('job.timeout')"
+            >
+              <a-input-number v-model="nodeConfig.task.custom!.timeout" />
+            </a-form-item>
+          </a-col>
+        </a-row>
+
+        <a-form-item
+          field="args"
+          :label="$t('job.arg')"
+          :tooltip="$t('job.arg.tips', { name: '{{name}}' })"
+        >
+          <workflow-node-args
+            :args="nodeConfig.task.custom!.formal_args"
+            :tasks="
+              nodeConfigs.filter((v) => {
+                return (
+                  v.node_type === 'bpmn:serviceTask' && v.id !== nodeConfig.id
+                );
+              })
+            "
+          />
         </a-form-item>
 
         <a-form-item field="code" :label="$t('job.code')">
@@ -345,6 +398,7 @@
     Task,
   } from '@/api/workflow';
 
+  import WorkflowNodeArgs from '@/components/workflow-node-args/index.vue';
   import SelectJob from '@/views/respository/components/select-job.vue';
   import SelectExecutor from '@/views/respository/components/select-executor.vue';
   import TaskResults from '../components/task-results.vue';
@@ -405,6 +459,7 @@
       },
     },
     data: {},
+    is_join_all: false,
   });
   const nodeConfigs = ref<NodeConfig[]>([]);
   const edgeConfigs = ref<EdgeConfig[]>([]);
@@ -504,6 +559,7 @@
           upload_file: '',
           code: '',
           executor_id: 0,
+          formal_args: [],
         };
       }
       fetchExecutorData({

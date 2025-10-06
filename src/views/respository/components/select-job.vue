@@ -67,7 +67,10 @@
   watch(
     () => eid,
     (val) => {
-      emit('update:eid', val.value);
+      // const currentJob = jobOptions.value.find(
+      //   (item) => item.eid === val.value
+      // );
+      // emit('changeJob', currentJob);
     },
     { deep: true, immediate: false }
   );

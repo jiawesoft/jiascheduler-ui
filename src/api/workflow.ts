@@ -20,6 +20,7 @@ export interface Task {
     timeout?: number;
     work_user?: string;
     code: string;
+    formal_args: WorkflowJobArgs[];
     upload_file: string;
     target?: string[];
   };
