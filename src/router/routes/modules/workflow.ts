@@ -49,6 +49,17 @@ const REPOSITORY: AppRouteRecordRaw = {
       },
     },
     {
+      path: 'timer', // The midline path complies with SEO specifications
+      name: 'WorkflowTimer',
+      component: () => import('@/views/workflow/timer/index.vue'),
+      meta: {
+        locale: 'menu.workflow.timer',
+        requiresAuth: true,
+        ignoreCache: true,
+        roles: ['*'],
+      },
+    },
+    {
       path: 'process', // The midline path complies with SEO specifications
       name: 'ProcessList',
       component: () => import('@/views/workflow/process/index.vue'),

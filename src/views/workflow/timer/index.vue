@@ -11,22 +11,6 @@
             @submit="search"
           >
             <a-row :gutter="5">
-              <a-col :span="5">
-                <a-form-item field="job_type" :label="$t('job.type')">
-                  <a-radio-group
-                    v-model="formModel.job_type"
-                    type="button"
-                    @change="search"
-                  >
-                    <a-radio value="default">{{
-                      $t('job.type.default')
-                    }}</a-radio>
-                    <a-radio value="bundle">{{
-                      $t('job.type.bundle')
-                    }}</a-radio>
-                  </a-radio-group>
-                </a-form-item>
-              </a-col>
               <a-col :span="7">
                 <a-form-item field="name" :label="$t('job.timer.name')">
                   <a-input
@@ -76,7 +60,7 @@
             <a-button
               type="primary"
               size="small"
-              @click="handleOpenJobTimerModal($event, null)"
+              @click="handleOpenWorkflowTimerModal($event, null)"
             >
               <template #icon>
                 <icon-plus />
@@ -179,7 +163,7 @@
             <a-space>
               <a-button
                 size="mini"
-                @click="handleOpenJobTimerModal($event, record)"
+                @click="handleOpenWorkflowTimerModal($event, record)"
               >
                 {{ $t('operations.edit') }}
               </a-button>
@@ -188,7 +172,7 @@
               <a-button
                 size="small"
                 status="success"
-                @click="handleOpenDispatchJobTimerModal($event, record)"
+                @click="handleOpenScheduleWorkflowTimerModal($event, record)"
               >
                 {{ $t('operations.dispatch') }}
               </a-button>
@@ -196,7 +180,7 @@
             <a-space>
               <a-popconfirm
                 :content="$t('job.action.confirm.deleteJobTimer')"
-                @before-ok="handleDeleteJobTimer($event, record)"
+                @before-ok="handleDeleteWorkflowTimer($event, record)"
               >
                 <a-button type="dashed" size="mini" status="danger">
                   {{ $t('operations.delete') }}
@@ -207,160 +191,69 @@
         </template>
       </a-table>
     </a-card>
-    <a-modal
-      v-model:visible="jobTimerModalVisible"
-      title-align="start"
-      style="width: auto"
-      :draggable="true"
-      :ok-text="$t('form.save')"
-      width="50%"
-      @before-ok="handleSubmitJobTimer"
-      @cancel="handleCancel"
-    >
-      <template #title> {{ $t('job.saveTimer') }}</template>
-      <a-space direction="vertical" size="large" :style="{ width: '500px' }">
-        <a-form
-          ref="saveJobTimerRef"
-          :rules="jobTimerFormValidateRules"
-          :model="jobTimerForm"
-          :auto-label-width="true"
-        >
-          <a-form-item
-            field="job_type"
-            required
-            :label="$t('job.type')"
-            disabled
-          >
-            <a-radio-group v-model="formModel.job_type" type="button">
-              <a-radio value="default">{{ $t('job.type.default') }}</a-radio>
-              <a-radio value="bundle">{{ $t('job.type.bundle') }}</a-radio>
-            </a-radio-group>
-          </a-form-item>
+  </div>
 
-          <a-form-item
-            field="name"
-            required
-            validate-trigger="blur"
-            :label="$t('job.timer.name')"
-          >
-            <a-input v-model="jobTimerForm.name" />
-          </a-form-item>
-          <a-form-item field="info" :label="$t('job.timer.info')">
-            <a-textarea v-model="jobTimerForm.info" />
-          </a-form-item>
-
-          <a-form-item
-            field="timer_expr"
-            required
-            :tooltip="$t('job.timerExpr.tooltips')"
-            :label="$t('job.timerExpr')"
-          >
-            <a-input-group>
-              <a-input
-                v-model="jobTimerForm.timer_expr.second"
-                :style="{ width: '90px' }"
-                placeholder="second"
-              />
-              <a-input
-                v-model="jobTimerForm.timer_expr.minute"
-                :style="{ width: '90px' }"
-                placeholder="minute"
-              />
-              <a-input
-                v-model="jobTimerForm.timer_expr.hour"
-                :style="{ width: '90px' }"
-                placeholder="hour"
-              />
-              <a-input
-                v-model="jobTimerForm.timer_expr.day_of_month"
-                :style="{ width: '120px' }"
-                placeholder="day of month"
-              />
-              <a-input
-                v-model="jobTimerForm.timer_expr.month"
-                :style="{ width: '90px' }"
-                placeholder="month"
-              />
-              <a-input
-                v-model="jobTimerForm.timer_expr.year"
-                :style="{ width: '90px' }"
-                placeholder="year"
-              />
-            </a-input-group>
-          </a-form-item>
-
-          <a-form-item field="eid" validate-trigger="blur" :label="$t('job')">
-            <select-job
-              v-if="jobTimerModalVisible"
-              v-model:eid="jobTimerForm.eid"
-              v-model:job-type="formModel.job_type"
-              @change-job="changeJob"
-            />
-          </a-form-item>
-          <a-form-item
-            v-if="jobTimerForm.job_args?.length > 0"
-            field="args"
-            :label="$t('job.arg')"
-            :tooltip="$t('job.arg.tips', { name: '{{name}}' })"
-          >
-            <job-args :args="jobTimerForm.job_args" />
-          </a-form-item>
-        </a-form>
-      </a-space>
-    </a-modal>
-    <a-modal
-      v-model:visible="dispatchJobTimerModalVisible"
-      title-align="start"
-      :draggable="true"
-      :ok-text="$t('job.dispatch')"
-      width="60%"
-      @before-ok="handleDispatchJobTimer"
-      @cancel="handleCancel"
-    >
-      <template #title> {{ $t('job.schedule') }}</template>
+  <!-- save workflow timer -->
+  <a-modal
+    v-model:visible="saveWorkflowTimerModalVisible"
+    title-align="start"
+    style="width: auto"
+    :draggable="true"
+    :ok-text="$t('form.save')"
+    width="50%"
+    @before-ok="handleSubmitWorkflowTimer"
+    @cancel="handleCancel"
+  >
+    <template #title> {{ $t('job.saveTimer') }}</template>
+    <a-space direction="vertical" size="large" :style="{ width: '500px' }">
       <a-form
-        ref="dispatchJobTimerRef"
-        :model="dispatchJobTimerForm"
-        :rules="dispatchJobTimerFormValidateRules"
+        ref="saveWorkflowTimerRef"
+        :rules="saveWorkflowTimerFormValidateRules"
+        :model="workflowTimerForm"
         :auto-label-width="true"
       >
         <a-form-item
-          field="schedule_name"
+          field="name"
+          required
           validate-trigger="blur"
-          :label="$t('job.schedule.name')"
+          :label="$t('workflow.timer.name')"
         >
-          <a-input v-model="dispatchJobTimerForm.schedule_name" />
+          <a-input v-model="workflowTimerForm.name" />
+        </a-form-item>
+        <a-form-item field="info" :label="$t('job.timer.info')">
+          <a-textarea v-model="workflowTimerForm.info" />
         </a-form-item>
 
-        <a-form-item field="eid" :disabled="true" :label="$t('job.timer')">
-          <SelectJobTimer
-            v-if="dispatchJobTimerModalVisible"
-            v-model:eid="dispatchJobTimerForm.eid"
-            v-model:job-type="dispatchJobTimerForm.job_type"
-            @change-timer="changeTimer"
-          />
-        </a-form-item>
         <a-form-item
-          v-if="dispatchJobTimerForm.args"
-          field="args"
-          :label="$t('job.arg')"
-          :tooltip="$t('job.arg.tips', { name: '{{name}}' })"
+          field="timer_expr"
+          required
+          :tooltip="$t('job.timerExpr.tooltips')"
+          :label="$t('job.timerExpr')"
         >
-          <job-args :args="dispatchJobTimerForm.args" />
-        </a-form-item>
-        <a-form-item
-          field="endpoints"
-          validate-trigger="blur"
-          :label="$t('job.endpoint')"
-        >
-          <SelectInstance
-            v-if="dispatchJobTimerModalVisible"
-            v-model="dispatchJobTimerForm.endpoints"
-          />
         </a-form-item>
       </a-form>
-    </a-modal>
-  </div>
+    </a-space>
+  </a-modal>
+
+  <!-- schedule workflow timer -->
+  <a-modal
+    v-model:visible="scheduleJobTimerModalVisible"
+    title-align="start"
+    :draggable="true"
+    :ok-text="$t('job.dispatch')"
+    width="60%"
+    @before-ok="handleScheduleWorkflowTimer"
+    @cancel="handleCancel"
+  >
+    <template #title> {{ $t('workflow.timer.schedule') }}</template>
+    <a-form
+      ref="scheduleWorkflowTimerRef"
+      :model="scheduleWorkflowTimerForm"
+      :rules="scheduleWorkflowTimerFormValidateRules"
+      :auto-label-width="true"
+    >
+    </a-form>
+  </a-modal>
 </template>
 
 <script lang="ts" setup>
@@ -395,49 +288,41 @@
   import TagItem from '@/components/tag-item/index.vue';
   import { genVersionFromTime } from '@/utils/time';
   import { useRouter } from 'vue-router';
-  import SelectInstance from '../components/select-instance.vue';
-  import SelectJobTimer from '../components/select-job-timer.vue';
-  import SelectJob from '../components/select-job.vue';
+  import {
+    CustomTimerExpr,
+    deleteWorkflowTimer,
+    queryWorkflowTimerList,
+    QueryWorkflowTimerListReq,
+    saveWorkflowTimer,
+    scheduleWorkflowTimer,
+    WorkflowTimerRecord,
+  } from '@/api/workflow';
 
   type SizeProps = 'mini' | 'small' | 'medium' | 'large';
   type Column = TableColumnData & { checked?: true };
-  const jobTimerModalVisible = ref(false);
-  const dispatchJobTimerModalVisible = ref(false);
-  const saveJobTimerRef = ref();
-  const dispatchJobTimerRef = ref();
+  const saveWorkflowTimerModalVisible = ref(false);
+  const scheduleJobTimerModalVisible = ref(false);
+  const saveWorkflowTimerRef = ref();
+  const scheduleWorkflowTimerRef = ref();
   const router = useRouter();
 
-  interface JobTimerForm {
+  interface WorkflowTimerForm {
     id: number;
-    job_args: JobArg[];
-    job_type: string;
     name: string;
-    timer_expr: TimerExpr;
-    eid: string;
-    executor_id: number;
+    timer_expr: CustomTimerExpr;
+    workflow_id: number;
+    version_id: number;
     info: string;
   }
 
-  interface DispatchJobTimerForm {
-    eid: string;
-    job_type: string;
-    schedule_name: string;
-    args: JobArg[];
-    namespace: string;
-    timer_expr: TimerExpr;
-    schedule_type: string;
-    action: string;
-    is_sync: boolean;
-    endpoints: endpoint[];
+  interface ScheduleWorkflowTimerForm {
+    id: number;
+    action: 'start_timer' | 'stop_timer';
   }
 
-  const defaultTimerExpr: TimerExpr = {
-    second: '',
-    minute: '',
-    hour: '',
-    day_of_month: '',
-    month: '',
-    year: '',
+  const defaultTimerExpr: CustomTimerExpr = {
+    zone: 'utc',
+    expr: '* * * * *',
   };
 
   const generateFormModel = () => {
@@ -449,39 +334,29 @@
   };
   const { loading, setLoading } = useLoading(true);
   const { t } = useI18n();
-  const renderData = ref<JobTimerRecord[]>([]);
+  const renderData = ref<WorkflowTimerRecord[]>([]);
   const formModel = ref(generateFormModel());
   const cloneColumns = ref<Column[]>([]);
   const showColumns = ref<Column[]>([]);
 
   const state = reactive<{
-    jobTimerForm: JobTimerForm;
-    dispatchJobTimerForm: DispatchJobTimerForm;
+    workflowTimerForm: WorkflowTimerForm;
+    scheduleWorkflowTimerForm: ScheduleWorkflowTimerForm;
   }>({
-    jobTimerForm: {
+    workflowTimerForm: {
       id: 0,
-      job_type: formModel.value.job_type,
       name: '',
-      executor_id: 0,
       timer_expr: defaultTimerExpr,
-      eid: '',
-      job_args: [],
       info: '',
+      workflow_id: 0,
+      version_id: 0,
     },
-    dispatchJobTimerForm: {
-      eid: '',
-      schedule_name: '',
-      namespace: 'default',
-      job_type: formModel.value.job_type,
-      timer_expr: defaultTimerExpr,
-      args: [],
-      schedule_type: 'once',
-      action: 'exec',
-      is_sync: false,
-      endpoints: [],
+    scheduleWorkflowTimerForm: {
+      id: 0,
+      action: 'start_timer',
     },
   });
-  const { jobTimerForm, dispatchJobTimerForm } = toRefs(state);
+  const { workflowTimerForm, scheduleWorkflowTimerForm } = toRefs(state);
 
   const size = ref<SizeProps>('medium');
 
@@ -517,10 +392,7 @@
       dataIndex: 'index',
       slotName: 'index',
     },
-    {
-      title: t('job.eid'),
-      dataIndex: 'eid',
-    },
+
     {
       title: t('job.timer.name'),
       dataIndex: 'name',
@@ -561,7 +433,7 @@
     },
   ]);
 
-  const jobTimerFormValidateRules = {
+  const saveWorkflowTimerFormValidateRules = {
     name: {
       required: true,
     },
@@ -585,7 +457,8 @@
       },
     },
   };
-  const dispatchJobTimerFormValidateRules = {
+
+  const scheduleWorkflowTimerFormValidateRules = {
     schedule_name: {
       required: true,
     },
@@ -595,7 +468,7 @@
   };
 
   const tagList = ref<TagRecord[]>([]);
-  const resourceType = ref('job');
+  const resourceType = ref('workflow');
 
   const initTagList = async () => {
     try {
@@ -616,16 +489,15 @@
   };
 
   const fetchData = async (
-    params: QueryJobReq = {
+    params: QueryWorkflowTimerListReq = {
       page: basePagination.page,
       page_size: basePagination.pageSize,
       tag_ids: tagIds.value,
-      job_type: formModel.value.job_type,
     }
   ) => {
     setLoading(true);
     try {
-      const { data } = await queryJobTimerList(params);
+      const { data } = await queryWorkflowTimerList(params);
 
       renderData.value = data.list;
       pagination.page = params.page;
@@ -644,41 +516,32 @@
   };
 
   const changeJob = (v: JobRecord) => {
-    if (v && !jobTimerForm.value.name) {
-      jobTimerForm.value.name = v?.name || '';
-    }
-    jobTimerForm.value.job_args = v.args ?? [];
-  };
-
-  const changeTimer = (v: JobTimerRecord) => {
-    if (v && v.job_args) {
-      dispatchJobTimerForm.value.args = v.job_args;
+    if (v && !workflowTimerForm.value.name) {
+      workflowTimerForm.value.name = v?.name || '';
     }
   };
 
-  const handleOpenJobTimerModal = (e: any, record: any) => {
-    saveJobTimerRef.value.clearValidate();
+  const handleOpenWorkflowTimerModal = (e: any, record: any) => {
+    saveWorkflowTimerRef.value.clearValidate();
     if (record) {
-      jobTimerForm.value = { ...record };
+      workflowTimerForm.value = { ...record };
     } else {
-      jobTimerForm.value = {
+      workflowTimerForm.value = {
         id: 0,
-        job_type: formModel.value.job_type,
         name: '',
-        eid: '',
-        job_args: [],
         timer_expr: defaultTimerExpr,
-        executor_id: 1,
         info: '',
+        workflow_id: 0,
+        version_id: 0,
       };
     }
-    jobTimerModalVisible.value = true;
+    saveWorkflowTimerModalVisible.value = true;
   };
 
-  const handleDeleteJobTimer = async (e: any, record: any) => {
+  const handleDeleteWorkflowTimer = async (e: any, record: any) => {
     setLoading(true);
     try {
-      await deleteJobTimer({
+      await deleteWorkflowTimer({
         id: record.id,
       });
     } finally {
@@ -689,9 +552,9 @@
     return true;
   };
 
-  const handleOpenDispatchJobTimerModal = (e: any, record: any) => {
-    dispatchJobTimerRef.value.clearValidate();
-    dispatchJobTimerForm.value = {
+  const handleOpenScheduleWorkflowTimerModal = (e: any, record: any) => {
+    scheduleWorkflowTimerRef.value.clearValidate();
+    scheduleWorkflowTimerForm.value = {
       ...record,
       ip: [],
       job_type: formModel.value.job_type,
@@ -699,50 +562,37 @@
       action: 'start_timer',
       schedule_type: 'timer',
     };
-    dispatchJobTimerModalVisible.value = true;
+    scheduleJobTimerModalVisible.value = true;
   };
 
-  const handleSubmitJobTimer = async () => {
-    const ret = await saveJobTimerRef.value.validate();
+  const handleSubmitWorkflowTimer = async () => {
+    const ret = await saveWorkflowTimerRef.value.validate();
     if (ret) {
       return false;
     }
     try {
-      const data = { ...jobTimerForm.value };
-      await saveJobTimer({
+      const data = { ...workflowTimerForm.value };
+      await saveWorkflowTimer({
         ...data,
       });
       Message.success(t('form.submit.success'));
     } catch (err) {
       return false;
     }
-
     search();
     return true;
   };
 
-  const handleDispatchJobTimer = async () => {
-    const ret = await dispatchJobTimerRef.value.validate();
+  const handleScheduleWorkflowTimer = async () => {
+    const ret = await scheduleWorkflowTimerRef.value.validate();
     if (ret) {
       return false;
     }
-    const args = {};
-    if (dispatchJobTimerForm.value.args) {
-      dispatchJobTimerForm.value.args.forEach((v) => {
-        args[v.name] = v.val;
-      });
-    }
 
     try {
-      await dispatchJob({
-        schedule_type: dispatchJobTimerForm.value.schedule_type as ScheduleType,
-        eid: dispatchJobTimerForm.value.eid,
-        schedule_name: dispatchJobTimerForm.value.schedule_name,
-        timer_expr: dispatchJobTimerForm.value.timer_expr,
-        action: dispatchJobTimerForm.value.action as JobAction,
-        args,
-        is_sync: false,
-        endpoints: dispatchJobTimerForm.value.endpoints,
+      await scheduleWorkflowTimer({
+        id: 0,
+        action: 'start_timer',
       });
     } catch (err) {
       return false;
@@ -762,7 +612,7 @@
   };
 
   const handleCancel = () => {
-    jobTimerModalVisible.value = false;
+    saveWorkflowTimerModalVisible.value = false;
   };
 
   const search = () => {

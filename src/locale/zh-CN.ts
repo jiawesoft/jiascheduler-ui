@@ -194,6 +194,7 @@ const localeWorkflow = {
   'menu.workflow.define': '流程定义',
   'menu.workflow.edit': '编辑流程',
   'menu.workflow.processList': '流程记录',
+  'menu.workflow.timer': '定时器',
 
   'workflow.name': '流程名',
   'workflow.info': '描述',
@@ -226,6 +227,9 @@ const localeWorkflow = {
   'workflow.action.confirm.delete': '确认要删除该流程么? ',
   'workflow.clear.records': '清空流程记录',
   'workflow.action.confirm.clear.records': '确认要清空流程记录么？',
+
+  'workflow.timer.save': '保存定时器',
+  'workflow.timer.name': '定时器',
 };
 
 const localeBase = {

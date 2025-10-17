@@ -199,6 +199,7 @@ const localeWorkflow = {
   'menu.workflow.define': 'Workflow Define',
   'menu.workflow.edit': 'Workflow Edit',
   'menu.workflow.processList': 'Process List',
+  'menu.workflow.timer': 'Timer List',
 
   'workflow.name': 'Name',
   'workflow.info': 'Info',
@@ -234,6 +235,8 @@ const localeWorkflow = {
   'workflow.clear.records': 'Clear workflow process records',
   'workflow.action.confirm.clear.records':
     'Are you sure you want to clear the workflow process records?',
+
+  'workflow.timer.save': '保存定时器',
 };
 
 const localeBase = {

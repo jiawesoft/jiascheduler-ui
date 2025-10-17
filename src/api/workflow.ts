@@ -344,3 +344,79 @@ export interface DeleteWorkflowProcessReq {
 export function deleteWorkflowProcess(data: DeleteWorkflowProcessReq) {
   return axios.post('/api/workflow/delete-process', data);
 }
+
+export interface CustomTimerExpr {
+  zone: string;
+  expr: string;
+}
+export interface WorkflowTimerRecord {
+  id: number;
+  workflow_id: number;
+  version_id: number;
+  timer_expr: CustomTimerExpr;
+  schedule_guid: string;
+  is_active: boolean;
+  tags?: { [key: string]: string }[];
+  team_id: number;
+  team_name: string;
+  created_user: string;
+  updated_user: string;
+  created_time: string;
+  updated_time: string;
+}
+
+export interface QueryWorkflowTimerListReq {
+  name?: string;
+  tag_ids?: number[];
+  page: number;
+  page_size: number;
+}
+
+export interface QueryWorkflowTimerListResp {
+  list: WorkflowTimerRecord[];
+  total: number;
+}
+
+export function queryWorkflowTimerList(params: QueryWorkflowTimerListReq) {
+  return axios.get<QueryWorkflowTimerListResp>('/api/workflow/timer/list', {
+    params,
+    paramsSerializer: (obj) => {
+      return qs.stringify(obj);
+    },
+  });
+}
+
+export interface SaveWorkflowTimerResp {
+  ret: number;
+}
+export type SaveWorkflowTimerReq = Partial<WorkflowTimerRecord>;
+
+export function saveWorkflowTimer(data: SaveWorkflowTimerReq) {
+  if (data?.id === 0) {
+    delete data.id;
+  }
+  return axios.post<SaveWorkflowResp>('/api/workflow/timer/save', data);
+}
+
+export interface ScheduleWorkflowTimerResp {
+  ret: string;
+}
+export interface ScheduleWorkflowTimerReq {
+  id: number;
+  action: 'start_timer' | 'stop_timer';
+}
+
+export function scheduleWorkflowTimer(req: ScheduleWorkflowTimerReq) {
+  return axios.post<ScheduleWorkflowTimerResp>(
+    '/api/workflow/timer/schedule',
+    req
+  );
+}
+
+export interface DeleteWorkflowTimerReq {
+  id: number;
+}
+
+export function deleteWorkflowTimer(data: DeleteWorkflowTimerReq) {
+  return axios.post('/api/workflow/delete', data);
+}
