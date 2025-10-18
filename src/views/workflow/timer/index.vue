@@ -191,69 +191,69 @@
         </template>
       </a-table>
     </a-card>
-  </div>
 
-  <!-- save workflow timer -->
-  <a-modal
-    v-model:visible="saveWorkflowTimerModalVisible"
-    title-align="start"
-    style="width: auto"
-    :draggable="true"
-    :ok-text="$t('form.save')"
-    width="50%"
-    @before-ok="handleSubmitWorkflowTimer"
-    @cancel="handleCancel"
-  >
-    <template #title> {{ $t('job.saveTimer') }}</template>
-    <a-space direction="vertical" size="large" :style="{ width: '500px' }">
+    <!-- save workflow timer -->
+    <a-modal
+      v-model:visible="saveWorkflowTimerModalVisible"
+      title-align="start"
+      style="width: auto"
+      :draggable="true"
+      :ok-text="$t('form.save')"
+      width="50%"
+      @before-ok="handleSubmitWorkflowTimer"
+      @cancel="handleCancel"
+    >
+      <template #title> {{ $t('job.saveTimer') }}</template>
+      <a-space direction="vertical" size="large" :style="{ width: '500px' }">
+        <a-form
+          ref="saveWorkflowTimerRef"
+          :rules="saveWorkflowTimerFormValidateRules"
+          :model="workflowTimerForm"
+          :auto-label-width="true"
+        >
+          <a-form-item
+            field="name"
+            required
+            validate-trigger="blur"
+            :label="$t('workflow.timer.name')"
+          >
+            <a-input v-model="workflowTimerForm.name" />
+          </a-form-item>
+          <a-form-item field="info" :label="$t('job.timer.info')">
+            <a-textarea v-model="workflowTimerForm.info" />
+          </a-form-item>
+
+          <a-form-item
+            field="timer_expr"
+            required
+            :tooltip="$t('job.timerExpr.tooltips')"
+            :label="$t('job.timerExpr')"
+          >
+          </a-form-item>
+        </a-form>
+      </a-space>
+    </a-modal>
+
+    <!-- schedule workflow timer -->
+    <a-modal
+      v-model:visible="scheduleJobTimerModalVisible"
+      title-align="start"
+      :draggable="true"
+      :ok-text="$t('job.dispatch')"
+      width="60%"
+      @before-ok="handleScheduleWorkflowTimer"
+      @cancel="handleCancel"
+    >
+      <template #title> {{ $t('workflow.timer.schedule') }}</template>
       <a-form
-        ref="saveWorkflowTimerRef"
-        :rules="saveWorkflowTimerFormValidateRules"
-        :model="workflowTimerForm"
+        ref="scheduleWorkflowTimerRef"
+        :model="scheduleWorkflowTimerForm"
+        :rules="scheduleWorkflowTimerFormValidateRules"
         :auto-label-width="true"
       >
-        <a-form-item
-          field="name"
-          required
-          validate-trigger="blur"
-          :label="$t('workflow.timer.name')"
-        >
-          <a-input v-model="workflowTimerForm.name" />
-        </a-form-item>
-        <a-form-item field="info" :label="$t('job.timer.info')">
-          <a-textarea v-model="workflowTimerForm.info" />
-        </a-form-item>
-
-        <a-form-item
-          field="timer_expr"
-          required
-          :tooltip="$t('job.timerExpr.tooltips')"
-          :label="$t('job.timerExpr')"
-        >
-        </a-form-item>
       </a-form>
-    </a-space>
-  </a-modal>
-
-  <!-- schedule workflow timer -->
-  <a-modal
-    v-model:visible="scheduleJobTimerModalVisible"
-    title-align="start"
-    :draggable="true"
-    :ok-text="$t('job.dispatch')"
-    width="60%"
-    @before-ok="handleScheduleWorkflowTimer"
-    @cancel="handleCancel"
-  >
-    <template #title> {{ $t('workflow.timer.schedule') }}</template>
-    <a-form
-      ref="scheduleWorkflowTimerRef"
-      :model="scheduleWorkflowTimerForm"
-      :rules="scheduleWorkflowTimerFormValidateRules"
-      :auto-label-width="true"
-    >
-    </a-form>
-  </a-modal>
+    </a-modal>
+  </div>
 </template>
 
 <script lang="ts" setup>

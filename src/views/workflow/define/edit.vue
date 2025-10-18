@@ -216,12 +216,7 @@
       </a-form-item>
 
       <template v-if="nodeConfig.task_type === 'standard'">
-        <a-form-item
-          field="eid"
-          validate-trigger="blur"
-          :label="$t('job')"
-          v-if="nodeConfig.task_type == 'standard'"
-        >
+        <a-form-item field="eid" validate-trigger="blur" :label="$t('job')">
           <SelectJob
             v-model:eid="nodeConfig.task.standard!.eid"
             job-type="default"

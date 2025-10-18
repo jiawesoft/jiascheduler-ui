@@ -44,7 +44,7 @@ const localeExecutor = {
 
 const localeJob = {
   'menu.repository.jobList': '作业',
-  'menu.repository.jobTimer': '定时器',
+  'menu.repository.jobTimer': '定时任务',
   'menu.repository.jobBundleScript': '脚本',
   'menu.repository.daemonJob': '常驻任务',
   'menu.runStatus.runList': '运行列表',
@@ -194,7 +194,7 @@ const localeWorkflow = {
   'menu.workflow.define': '流程定义',
   'menu.workflow.edit': '编辑流程',
   'menu.workflow.processList': '流程记录',
-  'menu.workflow.timer': '定时器',
+  'menu.workflow.timer': '定时流程',
 
   'workflow.name': '流程名',
   'workflow.info': '描述',
@@ -229,7 +229,8 @@ const localeWorkflow = {
   'workflow.action.confirm.clear.records': '确认要清空流程记录么？',
 
   'workflow.timer.save': '保存定时器',
-  'workflow.timer.name': '定时器',
+  'workflow.timer.name': '定时工作流',
+  'workflow.timer.schedule': '定时器调度',
 };
 
 const localeBase = {
