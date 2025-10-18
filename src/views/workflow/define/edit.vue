@@ -358,7 +358,7 @@
       </a-form-item>
     </a-form>
   </a-drawer>
-  <!-- edge config -->
+  <!-- save version -->
   <a-modal
     v-model:visible="workflowVersionModalVisible"
     title-align="start"
@@ -443,7 +443,7 @@
   import WorkflowNodeArgs from '@/components/workflow-node-args/index.vue';
   import SelectJob from '@/views/respository/components/select-job.vue';
   import SelectExecutor from '@/views/respository//components/select-executor.vue';
-  import { JobArg, JobRecord } from '@/api/job';
+  import { JobRecord } from '@/api/job';
   import SelectInstanceId from '../components/select-instance-id.vue';
 
   const { t } = useI18n();
@@ -791,6 +791,9 @@
     workflowId: number,
     versionId?: number
   ) => {
+    if (!lf.value) {
+      return;
+    }
     setLoading(true);
     try {
       const { data } = await getWorkflowDetail({
@@ -809,7 +812,8 @@
         info: data.workflow_info,
       };
 
-      lf.value?.render(graphData);
+      lf.value.render(graphData);
+      lf.value.translateCenter();
     } catch (err) {
       // you can report use errorHandler or other
     } finally {
@@ -929,7 +933,7 @@
 
       lf.value.register(CustomCurved);
 
-      (lf.value?.extension.menu as any).addMenuConfig({
+      (lf.value.extension.menu as any).addMenuConfig({
         nodeMenu: [
           {
             text: '属性',

@@ -583,7 +583,11 @@
   };
 
   const fetchWorkflowProcessDetail = async (processId: string) => {
+    if (!lf.value) {
+      return;
+    }
     setLoading(true);
+
     try {
       const { data } = await getWorkflowProcessDetail({
         process_id: processId,
@@ -598,7 +602,8 @@
         edges: edgeConfigs.value.map((v) => v.data) as any,
       };
 
-      lf.value?.render(graphData);
+      lf.value.render(graphData);
+      lf.value.translateCenter();
 
       data.completed_nodes.forEach((node) => {
         const hasErr = node.tasks.some((task) => task.exit_code !== 0);
