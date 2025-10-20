@@ -231,6 +231,8 @@ const localeWorkflow = {
   'workflow.timer.save': '保存定时器',
   'workflow.timer.name': '定时工作流',
   'workflow.timer.schedule': '定时器调度',
+  'workflow.timer.timezone': '时区',
+  'workflow.timer.refWorkflow': '工作流',
 };
 
 const localeBase = {

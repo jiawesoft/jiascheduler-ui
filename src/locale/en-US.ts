@@ -236,7 +236,11 @@ const localeWorkflow = {
   'workflow.action.confirm.clear.records':
     'Are you sure you want to clear the workflow process records?',
 
-  'workflow.timer.save': '保存定时器',
+  'workflow.timer.save': 'Save Timer',
+  'workflow.timer.name': 'Timer Expr',
+  'workflow.timer.schedule': 'Schedule Timer',
+  'workflow.timer.timezone': 'Timezone',
+  'workflow.timer.refWorkflow': 'Workflow Referenced',
 };
 
 const localeBase = {

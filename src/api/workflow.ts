@@ -98,6 +98,7 @@ export function releaseWorkflowVersion(data: ReleaseWorkflowVersionReq) {
 }
 
 export interface QueryWorkflowListReq {
+  id?: number;
   name?: string;
   tag_ids?: number[];
   page: number;
@@ -147,8 +148,9 @@ export function getWorkflowDetail(params: getWorkflowDetailReq) {
 
 export interface QueryWorkflowVersionListReq {
   version?: string;
-  workflow_id: number;
+  workflow_id?: number;
   default_id?: number;
+  id?: number;
   page: number;
   page_size: number;
 }
@@ -346,7 +348,7 @@ export function deleteWorkflowProcess(data: DeleteWorkflowProcessReq) {
 }
 
 export interface CustomTimerExpr {
-  zone: string;
+  timezone: string;
   expr: string;
 }
 export interface WorkflowTimerRecord {

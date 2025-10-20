@@ -199,39 +199,59 @@
       style="width: auto"
       :draggable="true"
       :ok-text="$t('form.save')"
-      width="50%"
+      width="auto"
       @before-ok="handleSubmitWorkflowTimer"
       @cancel="handleCancel"
     >
       <template #title> {{ $t('job.saveTimer') }}</template>
-      <a-space direction="vertical" size="large" :style="{ width: '500px' }">
-        <a-form
-          ref="saveWorkflowTimerRef"
-          :rules="saveWorkflowTimerFormValidateRules"
-          :model="workflowTimerForm"
-          :auto-label-width="true"
+      <a-form
+        ref="saveWorkflowTimerRef"
+        :rules="saveWorkflowTimerFormValidateRules"
+        :model="workflowTimerForm"
+        :auto-label-width="true"
+      >
+        <a-form-item
+          field="name"
+          required
+          validate-trigger="blur"
+          :label="$t('workflow.timer.name')"
         >
-          <a-form-item
-            field="name"
-            required
-            validate-trigger="blur"
-            :label="$t('workflow.timer.name')"
-          >
-            <a-input v-model="workflowTimerForm.name" />
-          </a-form-item>
-          <a-form-item field="info" :label="$t('job.timer.info')">
-            <a-textarea v-model="workflowTimerForm.info" />
-          </a-form-item>
+          <a-input v-model="workflowTimerForm.name" />
+        </a-form-item>
+        <a-form-item field="info" :label="$t('job.timer.info')">
+          <a-textarea v-model="workflowTimerForm.info" />
+        </a-form-item>
 
-          <a-form-item
-            field="timer_expr"
-            required
-            :tooltip="$t('job.timerExpr.tooltips')"
-            :label="$t('job.timerExpr')"
-          >
-          </a-form-item>
-        </a-form>
-      </a-space>
+        <a-form-item
+          field="timer_expr"
+          required
+          :tooltip="$t('job.timerExpr.tooltips')"
+          :label="$t('job.timerExpr')"
+        >
+          <a-input-group>
+            <a-select
+              :options="['local', 'utc']"
+              :style="{ width: '160px' }"
+              placeholder="timezone"
+              v-model="workflowTimerForm.timer_expr.timezone"
+            />
+            <a-input
+              v-model="workflowTimerForm.timer_expr.expr"
+              placeholder="timer expr"
+              style="width: 100%"
+            />
+          </a-input-group>
+        </a-form-item>
+        <a-form-item
+          field="ref_workflow"
+          :label="$t('workflow.timer.refWorkflow')"
+        >
+          <select-workflow
+            :workflow-id="workflowTimerForm.workflow_id"
+            :version-id="workflowTimerForm.version_id"
+          />
+        </a-form-item>
+      </a-form>
     </a-modal>
 
     <!-- schedule workflow timer -->
@@ -286,6 +306,7 @@
   import JobArgs from '@/components/job-args/index.vue';
   import TableTagItem from '@/components/table-tag-item/index.vue';
   import TagItem from '@/components/tag-item/index.vue';
+  import SelectWorkflow from '@/views/workflow/components/select-workflow.vue';
   import { genVersionFromTime } from '@/utils/time';
   import { useRouter } from 'vue-router';
   import {
@@ -321,7 +342,7 @@
   }
 
   const defaultTimerExpr: CustomTimerExpr = {
-    zone: 'utc',
+    timezone: 'local',
     expr: '* * * * *',
   };
 
@@ -437,21 +458,12 @@
     name: {
       required: true,
     },
-    eid: {
-      required: true,
-    },
+
     timer_expr: {
       required: true,
       type: 'object' as any,
       validator: (value: any, cb: (error?: string) => void) => {
-        if (
-          !value.second ||
-          !value.minute ||
-          !value.hour ||
-          !value.day_of_month ||
-          !value.month ||
-          !value.year
-        ) {
+        if (value.expr === '') {
           cb(t('job.timerExpr.validation.error'));
         }
       },
