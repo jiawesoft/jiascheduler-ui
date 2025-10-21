@@ -114,7 +114,7 @@ const localeJob = {
   'job.saveTimer': 'Save Timer',
   'job.timerExpr': 'Timer Expression',
   'job.timerExpr.tooltips':
-    'Comma-separated values (like 5,8,10) represent multiple time values. For example, a schedule of 0 2,14,26 * * * will execute at the 0th, 2nd, 14th, and 26th minutes of every hour.\nRanges can be specified with hyphens. A schedule of 0 0 * 5-10 * * will execute once an hour, but only on the 5th to 10th days of the month.\nThe day of the week can be specified as an abbreviation or full name. A schedule of 0 0 6 * * Sun,Sat will execute at 6 am on Sundays and Saturdays.',
+    'Using the cron format, the system can automatically verify the timer settings upon saving and generate a preview of the next execution time',
   'job.timer.info': 'Description',
   'job.timer.name': 'Name',
   'job.timer.name.placeholder': 'Please enter a name',
@@ -237,10 +237,21 @@ const localeWorkflow = {
     'Are you sure you want to clear the workflow process records?',
 
   'workflow.timer.save': 'Save Timer',
-  'workflow.timer.name': 'Timer Expr',
+  'workflow.timer.name': 'Name',
+  'workflow.timer.info': 'Info',
   'workflow.timer.schedule': 'Schedule Timer',
   'workflow.timer.timezone': 'Timezone',
+  'workflow.timer.expr': 'Expr',
   'workflow.timer.refWorkflow': 'Workflow Referenced',
+  'workflow.timer.refWorkflow.workflowPlaceholder': 'please select workflow',
+  'workflow.timer.refWorkflow.versionPlaceholder':
+    'please select workflow version',
+  'workflow.timer.refWorkflow.validation.error':
+    'The timer is not associated with a workflow',
+  'workflow.timer.nextExecTimePreview': 'Next execution time preview',
+  'workflow.timer.status': 'Status',
+  'workflow.timer.running': 'Running',
+  'workflow.timer.notStarted': 'NotStarted',
 };
 
 const localeBase = {
@@ -451,6 +462,7 @@ export default {
   'operations.next': 'Next',
 
   ...localeJob,
+  ...localeWorkflow,
   ...localeExecutor,
 
   ...localeUserAndPermissions,

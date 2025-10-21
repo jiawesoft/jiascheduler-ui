@@ -149,6 +149,19 @@
         <template #index="{ rowIndex }">
           {{ rowIndex + 1 + (pagination.page - 1) * pagination.pageSize }}
         </template>
+        <template #timerExpr="{ record }">
+          <a-tag color="arcoblue">
+            {{ record.timer_expr.timezone }} : {{ record.timer_expr.expr }}
+          </a-tag>
+        </template>
+        <template #isActive="{ record }">
+          <a-tag v-if="record.is_active" color="green">
+            {{ t('workflow.timer.running') }}
+          </a-tag>
+          <a-tag v-else color="blue">
+            {{ t('workflow.timer.notStarted') }}
+          </a-tag>
+        </template>
         <template #tags="{ record }">
           <table-tag-item
             :tag-list="record.tags"
@@ -247,8 +260,9 @@
           :label="$t('workflow.timer.refWorkflow')"
         >
           <select-workflow
-            :workflow-id="workflowTimerForm.workflow_id"
-            :version-id="workflowTimerForm.version_id"
+            v-if="saveWorkflowTimerModalVisible"
+            v-model:workflow-id="workflowTimerForm.workflow_id"
+            v-model:version-id="workflowTimerForm.version_id"
           />
         </a-form-item>
       </a-form>
@@ -260,7 +274,7 @@
       title-align="start"
       :draggable="true"
       :ok-text="$t('job.dispatch')"
-      width="60%"
+      width="61.8%"
       @before-ok="handleScheduleWorkflowTimer"
       @cancel="handleCancel"
     >
@@ -298,10 +312,10 @@
   import type { TableColumnData } from '@arco-design/web-vue/es/table/interface';
   import cloneDeep from 'lodash/cloneDeep';
   import Sortable from 'sortablejs';
-  import { computed, nextTick, reactive, ref, toRefs, watch } from 'vue';
+  import { computed, h, nextTick, reactive, ref, toRefs, watch } from 'vue';
   import { useI18n } from 'vue-i18n';
 
-  import { Message } from '@arco-design/web-vue';
+  import { Message, Modal } from '@arco-design/web-vue';
 
   import JobArgs from '@/components/job-args/index.vue';
   import TableTagItem from '@/components/table-tag-item/index.vue';
@@ -318,6 +332,7 @@
     scheduleWorkflowTimer,
     WorkflowTimerRecord,
   } from '@/api/workflow';
+  import { require } from 'ace-builds';
 
   type SizeProps = 'mini' | 'small' | 'medium' | 'large';
   type Column = TableColumnData & { checked?: true };
@@ -415,25 +430,27 @@
     },
 
     {
-      title: t('job.timer.name'),
+      title: t('workflow.timer.name'),
       dataIndex: 'name',
     },
     {
-      title: t('job'),
-      dataIndex: 'job_name',
+      title: t('workflow.timer.expr'),
+      dataIndex: 'timer_expr',
+      slotName: 'timerExpr',
     },
     {
-      title: t('job.timer.info'),
+      title: t('workflow.timer.status'),
+      dataIndex: 'is_active',
+      slotName: 'isActive',
+    },
+    {
+      title: t('workflow.timer.info'),
       dataIndex: 'info',
     },
     {
       title: t('tag.name'),
       dataIndex: 'tags',
       slotName: 'tags',
-    },
-    {
-      title: t('job.executor'),
-      dataIndex: 'executor_name',
     },
     {
       title: t('team.name'),
@@ -465,6 +482,18 @@
       validator: (value: any, cb: (error?: string) => void) => {
         if (value.expr === '') {
           cb(t('job.timerExpr.validation.error'));
+        }
+      },
+    },
+    ref_workflow: {
+      required: true,
+      type: 'object' as any,
+      validator: (value: any, cb: (error?: string) => void) => {
+        if (
+          !workflowTimerForm.value.version_id ||
+          !workflowTimerForm.value.workflow_id
+        ) {
+          cb(t('workflow.timer.refWorkflow.validation.error'));
         }
       },
     },
@@ -534,6 +563,7 @@
   };
 
   const handleOpenWorkflowTimerModal = (e: any, record: any) => {
+    saveWorkflowTimerModalVisible.value = true;
     saveWorkflowTimerRef.value.clearValidate();
     if (record) {
       workflowTimerForm.value = { ...record };
@@ -547,7 +577,6 @@
         version_id: 0,
       };
     }
-    saveWorkflowTimerModalVisible.value = true;
   };
 
   const handleDeleteWorkflowTimer = async (e: any, record: any) => {
@@ -583,11 +612,21 @@
       return false;
     }
     try {
-      const data = { ...workflowTimerForm.value };
-      await saveWorkflowTimer({
-        ...data,
+      const params = { ...workflowTimerForm.value };
+      const { data } = await saveWorkflowTimer({
+        ...params,
       });
-      Message.success(t('form.submit.success'));
+
+      Modal.success({
+        title: t('form.submit.success'),
+        content: () => {
+          const inner = data.next_exec_times.map((v) => {
+            return h('div', v);
+          });
+          inner.unshift(h('p', t('workflow.timer.nextPreview')));
+          return inner;
+        },
+      });
     } catch (err) {
       return false;
     }
@@ -633,7 +672,6 @@
       page_size: basePagination.pageSize,
       ...formModel.value,
       tag_ids: tagIds.value,
-      job_type: formModel.value.job_type,
     } as unknown as QueryJobReq);
   };
   const onPageChange = (current: number) => {

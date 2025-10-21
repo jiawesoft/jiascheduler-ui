@@ -66,7 +66,7 @@ export interface EdgeConfig {
 }
 
 export interface WorkflowRecord {
-  id?: number;
+  id: number;
   name: string;
   info: string;
   nodes: NodeConfig[];
@@ -74,7 +74,8 @@ export interface WorkflowRecord {
 }
 
 export interface SaveWorkflowResp {
-  ret: number;
+  result: number;
+  next_exec_times: string[];
 }
 export type SaveWorkflowReq = Partial<WorkflowRecord>;
 
@@ -149,7 +150,6 @@ export function getWorkflowDetail(params: getWorkflowDetailReq) {
 export interface QueryWorkflowVersionListReq {
   version?: string;
   workflow_id?: number;
-  default_id?: number;
   id?: number;
   page: number;
   page_size: number;

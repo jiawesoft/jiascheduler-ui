@@ -3,12 +3,12 @@
     <a-select
       v-model="workflowId"
       :loading="loading"
-      :style="{ width: '300' }"
+      :style="{ width: '200px' }"
       :filter-option="false"
       :fallback-option="false"
       allow-clear
       allow-search
-      placeholder="please select workflow"
+      :placeholder="$t('workflow.timer.refWorkflow.workflowPlaceholder')"
       @search="handleSearchWorkflow"
       @change="changeWorkflow"
     >
@@ -19,16 +19,15 @@
         >{{ item.name }}</a-option
       >
     </a-select>
-
     <a-select
       v-model="versionId"
       :loading="loading"
-      :style="{ width: '300' }"
+      :style="{ width: '200px' }"
       :filter-option="false"
       :fallback-option="false"
       allow-clear
       allow-search
-      placeholder="please select workflow version"
+      :placeholder="$t('workflow.timer.refWorkflow.versionPlaceholder')"
       @search="handleSearchWorkflowVersion"
       @change="changeWorkflowVersion"
     >
@@ -36,7 +35,6 @@
         v-for="item of workflowVersionOptions"
         :key="item.id"
         :value="item.id"
-        :label="item.version_info"
         >{{ item.version }}</a-option
       >
     </a-select>
@@ -114,7 +112,13 @@
     emit('changeWorkflowVersion', current);
   };
 
-  fetchWorkflow({ page: 1, page_size: 1000 });
+  fetchWorkflow({ id: workflowId.value, page: 1, page_size: 1000 });
+  fetchWorkflowVersion({
+    id: versionId.value,
+    workflow_id: workflowId.value,
+    page: 1,
+    page_size: 1000,
+  });
 
   watch(
     () => workflowId.value,
@@ -133,13 +137,7 @@
     () => versionId.value,
     (val) => {
       emit('update:versionId', val);
-      fetchWorkflowVersion({
-        workflow_id: val,
-        id: val,
-        page: 1,
-        page_size: 100,
-      });
     },
-    { deep: true, immediate: true }
+    { deep: true, immediate: false }
   );
 </script>

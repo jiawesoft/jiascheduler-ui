@@ -110,9 +110,9 @@ const localeJob = {
 
   'job.timer': '定时器',
   'job.saveTimer': '保存定时器',
-  'job.timerExpr': '时间表达式',
+  'job.timerExpr': '表达式',
   'job.timerExpr.tooltips':
-    '请注意, 逗号分隔的值 (如5,8,10) 表示多个时间值。例如, 0 2,14,26 * * *的时间表将在每小时的第0、2、14和26分钟执行。\n范围可以用短划线指定。0 0 * 5-10 * *的时间表将每小时执行一次, 但仅在当月的第5天到第10天执行。\n星期几可以指定为缩写或全名。0 0 6 * * Sun,Sat 的时间表将在周日和周六早上6点执行。',
+    '采用cron格式, 定时器保存时系统可自动校验, 并支持预览下次执行时间 (基于 https://github.com/hexagon/croner-rust 实现)',
   'job.timer.info': '简介',
   'job.timer.name': '名称',
   'job.timer.name.placeholder': '请输入名称',
@@ -229,10 +229,19 @@ const localeWorkflow = {
   'workflow.action.confirm.clear.records': '确认要清空流程记录么？',
 
   'workflow.timer.save': '保存定时器',
-  'workflow.timer.name': '定时工作流',
+  'workflow.timer.name': '名称',
+  'workflow.timer.info': '描述',
   'workflow.timer.schedule': '定时器调度',
   'workflow.timer.timezone': '时区',
+  'workflow.timer.expr': '表达式',
   'workflow.timer.refWorkflow': '工作流',
+  'workflow.timer.refWorkflow.workflowPlaceholder': '请选择工作流',
+  'workflow.timer.refWorkflow.versionPlaceholder': '请选择版本',
+  'workflow.timer.refWorkflow.validation.error': '定时器未关联工作流',
+  'workflow.timer.nextPreview': '下次执行时间预览',
+  'workflow.timer.status': '状态',
+  'workflow.timer.running': '运行中',
+  'workflow.timer.notStarted': '未启动',
 };
 
 const localeBase = {
