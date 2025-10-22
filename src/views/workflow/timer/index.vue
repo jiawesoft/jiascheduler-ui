@@ -173,33 +173,44 @@
 
         <template #operations="{ record }">
           <a-space direction="horizontal">
-            <a-space>
-              <a-button
-                size="mini"
-                @click="handleOpenWorkflowTimerModal($event, record)"
-              >
-                {{ $t('operations.edit') }}
+            <a-button
+              size="mini"
+              @click="handleOpenWorkflowTimerModal($event, record)"
+            >
+              {{ $t('operations.edit') }}
+            </a-button>
+
+            <a-popconfirm
+              v-if="record.is_active"
+              :content="$t('job.action.confirm.deleteJobTimer')"
+              @before-ok="
+                handleScheduleWorkflowTimer($event, record, 'stop_timer')
+              "
+            >
+              <a-button size="small" status="danger">
+                {{ $t('operations.stop') }}
               </a-button>
-            </a-space>
-            <a-space>
-              <a-button
-                size="small"
-                status="success"
-                @click="handleOpenScheduleWorkflowTimerModal($event, record)"
-              >
-                {{ $t('operations.dispatch') }}
+            </a-popconfirm>
+            <a-popconfirm
+              v-else
+              :content="$t('job.action.confirm.deleteJobTimer')"
+              @before-ok="
+                handleScheduleWorkflowTimer($event, record, 'start_timer')
+              "
+            >
+              <a-button size="small" status="success">
+                {{ $t('operations.start') }}
               </a-button>
-            </a-space>
-            <a-space>
-              <a-popconfirm
-                :content="$t('job.action.confirm.deleteJobTimer')"
-                @before-ok="handleDeleteWorkflowTimer($event, record)"
-              >
-                <a-button type="dashed" size="mini" status="danger">
-                  {{ $t('operations.delete') }}
-                </a-button>
-              </a-popconfirm>
-            </a-space>
+            </a-popconfirm>
+
+            <a-popconfirm
+              :content="$t('job.action.confirm.deleteJobTimer')"
+              @before-ok="handleDeleteWorkflowTimer($event, record)"
+            >
+              <a-button type="dashed" size="mini" status="danger">
+                {{ $t('operations.delete') }}
+              </a-button>
+            </a-popconfirm>
           </a-space>
         </template>
       </a-table>
@@ -209,10 +220,8 @@
     <a-modal
       v-model:visible="saveWorkflowTimerModalVisible"
       title-align="start"
-      style="width: auto"
       :draggable="true"
       :ok-text="$t('form.save')"
-      width="auto"
       @before-ok="handleSubmitWorkflowTimer"
       @cancel="handleCancel"
     >
@@ -267,43 +276,15 @@
         </a-form-item>
       </a-form>
     </a-modal>
-
-    <!-- schedule workflow timer -->
-    <a-modal
-      v-model:visible="scheduleJobTimerModalVisible"
-      title-align="start"
-      :draggable="true"
-      :ok-text="$t('job.dispatch')"
-      width="61.8%"
-      @before-ok="handleScheduleWorkflowTimer"
-      @cancel="handleCancel"
-    >
-      <template #title> {{ $t('workflow.timer.schedule') }}</template>
-      <a-form
-        ref="scheduleWorkflowTimerRef"
-        :model="scheduleWorkflowTimerForm"
-        :rules="scheduleWorkflowTimerFormValidateRules"
-        :auto-label-width="true"
-      >
-      </a-form>
-    </a-modal>
   </div>
 </template>
 
 <script lang="ts" setup>
   import {
     deleteJobTimer,
-    dispatchJob,
-    endpoint,
-    JobAction,
-    JobArg,
     JobRecord,
     JobTimerRecord,
     QueryJobReq,
-    queryJobTimerList,
-    saveJobTimer,
-    ScheduleType,
-    TimerExpr,
   } from '@/api/job';
   import { queryCountResource, TagRecord } from '@/api/tag';
   import useLoading from '@/hooks/loading';
@@ -316,9 +297,6 @@
   import { useI18n } from 'vue-i18n';
 
   import { Message, Modal } from '@arco-design/web-vue';
-
-  import JobArgs from '@/components/job-args/index.vue';
-  import TableTagItem from '@/components/table-tag-item/index.vue';
   import TagItem from '@/components/tag-item/index.vue';
   import SelectWorkflow from '@/views/workflow/components/select-workflow.vue';
   import { genVersionFromTime } from '@/utils/time';
@@ -581,6 +559,7 @@
 
   const handleDeleteWorkflowTimer = async (e: any, record: any) => {
     setLoading(true);
+
     try {
       await deleteWorkflowTimer({
         id: record.id,
@@ -591,19 +570,6 @@
 
     search();
     return true;
-  };
-
-  const handleOpenScheduleWorkflowTimerModal = (e: any, record: any) => {
-    scheduleWorkflowTimerRef.value.clearValidate();
-    scheduleWorkflowTimerForm.value = {
-      ...record,
-      ip: [],
-      job_type: formModel.value.job_type,
-      schedule_name: `${record.name}-${genVersionFromTime()}`,
-      action: 'start_timer',
-      schedule_type: 'timer',
-    };
-    scheduleJobTimerModalVisible.value = true;
   };
 
   const handleSubmitWorkflowTimer = async () => {
@@ -634,31 +600,30 @@
     return true;
   };
 
-  const handleScheduleWorkflowTimer = async () => {
-    const ret = await scheduleWorkflowTimerRef.value.validate();
-    if (ret) {
-      return false;
-    }
-
+  const handleScheduleWorkflowTimer = async (
+    e: any,
+    record: any,
+    action: 'start_timer' | 'stop_timer'
+  ) => {
     try {
       await scheduleWorkflowTimer({
-        id: 0,
-        action: 'start_timer',
+        id: record.id,
+        action,
       });
     } catch (err) {
       return false;
     }
 
     Message.success(t('form.submit.success'));
-    setTimeout(() => {
-      router.push({
-        path: '/run-status/run-list',
-        query: {
-          scheduleType: 'timer',
-          jobType: formModel.value.job_type,
-        },
-      });
-    }, 200);
+    // setTimeout(() => {
+    //   router.push({
+    //     path: '/run-status/run-list',
+    //     query: {
+    //       scheduleType: 'timer',
+    //       jobType: formModel.value.job_type,
+    //     },
+    //   });
+    // }, 200);
     return true;
   };
 

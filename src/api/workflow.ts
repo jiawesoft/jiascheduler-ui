@@ -420,5 +420,5 @@ export interface DeleteWorkflowTimerReq {
 }
 
 export function deleteWorkflowTimer(data: DeleteWorkflowTimerReq) {
-  return axios.post('/api/workflow/delete', data);
+  return axios.post('/api/workflow/timer/delete', data);
 }
