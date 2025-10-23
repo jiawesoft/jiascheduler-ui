@@ -158,6 +158,13 @@
           <a-tag v-if="record.is_active" color="green">
             {{ t('workflow.timer.running') }}
           </a-tag>
+          <a-tag
+            v-else-if="!record.is_active && record.startup_error !== ''"
+            :title="record.startup_error"
+            color="red"
+          >
+            {{ t('workflow.timer.startupError') }}
+          </a-tag>
           <a-tag v-else color="blue">
             {{ t('workflow.timer.notStarted') }}
           </a-tag>

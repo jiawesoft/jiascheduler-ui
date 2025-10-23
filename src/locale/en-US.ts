@@ -252,6 +252,7 @@ const localeWorkflow = {
   'workflow.timer.status': 'Status',
   'workflow.timer.running': 'Running',
   'workflow.timer.notStarted': 'NotStarted',
+  'workflow.timer.startupError': 'StartupError',
 };
 
 const localeBase = {
