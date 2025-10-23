@@ -252,10 +252,10 @@
         >
           <a-input-group>
             <a-select
+              v-model="workflowTimerForm.timer_expr.timezone"
               :options="['local', 'utc']"
               :style="{ width: '160px' }"
               placeholder="timezone"
-              v-model="workflowTimerForm.timer_expr.timezone"
             />
             <a-input
               v-model="workflowTimerForm.timer_expr.expr"
@@ -280,16 +280,10 @@
 </template>
 
 <script lang="ts" setup>
-  import {
-    deleteJobTimer,
-    JobRecord,
-    JobTimerRecord,
-    QueryJobReq,
-  } from '@/api/job';
   import { queryCountResource, TagRecord } from '@/api/tag';
   import useLoading from '@/hooks/loading';
   import { Pagination } from '@/types/global';
-  import type { SelectOptionData } from '@arco-design/web-vue/es/select/interface';
+
   import type { TableColumnData } from '@arco-design/web-vue/es/table/interface';
   import cloneDeep from 'lodash/cloneDeep';
   import Sortable from 'sortablejs';
@@ -299,7 +293,6 @@
   import { Message, Modal } from '@arco-design/web-vue';
   import TagItem from '@/components/tag-item/index.vue';
   import SelectWorkflow from '@/views/workflow/components/select-workflow.vue';
-  import { genVersionFromTime } from '@/utils/time';
   import { useRouter } from 'vue-router';
   import {
     CustomTimerExpr,
@@ -310,14 +303,11 @@
     scheduleWorkflowTimer,
     WorkflowTimerRecord,
   } from '@/api/workflow';
-  import { require } from 'ace-builds';
 
   type SizeProps = 'mini' | 'small' | 'medium' | 'large';
   type Column = TableColumnData & { checked?: true };
   const saveWorkflowTimerModalVisible = ref(false);
-  const scheduleJobTimerModalVisible = ref(false);
   const saveWorkflowTimerRef = ref();
-  const scheduleWorkflowTimerRef = ref();
   const router = useRouter();
 
   interface WorkflowTimerForm {
@@ -327,11 +317,6 @@
     workflow_id: number;
     version_id: number;
     info: string;
-  }
-
-  interface ScheduleWorkflowTimerForm {
-    id: number;
-    action: 'start_timer' | 'stop_timer';
   }
 
   const defaultTimerExpr: CustomTimerExpr = {
@@ -355,7 +340,6 @@
 
   const state = reactive<{
     workflowTimerForm: WorkflowTimerForm;
-    scheduleWorkflowTimerForm: ScheduleWorkflowTimerForm;
   }>({
     workflowTimerForm: {
       id: 0,
@@ -365,12 +349,8 @@
       workflow_id: 0,
       version_id: 0,
     },
-    scheduleWorkflowTimerForm: {
-      id: 0,
-      action: 'start_timer',
-    },
   });
-  const { workflowTimerForm, scheduleWorkflowTimerForm } = toRefs(state);
+  const { workflowTimerForm } = toRefs(state);
 
   const size = ref<SizeProps>('medium');
 
@@ -477,15 +457,6 @@
     },
   };
 
-  const scheduleWorkflowTimerFormValidateRules = {
-    schedule_name: {
-      required: true,
-    },
-    endpoints: {
-      required: true,
-    },
-  };
-
   const tagList = ref<TagRecord[]>([]);
   const resourceType = ref('workflow');
 
@@ -532,12 +503,6 @@
   const refreshPage = () => {
     initTagList();
     fetchData();
-  };
-
-  const changeJob = (v: JobRecord) => {
-    if (v && !workflowTimerForm.value.name) {
-      workflowTimerForm.value.name = v?.name || '';
-    }
   };
 
   const handleOpenWorkflowTimerModal = (e: any, record: any) => {
@@ -615,15 +580,7 @@
     }
 
     Message.success(t('form.submit.success'));
-    // setTimeout(() => {
-    //   router.push({
-    //     path: '/run-status/run-list',
-    //     query: {
-    //       scheduleType: 'timer',
-    //       jobType: formModel.value.job_type,
-    //     },
-    //   });
-    // }, 200);
+    search();
     return true;
   };
 
@@ -637,7 +594,7 @@
       page_size: basePagination.pageSize,
       ...formModel.value,
       tag_ids: tagIds.value,
-    } as unknown as QueryJobReq);
+    } as unknown as QueryWorkflowTimerListReq);
   };
   const onPageChange = (current: number) => {
     fetchData({
