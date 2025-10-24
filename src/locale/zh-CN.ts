@@ -243,6 +243,7 @@ const localeWorkflow = {
   'workflow.timer.running': '运行中',
   'workflow.timer.notStarted': '未启动',
   'workflow.timer.startupError': '启动失败',
+  'workflow.process.timer': '定时器',
 };
 
 const localeBase = {

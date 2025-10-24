@@ -153,6 +153,13 @@
       ></table-tag-item>
     </template>
 
+    <template #timerName="{ record }">
+      <a-typography-text v-if="record.timer_name">
+        {{ record.timer_name }}
+      </a-typography-text>
+      <a-typography-text v-else> -- </a-typography-text>
+    </template>
+
     <template #operations="{ record }">
       <a-button
         type="text"
@@ -322,12 +329,18 @@
       width: 120,
     },
     {
+      title: t('workflow.process.timer'),
+      dataIndex: 'timer_name',
+      width: 120,
+      slotName: 'timerName',
+    },
+    {
       title: t('columns.createdUser'),
       dataIndex: 'created_user',
       width: 100,
     },
     {
-      title: t('columns.createdUser'),
+      title: t('columns.createdTime'),
       dataIndex: 'created_time',
       width: 140,
     },
