@@ -243,6 +243,13 @@ const localeWorkflow = {
   'workflow.timer.running': '运行中',
   'workflow.timer.notStarted': '未启动',
   'workflow.timer.startupError': '启动失败',
+
+  'workflow.userVariables': '用户变量',
+  'workflow.userVariables.name': '变量名',
+  'workflow.userVariables.val': '值',
+  'workflow.userVariables.defVal': '默认值',
+  'workflow.userVariables.info': '描述',
+
   'workflow.process.timer': '定时器',
 };
 

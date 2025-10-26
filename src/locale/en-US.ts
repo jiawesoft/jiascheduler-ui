@@ -254,6 +254,12 @@ const localeWorkflow = {
   'workflow.timer.notStarted': 'NotStarted',
   'workflow.timer.startupError': 'StartupError',
 
+  'workflow.userVariables': 'User Variables',
+  'workflow.userVariables.name': 'Variable',
+  'workflow.userVariables.val': 'alue',
+  'workflow.userVariables.defVal': 'Default Value',
+  'workflow.userVariables.info': 'Info',
+
   'workflow.process.timer': 'Timer',
 };
 

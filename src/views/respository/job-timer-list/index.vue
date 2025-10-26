@@ -369,7 +369,7 @@
     dispatchJob,
     endpoint,
     JobAction,
-    JobArg,
+    WorkflowUserVariables,
     JobRecord,
     JobTimerRecord,
     QueryJobReq,
@@ -409,7 +409,7 @@
 
   interface JobTimerForm {
     id: number;
-    job_args: JobArg[];
+    job_args: WorkflowUserVariables[];
     job_type: string;
     name: string;
     timer_expr: TimerExpr;
@@ -422,7 +422,7 @@
     eid: string;
     job_type: string;
     schedule_name: string;
-    args: JobArg[];
+    args: WorkflowUserVariables[];
     namespace: string;
     timer_expr: TimerExpr;
     schedule_type: string;

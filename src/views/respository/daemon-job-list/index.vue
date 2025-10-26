@@ -312,7 +312,7 @@
     dispatchJob,
     endpoint,
     JobAction,
-    JobArg,
+    WorkflowUserVariables,
     JobRecord,
     JobSupervisorRecord,
     QueryJobReq,
@@ -355,7 +355,7 @@
     id: number;
     name: string;
     eid: string;
-    job_args: JobArg[];
+    job_args: WorkflowUserVariables[];
     executor_id: number;
     info: string;
     restart_interval: number;
@@ -369,7 +369,7 @@
     restart_interval: number;
     schedule_type: string;
     action: string;
-    args: JobArg[];
+    args: WorkflowUserVariables[];
     endpoints: endpoint[];
   }
 

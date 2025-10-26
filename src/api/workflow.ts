@@ -64,13 +64,18 @@ export interface EdgeConfig {
     [key: string]: any;
   };
 }
-
+export interface WorkflowUserVariables {
+  name: string;
+  val: string;
+  info: string;
+}
 export interface WorkflowRecord {
   id: number;
   name: string;
   info: string;
   nodes: NodeConfig[];
   edges: EdgeConfig[];
+  user_variables: WorkflowUserVariables[];
 }
 
 export interface SaveWorkflowResp {
@@ -136,6 +141,7 @@ export interface getWorkflowDetailResp {
   updated_time: string;
   nodes: NodeConfig[];
   edges: EdgeConfig[];
+  user_variables: WorkflowUserVariables[];
 }
 
 export function getWorkflowDetail(params: getWorkflowDetailReq) {

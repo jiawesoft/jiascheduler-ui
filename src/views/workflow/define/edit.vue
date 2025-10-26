@@ -24,6 +24,17 @@
             <a-form-item field="info" :label="$t('workflow.info')">
               <a-textarea v-model="workflowBasicInfoForm.info" />
             </a-form-item>
+
+            <a-form-item
+              field="user_variables"
+              :label="$t('workflow.userVariables')"
+            >
+              <workflow-user-variables
+                :key="workflowBasicInfoForm.name"
+                v-model:args="workflowBasicInfoForm.user_variables"
+                controlled
+              />
+            </a-form-item>
             <a-form-item>
               <a-space>
                 <a-button type="primary" html-type="submit">
@@ -40,6 +51,7 @@
     </a-card>
   </div>
 
+  <!-- workflow condition -->
   <a-drawer
     width="50%"
     :visible="editEdgeModalVisible"
@@ -405,7 +417,15 @@
     CurvedEdgeModel,
   } from '@logicflow/extension';
   import '@logicflow/extension/lib/style/index.css';
-  import { computed, nextTick, onMounted, ref } from 'vue';
+  import {
+    computed,
+    nextTick,
+    onMounted,
+    ref,
+    watch,
+    reactive,
+    toRefs,
+  } from 'vue';
   import { useRoute, useRouter } from 'vue-router';
 
   import { useI18n } from 'vue-i18n';
@@ -436,6 +456,7 @@
   } from '@/api/workflow';
   import { genVersionFromTime } from '@/utils/time';
   import WorkflowNodeArgs from '@/components/workflow-node-args/index.vue';
+  import WorkflowUserVariables from '@/components/workflow-user-variables/index.vue';
   import SelectJob from '@/views/respository/components/select-job.vue';
   import SelectExecutor from '@/views/respository//components/select-executor.vue';
   import { JobRecord } from '@/api/job';
@@ -463,15 +484,33 @@
   const lf = ref<LogicFlow>();
   const uploadFileList = ref<FileItem[]>([]);
 
-  const workflowBasicInfoForm = ref({
-    id: Number(route.query.id) || 0,
-    name: '',
-    info: '',
+  const state = reactive({
+    workflowBasicInfoForm: {
+      id: Number(route.query.id) || 0,
+      name: '',
+      info: '',
+      user_variables: [] as any[],
+    },
   });
+
+  const { workflowBasicInfoForm } = toRefs(state);
 
   const workflowBasicInfoFormValidateRules = {
     name: {
       required: true,
+    },
+    user_variables: {
+      type: 'Array' as any,
+      validator: (value: any, cb: (error?: string) => void) => {
+        if (!workflowBasicInfoForm.value.user_variables) {
+          return;
+        }
+        workflowBasicInfoForm.value.user_variables.forEach((v) => {
+          if (v.name === '') {
+            cb(t('workflow.timer.refWorkflow.validation.error'));
+          }
+        });
+      },
     },
   };
 
@@ -738,6 +777,7 @@
         id: data.id,
         name: data.name,
         info: data.info,
+        user_variables: data.user_variables,
       });
     } catch (err) {
       return false;
@@ -801,10 +841,12 @@
         nodes: nodeConfigs.value.map((v) => v.data) as any,
         edges: edgeConfigs.value.map((v) => v.data) as any,
       };
+
       workflowBasicInfoForm.value = {
         id: workflowId,
         name: data.workflow_name,
         info: data.workflow_info,
+        user_variables: data.user_variables || [],
       };
 
       lf.value.render(graphData);
