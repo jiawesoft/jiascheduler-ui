@@ -249,6 +249,9 @@ const localeWorkflow = {
   'workflow.userVariables.val': '值',
   'workflow.userVariables.defVal': '默认值',
   'workflow.userVariables.info': '描述',
+  'workflow.userVariables.tips':
+    '这些自定义变量可在定义工作流的条件中，或者脚本中直接访问。注意：在脚本中需以环境变量的形式访问',
+  'workflow.userVariables.validation.error': '用户变量设置错误',
 
   'workflow.process.timer': '定时器',
 };

@@ -28,6 +28,7 @@
             <a-form-item
               field="user_variables"
               :label="$t('workflow.userVariables')"
+              :tooltip="$t('workflow.userVariables.tips')"
             >
               <workflow-user-variables
                 :key="workflowBasicInfoForm.name"
@@ -417,15 +418,7 @@
     CurvedEdgeModel,
   } from '@logicflow/extension';
   import '@logicflow/extension/lib/style/index.css';
-  import {
-    computed,
-    nextTick,
-    onMounted,
-    ref,
-    watch,
-    reactive,
-    toRefs,
-  } from 'vue';
+  import { computed, nextTick, onMounted, ref, reactive, toRefs } from 'vue';
   import { useRoute, useRouter } from 'vue-router';
 
   import { useI18n } from 'vue-i18n';
@@ -507,7 +500,7 @@
         }
         workflowBasicInfoForm.value.user_variables.forEach((v) => {
           if (v.name === '') {
-            cb(t('workflow.timer.refWorkflow.validation.error'));
+            cb(t('workflow.userVariables.validation.error'));
           }
         });
       },
@@ -750,6 +743,7 @@
           return v;
         }),
         edges: data.edges,
+        user_variables: workflowBasicInfoForm.value.user_variables,
       });
     } catch (err) {
       return false;

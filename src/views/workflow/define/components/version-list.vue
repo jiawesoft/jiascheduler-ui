@@ -157,6 +157,7 @@
     </template>
   </a-table>
 
+  <!-- start process modal -->
   <a-modal
     v-model:visible="startProcessModalVisible"
     title-align="start"
@@ -179,6 +180,17 @@
         required
       >
         <a-input v-model="startProcessForm.process_name" />
+      </a-form-item>
+
+      <a-form-item
+        field="user_variables"
+        :label="$t('workflow.userVariables')"
+        :tooltip="$t('workflow.userVariables.tips')"
+      >
+        <workflow-user-variables
+          :key="startProcessForm.id"
+          v-model:args="startProcessForm.user_variables"
+        />
       </a-form-item>
 
       <a-form-item
@@ -214,9 +226,12 @@
     QueryWorkflowVersionListReq,
     startWorkflowProcess,
     WorkflowProcessArgs,
+    WorkflowUserVariables as UserVariables,
     WorkflowVersionRecord,
   } from '@/api/workflow';
   import SelectInstance from '@/views/respository/components/select-instance.vue';
+
+  import WorkflowUserVariables from '@/components/workflow-user-variables/index.vue';
 
   const props = defineProps<{
     workflowId: number;
@@ -229,6 +244,7 @@
   const startProcessModalVisible = ref(false);
   const startProcessForm = ref<{
     process_args: WorkflowProcessArgs;
+    user_variables?: UserVariables[];
     [key: string]: any;
   }>({
     workflow_id: 0,
@@ -471,7 +487,12 @@
       return false;
     }
 
-    console.log(startProcessForm);
+    const userVariables = {};
+    if (startProcessForm.value.user_variables) {
+      startProcessForm.value.user_variables.forEach((v) => {
+        userVariables[v.name] = v.val;
+      });
+    }
 
     try {
       await startWorkflowProcess({
@@ -480,6 +501,7 @@
         process_name: startProcessForm.value.process_name,
         process_args: {
           ...startProcessForm.value.process_args,
+          user_variables: userVariables,
           default_target: defaultTarget.value.map((v) => {
             return v.instance_id;
           }),

@@ -97,6 +97,7 @@ export interface ReleaseWorkflowVersionReq {
   version_info?: string;
   nodes: NodeConfig[];
   edges: EdgeConfig[];
+  user_variables?: WorkflowUserVariables[];
 }
 
 export function releaseWorkflowVersion(data: ReleaseWorkflowVersionReq) {

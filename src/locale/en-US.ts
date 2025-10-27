@@ -256,9 +256,12 @@ const localeWorkflow = {
 
   'workflow.userVariables': 'User Variables',
   'workflow.userVariables.name': 'Variable',
-  'workflow.userVariables.val': 'alue',
+  'workflow.userVariables.val': 'Value',
   'workflow.userVariables.defVal': 'Default Value',
   'workflow.userVariables.info': 'Info',
+  'workflow.userVariables.tips':
+    'These user variables can be accessed directly in the conditions of the definition workflow or in scripts. Note: they need to be accessed in the form of environment variables in scripts',
+  'workflow.userVariables.validation.error': 'Error in user variable setting',
 
   'workflow.process.timer': 'Timer',
 };
