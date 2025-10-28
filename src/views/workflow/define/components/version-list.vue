@@ -171,6 +171,7 @@
     <a-form
       ref="startProcessFormRef"
       :model="startProcessForm"
+      layout="vertical"
       :auto-label-width="true"
     >
       <a-form-item
@@ -183,6 +184,10 @@
       </a-form-item>
 
       <a-form-item
+        v-if="
+          startProcessForm.user_variables &&
+          startProcessForm.user_variables.length > 0
+        "
         field="user_variables"
         :label="$t('workflow.userVariables')"
         :tooltip="$t('workflow.userVariables.tips')"
@@ -193,15 +198,32 @@
         />
       </a-form-item>
 
+      <a-form-item>
+        <a-collapse :default-active-key="['1']" :bordered="false">
+          <a-collapse-item
+            header="Beijing Toutiao Technology Co., Ltd."
+            key="1"
+          >
+          </a-collapse-item>
+        </a-collapse>
+      </a-form-item>
+
       <a-form-item
         field="endpoints"
         validate-trigger="blur"
-        :label="$t('job.endpoint')"
+        :label="$t('workflow.defaultExecutionEndpoint')"
       >
-        <SelectInstance
-          v-if="startProcessModalVisible"
-          v-model="defaultTarget"
-        />
+        <a-collapse :default-active-key="['select-instance']" :bordered="false">
+          <a-collapse-item
+            :header="$t('workflow.defaultExecutionEndpoint.tips')"
+            key="select-instance"
+          >
+            <SelectInstance
+              v-if="startProcessModalVisible"
+              v-model="defaultTarget"
+            />
+          </a-collapse-item>
+        </a-collapse>
       </a-form-item>
     </a-form>
   </a-modal>

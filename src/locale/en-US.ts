@@ -235,6 +235,9 @@ const localeWorkflow = {
   'workflow.clear.records': 'Clear workflow process records',
   'workflow.action.confirm.clear.records':
     'Are you sure you want to clear the workflow process records?',
+  'workflow.defaultExecutionEndpoint': 'Execution instance',
+  'workflow.defaultExecutionEndpoint.tips':
+    'When no execution instance is set, the default execution instance is used',
 
   'workflow.timer.save': 'Save Timer',
   'workflow.timer.name': 'Name',
