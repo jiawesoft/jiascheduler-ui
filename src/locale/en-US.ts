@@ -220,6 +220,9 @@ const localeWorkflow = {
   'workflow.nodeConfig.TaskType.custom': 'Custom',
   'workflow.processName': 'Process Name',
   'workflow.processStatus': 'Process Status',
+  'workflow.processArgs': 'Process Args',
+  'workflow.processArgs.tips':
+    'Reset the job parameters or execution instance in the process node',
   'workflow.node': 'Node',
   'workflow.nodeStatus': 'Node Status',
   'workflow.process.detail': 'Process Detail',

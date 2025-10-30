@@ -215,6 +215,8 @@ const localeWorkflow = {
   'workflow.nodeConfig.TaskType.custom': '自定义',
   'workflow.processName': '流程名',
   'workflow.processStatus': '流程状态',
+  'workflow.processArgs': '流程参数',
+  'workflow.processArgs.tips': '重置流程节点中的作业参数，执行实例',
   'workflow.node': '节点',
   'workflow.nodeStatus': '节点状态',
   'workflow.process.detail': '流程详情',

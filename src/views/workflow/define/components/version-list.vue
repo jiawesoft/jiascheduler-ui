@@ -197,34 +197,37 @@
           v-model:args="startProcessForm.user_variables"
         />
       </a-form-item>
+      <a-collapse :default-active-key="['basic']" :bordered="false">
+        <a-collapse-item
+          :header="$t('workflow.processArgs')"
+          key="process_args"
+          class="form-field-container"
+        >
+          <a-form-item field="process_args" validate-trigger="blur">
+            <SelectInstance
+              v-if="startProcessModalVisible"
+              v-model="defaultTarget"
+            />
+          </a-form-item>
+        </a-collapse-item>
 
-      <a-form-item>
-        <a-collapse :default-active-key="['1']" :bordered="false">
-          <a-collapse-item
-            header="Beijing Toutiao Technology Co., Ltd."
-            key="1"
-          >
-          </a-collapse-item>
-        </a-collapse>
-      </a-form-item>
-
-      <a-form-item
-        field="endpoints"
-        validate-trigger="blur"
-        :label="$t('workflow.defaultExecutionEndpoint')"
-      >
-        <a-collapse :default-active-key="['select-instance']" :bordered="false">
-          <a-collapse-item
-            :header="$t('workflow.defaultExecutionEndpoint.tips')"
-            key="select-instance"
+        <a-collapse-item
+          :header="$t('workflow.defaultExecutionEndpoint')"
+          key="select-instance"
+          class="form-field-container"
+        >
+          <a-form-item
+            field="endpoints"
+            validate-trigger="blur"
+            :extra="$t('workflow.defaultExecutionEndpoint.tips')"
           >
             <SelectInstance
               v-if="startProcessModalVisible"
               v-model="defaultTarget"
             />
-          </a-collapse-item>
-        </a-collapse>
-      </a-form-item>
+          </a-form-item>
+        </a-collapse-item>
+      </a-collapse>
     </a-form>
   </a-modal>
 </template>
@@ -573,6 +576,13 @@
       }
     }
   }
+  .form-field-container {
+    /deep/.arco-collapse-item-content {
+      padding-right: 10px;
+      padding-left: 10px;
+    }
+  }
+
   .action-icon {
     margin-left: 12px;
     cursor: pointer;
