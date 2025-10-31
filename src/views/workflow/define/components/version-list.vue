@@ -197,18 +197,54 @@
           v-model:args="startProcessForm.user_variables"
         />
       </a-form-item>
-      <a-collapse :default-active-key="['basic']" :bordered="false">
+      <a-collapse :bordered="false">
         <a-collapse-item
+          v-if="startProcessForm.nodes"
           :header="$t('workflow.processArgs')"
           key="process_args"
           class="form-field-container"
         >
-          <a-form-item field="process_args" validate-trigger="blur">
-            <SelectInstance
-              v-if="startProcessModalVisible"
-              v-model="defaultTarget"
-            />
-          </a-form-item>
+          <a-collapse
+            :default-active-key="startProcessForm.nodes.filter(
+              (v: { node_type: string; }) => v.node_type === 'bpmn:serviceTask'
+            )[0].id"
+          >
+            <a-collapse-item
+              v-for="(value, i) in startProcessForm.nodes.filter(
+              (v: { node_type: string; }) => v.node_type === 'bpmn:serviceTask'
+            )"
+              :key="value.id"
+              :header="`${value.name} - ${value.id}`"
+            >
+              <a-form-item
+                :field="`node[${i}]`"
+                validate-trigger="blur"
+                :label="$t('workflow.nodeConfig.task.args')"
+              >
+                <workflow-node-args
+                  v-if="value.task_type === 'custom'"
+                  :args="value.task.custom.formal_args"
+                >
+                </workflow-node-args>
+              </a-form-item>
+              <a-form-item
+                :field="`node[${i}].target`"
+                :label="$t('job.endpoint')"
+              >
+                <a-space direction="vertical">
+                  <a-button>{{ $t('form.select') }}</a-button>
+                  <a-textarea
+                    :placeholder="$t('job.endpoint.tips')"
+                    style="width: 500px"
+                    :auto-size="{
+                      minRows: 2,
+                      maxRows: 5,
+                    }"
+                  />
+                </a-space>
+              </a-form-item>
+            </a-collapse-item>
+          </a-collapse>
         </a-collapse-item>
 
         <a-collapse-item
@@ -257,6 +293,7 @@
   import SelectInstance from '@/views/respository/components/select-instance.vue';
 
   import WorkflowUserVariables from '@/components/workflow-user-variables/index.vue';
+  import WorkflowNodeArgs from '@/components/workflow-node-args/index.vue';
 
   const props = defineProps<{
     workflowId: number;
@@ -405,6 +442,7 @@
   };
 
   const handleStartProcessModal = (e: any, record: any) => {
+    console.log('record:', record);
     if (record) {
       startProcessForm.value = {
         ...record,

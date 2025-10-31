@@ -77,6 +77,7 @@ const localeJob = {
   'job.selectJob': 'Select Job',
   'job.bindIp': 'Execution IP',
   'job.endpoint': 'Endpoint',
+  'job.endpoint.tips': 'When manually inputting, line breaks separate data',
   'job.dispatch': 'Dispatch',
   'job.workDir': 'Working Directory',
   'job.workDir.tips': 'Defalt is Jiascheduler agent working directory',
@@ -218,6 +219,7 @@ const localeWorkflow = {
   'workflow.nodeConfig.TaskType': 'Task Type',
   'workflow.nodeConfig.TaskType.job': 'Job',
   'workflow.nodeConfig.TaskType.custom': 'Custom',
+  'workflow.nodeConfig.task.args': 'Job Args',
   'workflow.processName': 'Process Name',
   'workflow.processStatus': 'Process Status',
   'workflow.processArgs': 'Process Args',
@@ -240,7 +242,7 @@ const localeWorkflow = {
     'Are you sure you want to clear the workflow process records?',
   'workflow.defaultExecutionEndpoint': 'Execution instance',
   'workflow.defaultExecutionEndpoint.tips':
-    'When no execution instance is set, the default execution instance is used',
+    'When there is no predefined execution instance in the process, you can set the default execution instance for all nodes here, or reset the execution instance in the process parameters',
 
   'workflow.timer.save': 'Save Timer',
   'workflow.timer.name': 'Name',
@@ -450,6 +452,7 @@ export default {
   'columns.createdUser': 'Creator',
   'columns.updatedUser': 'Updater',
 
+  'form.select': 'Select',
   'form.selectAll': 'Select All',
   'form.search': 'Search',
   'form.reset': 'Reset',

@@ -77,7 +77,8 @@ const localeJob = {
   'job.upload_file.tooltip': '文件会被上传至/tmp目录, 且可于作业中直接访问',
   'job.selectJob': '选择作业',
   'job.bindIp': '执行IP',
-  'job.endpoint': '执行节点',
+  'job.endpoint': '执行实例',
+  'job.endpoint.tips': '人工输入时，换行符分割数据',
   'job.dispatch': '推送',
   'job.workDir': '执行目录',
   'job.workDir.tips': '默认取Jiascheduler Agent执行目录',
@@ -213,6 +214,7 @@ const localeWorkflow = {
   'workflow.nodeConfig.TaskType': '任务类型',
   'workflow.nodeConfig.TaskType.job': '作业',
   'workflow.nodeConfig.TaskType.custom': '自定义',
+  'workflow.nodeConfig.task.args': '作业参数',
   'workflow.processName': '流程名',
   'workflow.processStatus': '流程状态',
   'workflow.processArgs': '流程参数',
@@ -231,7 +233,7 @@ const localeWorkflow = {
   'workflow.action.confirm.clear.records': '确认要清空流程记录么？',
   'workflow.defaultExecutionEndpoint': '默认执行实例',
   'workflow.defaultExecutionEndpoint.tips':
-    '当未设置执行实例时，采用流程中预先定义的实例，你可以在节点参数中重置执行实例',
+    '当流程中未预先定义执行实例时你可以在这里统一设置所有节点的默认执行实例，你也可以在流程参数中重置执行实例',
 
   'workflow.timer.save': '保存定时器',
   'workflow.timer.name': '名称',
@@ -434,6 +436,7 @@ export default {
   'columns.createdUser': '创建人',
   'columns.updatedUser': '更新人',
 
+  'form.select': '选择',
   'form.selectAll': '选择全部',
   'form.search': '查询',
   'form.reset': '重置',
