@@ -79,6 +79,7 @@ const localeJob = {
   'job.bindIp': '执行IP',
   'job.endpoint': '执行实例',
   'job.endpoint.tips': '人工输入时，换行符分割数据',
+  'job.endpoint.title': '选择执行实例',
   'job.dispatch': '推送',
   'job.workDir': '执行目录',
   'job.workDir.tips': '默认取Jiascheduler Agent执行目录',

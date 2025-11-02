@@ -77,6 +77,7 @@ const localeJob = {
   'job.selectJob': 'Select Job',
   'job.bindIp': 'Execution IP',
   'job.endpoint': 'Endpoint',
+  'job.endpoint.title': 'Select execution endpoint',
   'job.endpoint.tips': 'When manually inputting, line breaks separate data',
   'job.dispatch': 'Dispatch',
   'job.workDir': 'Working Directory',

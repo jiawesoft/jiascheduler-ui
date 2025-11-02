@@ -205,9 +205,9 @@
           class="form-field-container"
         >
           <a-collapse
-            :default-active-key="startProcessForm.nodes.filter(
+            :default-active-key="[startProcessForm.nodes.filter(
               (v: { node_type: string; }) => v.node_type === 'bpmn:serviceTask'
-            )[0].id"
+            )[0]?.id]"
           >
             <a-collapse-item
               v-for="(value, i) in startProcessForm.nodes.filter(
@@ -217,29 +217,90 @@
               :header="`${value.name} - ${value.id}`"
             >
               <a-form-item
-                :field="`node[${i}]`"
+                v-if="
+                  value.task_type === 'custom' &&
+                  value.task.custom?.formal_args?.length
+                "
+                :field="`node[${i}].formal_args`"
                 validate-trigger="blur"
                 :label="$t('workflow.nodeConfig.task.args')"
               >
                 <workflow-node-args
-                  v-if="value.task_type === 'custom'"
                   :args="value.task.custom.formal_args"
-                >
-                </workflow-node-args>
+                  :tasks="startProcessForm.nodes.filter((v: { node_type: string; id:string}) => v.node_type === 'bpmn:serviceTask' && v.id !== value.id)"
+                />
               </a-form-item>
+              <a-form-item
+                v-else-if="
+                  value.task_type === 'standard' &&
+                  value.task.custom?.formal_args?.length
+                "
+                :field="`node[${i}].formal_args`"
+                validate-trigger="blur"
+                :label="$t('workflow.nodeConfig.task.args')"
+              >
+                <workflow-node-args
+                  :args="value.task.standard?.formal_args"
+                  :tasks="startProcessForm.nodes.filter((v: { node_type: string; id:string}) => v.node_type === 'bpmn:serviceTask' && v.id !== value.id)"
+                />
+              </a-form-item>
+
               <a-form-item
                 :field="`node[${i}].target`"
                 :label="$t('job.endpoint')"
               >
-                <a-space direction="vertical">
-                  <a-button>{{ $t('form.select') }}</a-button>
+                <a-space
+                  v-if="value.task_type === 'custom'"
+                  direction="vertical"
+                >
+                  <a-button
+                    size="mini"
+                    @click="
+                      handleSelectNodeEndpoint(
+                        $event,
+                        value.task.custom?.target || [],
+                        value.id
+                      )
+                    "
+                  >
+                    {{ $t('form.select') }}
+                  </a-button>
                   <a-textarea
+                    :key="value.task.custom?.target?.join('\n')"
+                    :default-value="value.task.custom?.target?.join('\n')"
+                    :placeholder="$t('job.endpoint.tips')"
+                    style="width: 500px"
+                    :auto-size="{ minRows: 2, maxRows: 5 }"
+                    disabled
+                  />
+                </a-space>
+
+                <a-space
+                  v-else-if="value.task_type === 'standard'"
+                  direction="vertical"
+                >
+                  <a-button
+                    size="mini"
+                    @click="
+                      handleSelectNodeEndpoint(
+                        $event,
+                        value.task.standard?.target || [],
+                        value.id
+                      )
+                    "
+                  >
+                    {{ $t('form.select') }}
+                  </a-button>
+                  <a-textarea
+                    :key="value.task.standard?.target?.join('\n')"
+                    :default-value="value.task.standard?.target?.join('\n')"
                     :placeholder="$t('job.endpoint.tips')"
                     style="width: 500px"
                     :auto-size="{
                       minRows: 2,
                       maxRows: 5,
                     }"
+                    disabled
                   />
                 </a-space>
               </a-form-item>
@@ -266,6 +327,20 @@
       </a-collapse>
     </a-form>
   </a-modal>
+
+  <!-- start process modal -->
+  <a-modal
+    v-model:visible="selectNodeExecutionEndpointModalVisible"
+    title-align="start"
+    :draggable="true"
+    :ok-text="$t('form.save')"
+    width="61.8%"
+    @before-ok="handleSaveNodeEndpoint"
+    @cancel="handleCancelSaveNodeEndpointModal"
+  >
+    <template #title> {{ $t('job.endpoint.title') }}</template>
+    <SelectInstance :key="currentEditNodeId" v-model="nodeTarget" />
+  </a-modal>
 </template>
 
 <script lang="ts" setup>
@@ -289,6 +364,7 @@
     WorkflowProcessArgs,
     WorkflowUserVariables as UserVariables,
     WorkflowVersionRecord,
+    NodeConfig,
   } from '@/api/workflow';
   import SelectInstance from '@/views/respository/components/select-instance.vue';
 
@@ -307,11 +383,13 @@
   const startProcessForm = ref<{
     process_args: WorkflowProcessArgs;
     user_variables?: UserVariables[];
+    nodes: NodeConfig[];
     [key: string]: any;
   }>({
     workflow_id: 0,
     version_id: 0,
     process_name: '',
+    nodes: [],
     process_args: {
       user_variables: {},
       default_target: [],
@@ -319,7 +397,10 @@
     },
   });
 
+  const selectNodeExecutionEndpointModalVisible = ref(false);
   const defaultTarget = ref<endpoint[]>([]);
+  const nodeTarget = ref<endpoint[]>([]);
+  const currentEditNodeId = ref('');
 
   const theme = computed(() => {
     return useAppStore().theme;
@@ -442,7 +523,6 @@
   };
 
   const handleStartProcessModal = (e: any, record: any) => {
-    console.log('record:', record);
     if (record) {
       startProcessForm.value = {
         ...record,
@@ -542,6 +622,46 @@
         });
       });
     }
+  };
+
+  const handleSelectNodeEndpoint = async (
+    e: any,
+    record: string[],
+    i: string
+  ) => {
+    selectNodeExecutionEndpointModalVisible.value = true;
+    currentEditNodeId.value = i;
+    nodeTarget.value = record.map((v) => {
+      return { instance_id: v } as endpoint;
+    });
+  };
+
+  const handleSaveNodeEndpoint = async () => {
+    const { nodes } = startProcessForm.value;
+
+    nodes.forEach((v, i) => {
+      if (v.id !== currentEditNodeId.value) {
+        return;
+      }
+      if (v.task.custom) {
+        nodes[i].task.custom!.target = nodeTarget.value.map(
+          (v) => v.instance_id
+        );
+      } else if (v.task.standard) {
+        nodes[i].task.standard!.target = nodeTarget.value.map(
+          (v) => v.instance_id
+        );
+      }
+    });
+
+    startProcessForm.value = {
+      ...startProcessForm.value,
+      nodes,
+    };
+  };
+
+  const handleCancelSaveNodeEndpointModal = () => {
+    selectNodeExecutionEndpointModalVisible.value = false;
   };
 
   const handleStartProcess = async () => {
