@@ -45,7 +45,7 @@
       style="display: flex; align-items: center; justify-content: end"
     >
       <a-tooltip :content="$t('columns.actions.refresh')">
-        <div class="action-icon" @click="search">
+        <div class="action-icon" @click="refreshPage">
           <icon-refresh size="18" />
         </div>
       </a-tooltip>
@@ -391,7 +391,7 @@
     process_name: '',
     nodes: [],
     process_args: {
-      user_variables: {},
+      user_variables: [],
       default_target: [],
       nodes: [],
     },
@@ -670,21 +670,29 @@
       return false;
     }
 
-    const userVariables = {};
-    if (startProcessForm.value.user_variables) {
-      startProcessForm.value.user_variables.forEach((v) => {
-        userVariables[v.name] = v.val;
-      });
-    }
-
     try {
       await startWorkflowProcess({
         workflow_id: startProcessForm.value.workflow_id,
         version_id: startProcessForm.value.version_id,
         process_name: startProcessForm.value.process_name,
         process_args: {
-          ...startProcessForm.value.process_args,
-          user_variables: userVariables,
+          user_variables: startProcessForm.value.user_variables,
+          nodes: startProcessForm.value.nodes
+            .filter((v) => v.node_type === 'bpmn:serviceTask')
+            .map((v) => {
+              if (v.task_type === 'standard') {
+                return {
+                  node_id: v.id,
+                  target: v.task.standard?.target,
+                  args: v.task.standard?.formal_args,
+                };
+              }
+              return {
+                node_id: v.id,
+                target: v.task.custom?.target,
+                args: v.task.custom?.formal_args,
+              };
+            }),
           default_target: defaultTarget.value.map((v) => {
             return v.instance_id;
           }),

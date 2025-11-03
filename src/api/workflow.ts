@@ -188,17 +188,13 @@ export function queryWorkflowVersionList(params: QueryWorkflowVersionListReq) {
 
 export interface WorkflowNodeArgs {
   node_id: string;
-  target: string[];
-  args: {
-    [key: string]: any;
-  };
+  target?: string[];
+  args?: WorkflowJobArgs[];
 }
 export interface WorkflowProcessArgs {
-  default_target: string[];
-  user_variables: {
-    [key: string]: any;
-  };
-  nodes: WorkflowNodeArgs[];
+  default_target?: string[];
+  user_variables?: WorkflowUserVariables[];
+  nodes?: WorkflowNodeArgs[];
 }
 
 export interface StartWorkflowProcessReq {
