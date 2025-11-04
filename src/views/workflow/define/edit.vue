@@ -620,6 +620,12 @@
       return false;
     }
 
+    if (nodeConfig.value.task_type === 'custom') {
+      nodeConfig.value.task.standard = undefined;
+    } else {
+      nodeConfig.value.task.custom = undefined;
+    }
+
     const originNodeId: string = nodeConfig.value.data.id;
 
     lf.value
@@ -714,6 +720,11 @@
       fetchExecutorData({
         default_id: nodeConfig.value.task.custom.executor_id,
       });
+    } else if (!nodeConfig.value.task.standard) {
+      nodeConfig.value.task.standard = {
+        eid: '',
+        formal_args: [],
+      };
     }
   };
 
