@@ -109,7 +109,9 @@
     const current = workflowVersionOptions.value.find(
       (item) => item.id === val
     );
-    emit('changeWorkflowVersion', current);
+    if (current) {
+      emit('changeWorkflowVersion', current);
+    }
   };
 
   fetchWorkflow({ id: workflowId.value, page: 1, page_size: 1000 });
@@ -129,6 +131,14 @@
         page: 1,
         page_size: 100,
       });
+    },
+    { deep: true, immediate: false }
+  );
+
+  watch(
+    () => workflowVersionOptions.value,
+    () => {
+      changeWorkflowVersion(versionId.value);
     },
     { deep: true, immediate: false }
   );

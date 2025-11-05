@@ -224,9 +224,11 @@
     </a-card>
 
     <!-- save workflow timer -->
-    <a-modal
-      v-model:visible="saveWorkflowTimerModalVisible"
+    <a-drawer
+      placement="right"
+      :visible="saveWorkflowTimerModalVisible"
       title-align="start"
+      width="50%"
       :draggable="true"
       :ok-text="$t('form.save')"
       @before-ok="handleSubmitWorkflowTimer"
@@ -279,10 +281,11 @@
             v-if="saveWorkflowTimerModalVisible"
             v-model:workflow-id="workflowTimerForm.workflow_id"
             v-model:version-id="workflowTimerForm.version_id"
+            @changeWorkflowVersion="handleChangeWorkflowVersion"
           />
         </a-form-item>
       </a-form>
-    </a-modal>
+    </a-drawer>
   </div>
 </template>
 
@@ -300,6 +303,7 @@
   import { Message, Modal } from '@arco-design/web-vue';
   import TagItem from '@/components/tag-item/index.vue';
   import SelectWorkflow from '@/views/workflow/components/select-workflow.vue';
+  import TableTagItem from '@/components/table-tag-item/index.vue';
   import { useRouter } from 'vue-router';
   import {
     CustomTimerExpr,
@@ -309,12 +313,14 @@
     saveWorkflowTimer,
     scheduleWorkflowTimer,
     WorkflowTimerRecord,
+    WorkflowVersionRecord,
   } from '@/api/workflow';
 
   type SizeProps = 'mini' | 'small' | 'medium' | 'large';
   type Column = TableColumnData & { checked?: true };
   const saveWorkflowTimerModalVisible = ref(false);
   const saveWorkflowTimerRef = ref();
+  const currentWorkflowVersion = ref<WorkflowVersionRecord>;
   const router = useRouter();
 
   interface WorkflowTimerForm {
@@ -630,6 +636,10 @@
     index: number
   ) => {
     cloneColumns.value = showColumns.value.filter((item) => item.checked);
+  };
+
+  const handleChangeWorkflowVersion = (record: any) => {
+    console.log('version record:', record);
   };
 
   const popupVisibleChange = (val: boolean) => {

@@ -261,7 +261,6 @@
   import { queryCountResource, TagRecord } from '@/api/tag';
   import TableTagItem from '@/components/table-tag-item/index.vue';
   import TagItem from '@/components/tag-item/index.vue';
-  import SelectInstance from '@/views/respository/components/select-instance.vue';
   import versionList from './components/version-list.vue';
 
   type SizeProps = 'mini' | 'small' | 'medium' | 'large';
