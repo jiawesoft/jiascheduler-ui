@@ -168,6 +168,7 @@ export interface WorkflowVersionRecord {
   version_info: string;
   created_time: string;
   created_user: string;
+  user_variables?: WorkflowUserVariables[];
   nodes?: NodeConfig[];
   edges?: EdgeConfig[];
 }

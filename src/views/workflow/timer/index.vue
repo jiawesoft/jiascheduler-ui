@@ -240,6 +240,7 @@
         :rules="saveWorkflowTimerFormValidateRules"
         :model="workflowTimerForm"
         :auto-label-width="true"
+        layout="vertical"
       >
         <a-form-item
           field="name"
@@ -284,6 +285,144 @@
             @changeWorkflowVersion="handleChangeWorkflowVersion"
           />
         </a-form-item>
+
+        <a-form-item
+          v-if="currentWorkflowVersion && currentWorkflowVersion.user_variables"
+          field="user_variables"
+          :label="$t('workflow.userVariables')"
+          :tooltip="$t('workflow.userVariables.tips')"
+        >
+          <workflow-user-variables
+            :key="currentWorkflowVersion.id"
+            v-model:args="currentWorkflowVersion.user_variables"
+          />
+        </a-form-item>
+
+        <a-collapse v-if="currentWorkflowVersion" :bordered="false">
+          <a-collapse-item
+            v-if="currentWorkflowVersion.nodes"
+            :header="$t('workflow.processArgs')"
+            key="process_args"
+            class="form-field-container"
+          >
+            <a-collapse
+              :default-active-key="[currentWorkflowVersion.nodes.filter(
+              (v: { node_type: string; }) => v.node_type === 'bpmn:serviceTask'
+            )[0]?.id]"
+            >
+              <a-collapse-item
+                v-for="(value, i) in currentWorkflowVersion.nodes.filter(
+              (v: { node_type: string; }) => v.node_type === 'bpmn:serviceTask'
+            )"
+                :key="value.id"
+                :header="`${value.name} - ${value.id}`"
+              >
+                <a-form-item
+                  v-if="
+                    value.task_type === 'custom' &&
+                    value.task.custom?.formal_args?.length
+                  "
+                  :field="`node[${i}].formal_args`"
+                  validate-trigger="blur"
+                  :label="$t('workflow.nodeConfig.task.args')"
+                >
+                  <workflow-node-args
+                    :args="value.task.custom.formal_args"
+                    :tasks="currentWorkflowVersion.nodes.filter((v: { node_type: string; id:string}) => v.node_type === 'bpmn:serviceTask' && v.id !== value.id)"
+                  />
+                </a-form-item>
+                <a-form-item
+                  v-else-if="
+                    value.task_type === 'standard' &&
+                    value.task.custom?.formal_args?.length
+                  "
+                  :field="`node[${i}].formal_args`"
+                  validate-trigger="blur"
+                  :label="$t('workflow.nodeConfig.task.args')"
+                >
+                  <workflow-node-args
+                    :args="value.task.standard?.formal_args"
+                    :tasks="currentWorkflowVersion.nodes.filter((v: { node_type: string; id:string}) => v.node_type === 'bpmn:serviceTask' && v.id !== value.id)"
+                  />
+                </a-form-item>
+
+                <a-form-item
+                  :field="`node[${i}].target`"
+                  :label="$t('job.endpoint')"
+                >
+                  <a-space
+                    v-if="value.task_type === 'custom'"
+                    direction="vertical"
+                  >
+                    <a-button
+                      size="mini"
+                      @click="
+                        handleSelectNodeEndpoint(
+                          $event,
+                          value.task.custom?.target || [],
+                          value.id
+                        )
+                      "
+                    >
+                      {{ $t('form.select') }}
+                    </a-button>
+                    <a-textarea
+                      :key="value.task.custom?.target?.join('\n')"
+                      :default-value="value.task.custom?.target?.join('\n')"
+                      :placeholder="$t('job.endpoint.tips')"
+                      style="width: 500px"
+                      :auto-size="{ minRows: 2, maxRows: 5 }"
+                      disabled
+                    />
+                  </a-space>
+
+                  <a-space
+                    v-else-if="value.task_type === 'standard'"
+                    direction="vertical"
+                  >
+                    <a-button
+                      size="mini"
+                      @click="
+                        handleSelectNodeEndpoint(
+                          $event,
+                          value.task.standard?.target || [],
+                          value.id
+                        )
+                      "
+                    >
+                      {{ $t('form.select') }}
+                    </a-button>
+                    <a-textarea
+                      :key="value.task.standard?.target?.join('\n')"
+                      :default-value="value.task.standard?.target?.join('\n')"
+                      :placeholder="$t('job.endpoint.tips')"
+                      style="width: 500px"
+                      :auto-size="{
+                        minRows: 2,
+                        maxRows: 5,
+                      }"
+                      disabled
+                    />
+                  </a-space>
+                </a-form-item>
+              </a-collapse-item>
+            </a-collapse>
+          </a-collapse-item>
+
+          <a-collapse-item
+            :header="$t('workflow.defaultExecutionEndpoint')"
+            key="select-instance"
+            class="form-field-container"
+          >
+            <a-form-item
+              field="endpoints"
+              validate-trigger="blur"
+              :extra="$t('workflow.defaultExecutionEndpoint.tips')"
+            >
+              <SelectInstance v-model="defaultTarget" />
+            </a-form-item>
+          </a-collapse-item>
+        </a-collapse>
       </a-form>
     </a-drawer>
   </div>
@@ -316,12 +455,22 @@
     WorkflowVersionRecord,
   } from '@/api/workflow';
 
+  import WorkflowUserVariables from '@/components/workflow-user-variables/index.vue';
+  import SelectInstance from '@/views/respository/components/select-instance.vue';
+  import WorkflowNodeArgs from '@/components/workflow-node-args/index.vue';
+  import { endpoint } from '@/api/job';
+
   type SizeProps = 'mini' | 'small' | 'medium' | 'large';
   type Column = TableColumnData & { checked?: true };
   const saveWorkflowTimerModalVisible = ref(false);
   const saveWorkflowTimerRef = ref();
-  const currentWorkflowVersion = ref<WorkflowVersionRecord>;
+  const currentWorkflowVersion = ref<WorkflowVersionRecord>();
   const router = useRouter();
+
+  const selectNodeExecutionEndpointModalVisible = ref(false);
+  const defaultTarget = ref<endpoint[]>([]);
+  const nodeTarget = ref<endpoint[]>([]);
+  const currentEditNodeId = ref('');
 
   interface WorkflowTimerForm {
     id: number;
@@ -601,6 +750,18 @@
     saveWorkflowTimerModalVisible.value = false;
   };
 
+  const handleSelectNodeEndpoint = async (
+    e: any,
+    record: string[],
+    i: string
+  ) => {
+    selectNodeExecutionEndpointModalVisible.value = true;
+    currentEditNodeId.value = i;
+    nodeTarget.value = record.map((v) => {
+      return { instance_id: v } as endpoint;
+    });
+  };
+
   const search = () => {
     fetchData({
       page: basePagination.page,
@@ -640,6 +801,7 @@
 
   const handleChangeWorkflowVersion = (record: any) => {
     console.log('version record:', record);
+    currentWorkflowVersion.value = record;
   };
 
   const popupVisibleChange = (val: boolean) => {
@@ -693,6 +855,13 @@
 <style scoped lang="less">
   .container {
     padding: 0 20px 20px 20px;
+  }
+
+  .form-field-container {
+    /deep/.arco-collapse-item-content {
+      padding-right: 10px;
+      padding-left: 10px;
+    }
   }
 
   :deep(.arco-table-th) {

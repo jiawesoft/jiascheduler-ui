@@ -109,9 +109,8 @@
     const current = workflowVersionOptions.value.find(
       (item) => item.id === val
     );
-    if (current) {
-      emit('changeWorkflowVersion', current);
-    }
+
+    emit('changeWorkflowVersion', current);
   };
 
   fetchWorkflow({ id: workflowId.value, page: 1, page_size: 1000 });
