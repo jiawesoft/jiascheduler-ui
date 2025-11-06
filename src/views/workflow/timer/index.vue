@@ -425,6 +425,20 @@
         </a-collapse>
       </a-form>
     </a-drawer>
+
+    <!-- start process modal -->
+    <a-modal
+      v-model:visible="selectNodeExecutionEndpointModalVisible"
+      title-align="start"
+      :draggable="true"
+      :ok-text="$t('form.save')"
+      width="61.8%"
+      @before-ok="handleSaveNodeEndpoint"
+      @cancel="handleCancelSaveNodeEndpointModal"
+    >
+      <template #title> {{ $t('job.endpoint.title') }}</template>
+      <SelectInstance :key="currentEditNodeId" v-model="nodeTarget" />
+    </a-modal>
   </div>
 </template>
 
@@ -451,6 +465,7 @@
     QueryWorkflowTimerListReq,
     saveWorkflowTimer,
     scheduleWorkflowTimer,
+    WorkflowProcessArgs,
     WorkflowTimerRecord,
     WorkflowVersionRecord,
   } from '@/api/workflow';
@@ -479,6 +494,7 @@
     workflow_id: number;
     version_id: number;
     info: string;
+    process_args?: WorkflowProcessArgs;
   }
 
   const defaultTimerExpr: CustomTimerExpr = {
@@ -510,6 +526,11 @@
       info: '',
       workflow_id: 0,
       version_id: 0,
+      process_args: {
+        user_variables: [],
+        default_target: [],
+        nodes: [],
+      },
     },
   });
   const { workflowTimerForm } = toRefs(state);
@@ -802,6 +823,37 @@
   const handleChangeWorkflowVersion = (record: any) => {
     console.log('version record:', record);
     currentWorkflowVersion.value = record;
+  };
+
+  const handleSaveNodeEndpoint = async () => {
+    if (!currentWorkflowVersion.value?.nodes) {
+      return;
+    }
+    const { nodes } = currentWorkflowVersion.value;
+
+    nodes.forEach((v, i) => {
+      if (v.id !== currentEditNodeId.value) {
+        return;
+      }
+      if (v.task.custom) {
+        nodes[i].task.custom!.target = nodeTarget.value.map(
+          (v) => v.instance_id
+        );
+      } else if (v.task.standard) {
+        nodes[i].task.standard!.target = nodeTarget.value.map(
+          (v) => v.instance_id
+        );
+      }
+    });
+
+    currentWorkflowVersion.value = {
+      ...currentWorkflowVersion.value,
+      nodes,
+    };
+  };
+
+  const handleCancelSaveNodeEndpointModal = () => {
+    selectNodeExecutionEndpointModalVisible.value = false;
   };
 
   const popupVisibleChange = (val: boolean) => {
