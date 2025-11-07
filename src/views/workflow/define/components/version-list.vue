@@ -320,7 +320,7 @@
           >
             <SelectInstance
               v-if="startProcessModalVisible"
-              v-model="defaultTarget"
+              v-model="startProcessForm.default_target"
             />
           </a-form-item>
         </a-collapse-item>
@@ -384,12 +384,14 @@
     process_args: WorkflowProcessArgs;
     user_variables?: UserVariables[];
     nodes: NodeConfig[];
+    default_target: endpoint[];
     [key: string]: any;
   }>({
     workflow_id: 0,
     version_id: 0,
     process_name: '',
     nodes: [],
+    default_target: [],
     process_args: {
       user_variables: [],
       default_target: [],
@@ -398,7 +400,6 @@
   });
 
   const selectNodeExecutionEndpointModalVisible = ref(false);
-  const defaultTarget = ref<endpoint[]>([]);
   const nodeTarget = ref<endpoint[]>([]);
   const currentEditNodeId = ref('');
 
@@ -693,7 +694,7 @@
                 args: v.task.custom?.formal_args,
               };
             }),
-          default_target: defaultTarget.value.map((v) => {
+          default_target: startProcessForm.value.map((v) => {
             return v.instance_id;
           }),
         },

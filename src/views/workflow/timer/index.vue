@@ -287,31 +287,31 @@
         </a-form-item>
 
         <a-form-item
-          v-if="currentWorkflowVersion && currentWorkflowVersion.user_variables"
+          v-if="workflowTimerForm.user_variables"
           field="user_variables"
           :label="$t('workflow.userVariables')"
           :tooltip="$t('workflow.userVariables.tips')"
         >
-          <workflow-user-variables
-            :key="currentWorkflowVersion.id"
-            v-model:args="currentWorkflowVersion.user_variables"
+          <workflow-user-variables-table
+            :key="workflowTimerForm.id"
+            v-model:args="workflowTimerForm.user_variables"
           />
         </a-form-item>
 
-        <a-collapse v-if="currentWorkflowVersion" :bordered="false">
+        <a-collapse v-if="workflowTimerForm.nodes" :bordered="false">
           <a-collapse-item
-            v-if="currentWorkflowVersion.nodes"
+            v-if="workflowTimerForm.nodes"
             :header="$t('workflow.processArgs')"
             key="process_args"
             class="form-field-container"
           >
             <a-collapse
-              :default-active-key="[currentWorkflowVersion.nodes.filter(
+              :default-active-key="[workflowTimerForm.nodes.filter(
               (v: { node_type: string; }) => v.node_type === 'bpmn:serviceTask'
             )[0]?.id]"
             >
               <a-collapse-item
-                v-for="(value, i) in currentWorkflowVersion.nodes.filter(
+                v-for="(value, i) in workflowTimerForm.nodes.filter(
               (v: { node_type: string; }) => v.node_type === 'bpmn:serviceTask'
             )"
                 :key="value.id"
@@ -328,7 +328,7 @@
                 >
                   <workflow-node-args
                     :args="value.task.custom.formal_args"
-                    :tasks="currentWorkflowVersion.nodes.filter((v: { node_type: string; id:string}) => v.node_type === 'bpmn:serviceTask' && v.id !== value.id)"
+                    :tasks="workflowTimerForm.nodes.filter((v: { node_type: string; id:string}) => v.node_type === 'bpmn:serviceTask' && v.id !== value.id)"
                   />
                 </a-form-item>
                 <a-form-item
@@ -342,7 +342,7 @@
                 >
                   <workflow-node-args
                     :args="value.task.standard?.formal_args"
-                    :tasks="currentWorkflowVersion.nodes.filter((v: { node_type: string; id:string}) => v.node_type === 'bpmn:serviceTask' && v.id !== value.id)"
+                    :tasks="workflowTimerForm.nodes.filter((v: { node_type: string; id:string}) => v.node_type === 'bpmn:serviceTask' && v.id !== value.id)"
                   />
                 </a-form-item>
 
@@ -419,7 +419,7 @@
               validate-trigger="blur"
               :extra="$t('workflow.defaultExecutionEndpoint.tips')"
             >
-              <SelectInstance v-model="defaultTarget" />
+              <SelectInstance v-model="workflowTimerForm.default_target" />
             </a-form-item>
           </a-collapse-item>
         </a-collapse>
@@ -461,16 +461,19 @@
   import {
     CustomTimerExpr,
     deleteWorkflowTimer,
+    EdgeConfig,
+    NodeConfig,
     queryWorkflowTimerList,
     QueryWorkflowTimerListReq,
     saveWorkflowTimer,
     scheduleWorkflowTimer,
     WorkflowProcessArgs,
     WorkflowTimerRecord,
+    WorkflowUserVariables,
     WorkflowVersionRecord,
   } from '@/api/workflow';
 
-  import WorkflowUserVariables from '@/components/workflow-user-variables/index.vue';
+  import WorkflowUserVariablesTable from '@/components/workflow-user-variables/index.vue';
   import SelectInstance from '@/views/respository/components/select-instance.vue';
   import WorkflowNodeArgs from '@/components/workflow-node-args/index.vue';
   import { endpoint } from '@/api/job';
@@ -479,11 +482,9 @@
   type Column = TableColumnData & { checked?: true };
   const saveWorkflowTimerModalVisible = ref(false);
   const saveWorkflowTimerRef = ref();
-  const currentWorkflowVersion = ref<WorkflowVersionRecord>();
   const router = useRouter();
 
   const selectNodeExecutionEndpointModalVisible = ref(false);
-  const defaultTarget = ref<endpoint[]>([]);
   const nodeTarget = ref<endpoint[]>([]);
   const currentEditNodeId = ref('');
 
@@ -494,6 +495,10 @@
     workflow_id: number;
     version_id: number;
     info: string;
+    user_variables?: WorkflowUserVariables[];
+    nodes?: NodeConfig[];
+    edges?: EdgeConfig[];
+    default_target: endpoint[];
     process_args?: WorkflowProcessArgs;
   }
 
@@ -526,6 +531,7 @@
       info: '',
       workflow_id: 0,
       version_id: 0,
+      default_target: [],
       process_args: {
         user_variables: [],
         default_target: [],
@@ -699,6 +705,7 @@
         name: '',
         timer_expr: defaultTimerExpr,
         info: '',
+        default_target: [],
         workflow_id: 0,
         version_id: 0,
       };
@@ -726,7 +733,31 @@
       return false;
     }
     try {
-      const params = { ...workflowTimerForm.value };
+      const params = {
+        ...workflowTimerForm.value,
+        process_args: {
+          user_variables: workflowTimerForm.value.user_variables,
+          nodes: (workflowTimerForm.value?.nodes || [])
+            .filter((v) => v.node_type === 'bpmn:serviceTask')
+            .map((v) => {
+              if (v.task_type === 'standard') {
+                return {
+                  node_id: v.id,
+                  target: v.task.standard?.target,
+                  args: v.task.standard?.formal_args,
+                };
+              }
+              return {
+                node_id: v.id,
+                target: v.task.custom?.target,
+                args: v.task.custom?.formal_args,
+              };
+            }),
+          default_target: workflowTimerForm.value.default_target.map((v) => {
+            return v.instance_id;
+          }),
+        },
+      };
       const { data } = await saveWorkflowTimer({
         ...params,
       });
@@ -821,15 +852,19 @@
   };
 
   const handleChangeWorkflowVersion = (record: any) => {
-    console.log('version record:', record);
-    currentWorkflowVersion.value = record;
+    workflowTimerForm.value = {
+      ...workflowTimerForm.value,
+      user_variables: record?.user_variables,
+      nodes: record?.nodes,
+      edges: record?.edges,
+    };
   };
 
   const handleSaveNodeEndpoint = async () => {
-    if (!currentWorkflowVersion.value?.nodes) {
+    if (!workflowTimerForm.value?.nodes) {
       return;
     }
-    const { nodes } = currentWorkflowVersion.value;
+    const { nodes } = workflowTimerForm.value;
 
     nodes.forEach((v, i) => {
       if (v.id !== currentEditNodeId.value) {
@@ -846,8 +881,8 @@
       }
     });
 
-    currentWorkflowVersion.value = {
-      ...currentWorkflowVersion.value,
+    workflowTimerForm.value = {
+      ...workflowTimerForm.value,
       nodes,
     };
   };
