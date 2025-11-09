@@ -287,7 +287,7 @@
         </a-form-item>
 
         <a-form-item
-          v-if="workflowTimerForm.user_variables"
+          v-if="(workflowTimerForm.user_variables || []).length > 0"
           field="user_variables"
           :label="$t('workflow.userVariables')"
           :tooltip="$t('workflow.userVariables.tips')"
@@ -697,6 +697,7 @@
   const handleOpenWorkflowTimerModal = (e: any, record: any) => {
     saveWorkflowTimerModalVisible.value = true;
     saveWorkflowTimerRef.value.clearValidate();
+
     if (record) {
       workflowTimerForm.value = { ...record };
     } else {
@@ -775,6 +776,7 @@
     } catch (err) {
       return false;
     }
+    saveWorkflowTimerModalVisible.value = false;
     search();
     return true;
   };
@@ -851,12 +853,40 @@
     cloneColumns.value = showColumns.value.filter((item) => item.checked);
   };
 
-  const handleChangeWorkflowVersion = (record: any) => {
+  const handleChangeWorkflowVersion = (record: WorkflowVersionRecord) => {
+    const nodes = cloneDeep(record.nodes);
+
+    if (
+      workflowTimerForm.value.process_args?.nodes &&
+      workflowTimerForm.value.version_id === record.id
+    ) {
+      const processArgsNodes = workflowTimerForm.value.process_args?.nodes;
+      nodes?.forEach((v, i) => {
+        const matched = processArgsNodes.find((vv) => vv.node_id === v.id);
+        if (!matched) {
+          return;
+        }
+        if (v.task_type === 'custom' && v.task.custom) {
+          nodes[i].task.custom = {
+            ...v.task.custom,
+            formal_args: matched.args ?? [],
+            target: matched.target,
+          };
+        }
+        if (v.task_type === 'standard' && v.task.standard) {
+          nodes[i].task.standard = {
+            ...v.task.standard,
+            formal_args: matched.args ?? [],
+            target: matched.target,
+          };
+        }
+      });
+    }
+
     workflowTimerForm.value = {
-      ...workflowTimerForm.value,
       user_variables: record?.user_variables,
-      nodes: record?.nodes,
-      edges: record?.edges,
+      nodes,
+      ...workflowTimerForm.value,
     };
   };
 

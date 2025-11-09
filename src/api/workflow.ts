@@ -362,6 +362,7 @@ export interface WorkflowTimerRecord {
   timer_expr: CustomTimerExpr;
   schedule_guid: string;
   is_active: boolean;
+  process_args?: WorkflowProcessArgs;
   tags?: { [key: string]: string }[];
   team_id: number;
   team_name: string;
