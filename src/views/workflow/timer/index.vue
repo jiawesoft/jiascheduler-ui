@@ -854,39 +854,51 @@
   };
 
   const handleChangeWorkflowVersion = (record: WorkflowVersionRecord) => {
-    const nodes = cloneDeep(record.nodes);
+    if (!record) {
+      workflowTimerForm.value = {
+        ...workflowTimerForm.value,
+        user_variables: [],
+        nodes: [],
+      };
+      return;
+    }
+    const nodes = cloneDeep(record.nodes ?? []);
+    let userVariables = cloneDeep(record.user_variables ?? []);
 
-    if (
-      workflowTimerForm.value.process_args?.nodes &&
-      workflowTimerForm.value.version_id === record.id
-    ) {
-      const processArgsNodes = workflowTimerForm.value.process_args?.nodes;
-      nodes?.forEach((v, i) => {
-        const matched = processArgsNodes.find((vv) => vv.node_id === v.id);
-        if (!matched) {
-          return;
-        }
-        if (v.task_type === 'custom' && v.task.custom) {
-          nodes[i].task.custom = {
-            ...v.task.custom,
-            formal_args: matched.args ?? [],
-            target: matched.target,
-          };
-        }
-        if (v.task_type === 'standard' && v.task.standard) {
-          nodes[i].task.standard = {
-            ...v.task.standard,
-            formal_args: matched.args ?? [],
-            target: matched.target,
-          };
-        }
-      });
+    if (workflowTimerForm.value.version_id === record.id) {
+      if (workflowTimerForm.value.process_args?.nodes) {
+        const processArgsNodes = workflowTimerForm.value.process_args?.nodes;
+        nodes?.forEach((v, i) => {
+          const matched = processArgsNodes.find((vv) => vv.node_id === v.id);
+          if (!matched) {
+            return;
+          }
+          if (v.task_type === 'custom' && v.task.custom) {
+            nodes[i].task.custom = {
+              ...v.task.custom,
+              formal_args: matched.args ?? [],
+              target: matched.target,
+            };
+          }
+          if (v.task_type === 'standard' && v.task.standard) {
+            nodes[i].task.standard = {
+              ...v.task.standard,
+              formal_args: matched.args ?? [],
+              target: matched.target,
+            };
+          }
+        });
+      }
+
+      if (workflowTimerForm.value.process_args?.user_variables) {
+        userVariables = workflowTimerForm.value.process_args.user_variables;
+      }
     }
 
     workflowTimerForm.value = {
-      user_variables: record?.user_variables,
-      nodes,
       ...workflowTimerForm.value,
+      user_variables: userVariables,
+      nodes,
     };
   };
 

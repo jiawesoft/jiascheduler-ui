@@ -93,7 +93,7 @@
   };
   const handleSearchWorkflowVersion = async (version: string) => {
     await fetchWorkflowVersion({
-      workflow_id: workflowId.value,
+      workflow_id: workflowId.value || 0,
       version,
       page: 1,
       page_size: 1000,
@@ -113,9 +113,9 @@
     emit('changeWorkflowVersion', current);
   };
 
-  fetchWorkflow({ id: workflowId.value, page: 1, page_size: 1000 });
+  fetchWorkflow({ id: workflowId.value || 0, page: 1, page_size: 1000 });
   fetchWorkflowVersion({
-    id: versionId.value,
+    id: versionId.value || 0,
     workflow_id: workflowId.value,
     page: 1,
     page_size: 1000,
@@ -124,9 +124,9 @@
   watch(
     () => workflowId.value,
     (val) => {
-      emit('update:workflowId', val);
+      emit('update:workflowId', val || 0);
       fetchWorkflowVersion({
-        workflow_id: val,
+        workflow_id: val || 0,
         page: 1,
         page_size: 100,
       });
@@ -137,7 +137,7 @@
   watch(
     () => workflowVersionOptions.value,
     () => {
-      changeWorkflowVersion(versionId.value);
+      changeWorkflowVersion(versionId.value || 0);
     },
     { deep: true, immediate: false }
   );
@@ -145,7 +145,7 @@
   watch(
     () => versionId.value,
     (val) => {
-      emit('update:versionId', val);
+      emit('update:versionId', val || 0);
     },
     { deep: true, immediate: false }
   );
