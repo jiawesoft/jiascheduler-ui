@@ -70,7 +70,7 @@
       :model="edgeConfig"
       :auto-label-width="true"
     >
-      <a-form-item field="name" label="名称">
+      <a-form-item field="name" :label="$t('workflow.condition.name')">
         <a-input v-model="edgeConfig.name" />
       </a-form-item>
       <a-form-item
@@ -81,24 +81,32 @@
       >
         <a-space direction="horizontal" size="mini">
           <a-select v-model="rule.left_val.val_type">
-            <a-option value="exit_code">节点退出码</a-option>
-            <a-option value="output">节点输出</a-option>
-            <a-option value="user_variables">用户变量</a-option>
-            <a-option value="custom">自定义</a-option>
+            <a-option value="exit_code">
+              {{ $t('workflow.nodeConfig.exitCode') }}
+            </a-option>
+            <a-option value="output">
+              {{ $t('workflow.nodeConfig.output') }}
+            </a-option>
+            <a-option value="user_variables">
+              {{ $t('workflow.userVariables') }}
+            </a-option>
+            <a-option value="custom">
+              {{ $t('workflow.nodeConfig.operation.custom') }}
+            </a-option>
           </a-select>
           <a-input
             v-if="
               rule.left_val.val_type == 'custom' ||
               rule.left_val.val_type == 'user_variables'
             "
-            placeholder="请输入数据"
+            :placeholder="$t('workflow.nodeConfig.operation.setVal')"
             v-model="rule.left_val.val"
           />
 
           <a-select
             v-else
             v-model="rule.left_val.val"
-            placeholder="选择节点"
+            :placeholder="$t('workflow.nodeConfig.operation.selectNode')"
             allow-search
           >
             <a-option
@@ -122,24 +130,32 @@
             <a-option value="==">{{ '==' }}</a-option>
           </a-select>
           <a-select v-model="rule.right_val.val_type">
-            <a-option value="exit_code">节点退出码</a-option>
-            <a-option value="output">节点输出</a-option>
-            <a-option value="user_variables">用户变量</a-option>
-            <a-option value="custom">自定义</a-option>
+            <a-option value="exit_code">
+              {{ $t('workflow.nodeConfig.exitCode') }}
+            </a-option>
+            <a-option value="output">
+              {{ $t('workflow.nodeConfig.output') }}
+            </a-option>
+            <a-option value="user_variables">
+              {{ $t('workflow.userVariables') }}
+            </a-option>
+            <a-option value="custom">
+              {{ $t('workflow.nodeConfig.operation.custom') }}
+            </a-option>
           </a-select>
           <a-input
             v-if="
               rule.right_val.val_type == 'custom' ||
               rule.right_val.val_type == 'user_variables'
             "
-            placeholder="请输入数据"
+            :placeholder="$t('workflow.nodeConfig.operation.setVal')"
             v-model="rule.right_val.val"
           />
 
           <a-select
             v-else
             v-model="rule.right_val.val"
-            placeholder="选择节点"
+            :placeholder="$t('workflow.nodeConfig.operation.selectNode')"
             allow-search
           >
             <a-option
@@ -158,16 +174,22 @@
           <a-button @click="handleAddConditionRule">+</a-button>
         </a-space>
       </a-form-item>
-      <a-form-item label="运算">
+      <a-form-item :label="$t('workflow.nodeConfig.operation')">
         <a-space direction="vertical" style="width: 100%">
           <a-radio-group
             type="button"
             v-model="edgeConfig.condition!.logical_op"
             @change="handleChangeLogicalOperation"
           >
-            <a-radio value="and">并且</a-radio>
-            <a-radio value="or">或者</a-radio>
-            <a-radio value="custom">自定义</a-radio>
+            <a-radio value="and">
+              {{ $t('workflow.nodeConfig.operation.and') }}
+            </a-radio>
+            <a-radio value="or">
+              {{ $t('workflow.nodeConfig.operation.or') }}
+            </a-radio>
+            <a-radio value="custom">
+              {{ $t('workflow.nodeConfig.operation.custom') }}
+            </a-radio>
           </a-radio-group>
           <a-input
             v-model="edgeConfig.condition!.expr"

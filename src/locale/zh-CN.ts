@@ -216,6 +216,16 @@ const localeWorkflow = {
   'workflow.nodeConfig.TaskType.job': '作业',
   'workflow.nodeConfig.TaskType.custom': '自定义',
   'workflow.nodeConfig.task.args': '作业参数',
+  'workflow.nodeConfig.exitCode': '任务退出码',
+  'workflow.nodeConfig.output': '节点输出',
+
+  'workflow.nodeConfig.operation': '运算',
+  'workflow.nodeConfig.operation.and': '并且',
+  'workflow.nodeConfig.operation.or': '或者',
+  'workflow.nodeConfig.operation.custom': '自定义',
+  'workflow.nodeConfig.operation.selectNode': '选择节点',
+  'workflow.nodeConfig.operation.setVal': '输入数据',
+
   'workflow.processName': '流程名',
   'workflow.processStatus': '流程状态',
   'workflow.processArgs': '流程参数',
@@ -223,7 +233,9 @@ const localeWorkflow = {
   'workflow.node': '节点',
   'workflow.nodeStatus': '节点状态',
   'workflow.process.detail': '流程详情',
+
   'workflow.condition': '条件配置',
+  'workflow.condition.name': '名称',
   'workflow.condition.isJoinAll': '等待所有前置条件都满足再执行当前任务',
   'workflow.bindIp': '执行ip',
   'workflow.nodeConfig.static': '静态',
