@@ -69,7 +69,7 @@
 
   import { computed, ref } from 'vue';
   import { useI18n } from 'vue-i18n';
-  import { WorkflowUserVariables } from '@/api/job';
+  import { JobArg } from '@/api/job';
 
   const theme = computed(() => {
     return useAppStore().theme;
@@ -108,12 +108,10 @@
       Array.isArray(props.value.snapshot_data.args) &&
       props.value.snapshot_data.args.length > 0
     ) {
-      return (props.value.snapshot_data.args as WorkflowUserVariables[]).map(
-        (v) => {
-          v.val = props.value.actual_args[v.name];
-          return v;
-        }
-      );
+      return (props.value.snapshot_data.args as JobArg[]).map((v) => {
+        v.val = props.value.actual_args[v.name];
+        return v;
+      });
     }
     return [];
   });
