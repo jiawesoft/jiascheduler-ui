@@ -158,52 +158,47 @@
     </template>
 
     <template #operations="{ record }">
-      <a-space direction="horizontal">
-        <a-space>
-          <a-dropdown-button
-            :hide-on-select="false"
-            size="mini"
-            @click="handleViewScheduleDetailModal($event, record)"
-          >
-            {{ $t('operations.view') }}
-            <template #icon>
-              <icon-down />
-            </template>
-            <template #content>
-              <a-doption>
-                <a-popconfirm
-                  :content="$t('job.action.confirm.start')"
-                  @before-ok="handleAction($event, record, 'exec')"
-                >
-                  <a-button type="dashed" size="mini" status="success">
-                    {{ $t('job.start') }}
-                  </a-button>
-                </a-popconfirm>
-              </a-doption>
-              <a-doption>
-                <a-popconfirm
-                  :content="$t('job.action.confirm.start')"
-                  @before-ok="handleAction($event, record, 'kill')"
-                >
-                  <a-button type="dashed" size="mini" status="warning">
-                    {{ $t('job.stop') }}
-                  </a-button>
-                </a-popconfirm>
-              </a-doption>
-              <a-doption> </a-doption>
-            </template>
-          </a-dropdown-button>
-        </a-space>
-        <a-space>
-          <a-popconfirm
-            :content="$t('job.action.confirm.deleteSchedule')"
-            @before-ok="handleDeleteScheduleHistory($event, record)"
-          >
-            <a-button type="dashed" size="mini" status="danger">
-              {{ $t('operations.delete') }}
-            </a-button>
-          </a-popconfirm>
-        </a-space>
+      <a-space direction="horizontal" wrap>
+        <a-button
+          :hide-on-select="false"
+          size="mini"
+          @click="handleViewScheduleDetailModal($event, record)"
+        >
+          {{ $t('operations.edit') }}
+        </a-button>
+        <a-button
+          :hide-on-select="false"
+          size="mini"
+          @click="handleViewScheduleDetailModal($event, record)"
+        >
+          {{ $t('operations.view') }}
+        </a-button>
+
+        <a-popconfirm
+          :content="$t('job.action.confirm.start')"
+          @before-ok="handleAction($event, record, 'exec')"
+        >
+          <a-button type="dashed" size="mini" status="success">
+            {{ $t('job.start') }}
+          </a-button>
+        </a-popconfirm>
+
+        <a-popconfirm
+          :content="$t('job.action.confirm.start')"
+          @before-ok="handleAction($event, record, 'kill')"
+        >
+          <a-button type="dashed" size="mini" status="warning">
+            {{ $t('job.stop') }}
+          </a-button>
+        </a-popconfirm>
+        <a-popconfirm
+          :content="$t('job.action.confirm.deleteSchedule')"
+          @before-ok="handleDeleteScheduleHistory($event, record)"
+        >
+          <a-button type="dashed" size="mini" status="danger">
+            {{ $t('operations.delete') }}
+          </a-button>
+        </a-popconfirm>
       </a-space>
     </template>
   </a-table>
@@ -220,9 +215,9 @@
       <a-space direction="vertical" size="large">
         <a-radio-group v-model="viewType" type="button">
           <a-radio value="execHistory">{{ $t('job.runHistory') }}</a-radio>
-          <a-radio value="scheduleDetail">{{
-            $t('job.schedule.detail')
-          }}</a-radio>
+          <a-radio value="scheduleDetail">
+            {{ $t('job.schedule.detail') }}
+          </a-radio>
         </a-radio-group>
       </a-space>
     </template>
@@ -399,7 +394,7 @@
       title: t('operations'),
       dataIndex: 'operations',
       slotName: 'operations',
-      width: 120,
+      width: 180,
       fixed: 'right',
     },
   ]);
