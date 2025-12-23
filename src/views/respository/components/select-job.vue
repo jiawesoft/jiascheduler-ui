@@ -5,6 +5,7 @@
     :style="{ width: '320px' }"
     :filter-option="false"
     :fallback-option="false"
+    :disabled="disabled"
     allow-clear
     allow-search
     @search="handleSearchJob"
@@ -24,12 +25,14 @@
   const props = defineProps<{
     eid?: string;
     jobType: string;
+    disabled?: boolean;
   }>();
 
   const emit = defineEmits(['update:eid', 'changeJob']);
 
   const eid = ref(props.eid);
   const loading = ref(false);
+  const disabled = ref(props.disabled || false);
 
   const jobOptions = ref<JobRecord[]>([]);
   const basePagination: Pagination = {

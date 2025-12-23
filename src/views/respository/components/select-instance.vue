@@ -13,9 +13,14 @@
           <a-row :gutter="5">
             <a-col :span="15">
               <a-form-item field="ip" :label="$t('instance.ip')">
-                <a-input
+                <!-- <a-input
                   v-model="formModel.ip"
                   :placeholder="$t('instance.ip.placeholder')"
+                /> -->
+                <a-textarea
+                  :placeholder="$t('instance.ip.placeholder')"
+                  v-model="formModel.ip"
+                  auto-size
                 />
               </a-form-item>
             </a-col>

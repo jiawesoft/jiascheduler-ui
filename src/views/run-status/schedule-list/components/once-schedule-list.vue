@@ -158,16 +158,14 @@
     </template>
 
     <template #operations="{ record }">
-      <a-space direction="horizontal" wrap>
+      <a-space direction="horizontal" size="mini">
         <a-button
-          :hide-on-select="false"
           size="mini"
           @click="handleViewScheduleDetailModal($event, record)"
         >
           {{ $t('operations.edit') }}
         </a-button>
         <a-button
-          :hide-on-select="false"
           size="mini"
           @click="handleViewScheduleDetailModal($event, record)"
         >
@@ -203,20 +201,20 @@
     </template>
   </a-table>
 
-  <a-modal
-    v-model:visible="scheduleDetailVisible"
-    title-align="start"
-    :draggable="true"
-    width="80%"
-    hide-cancel
+  <a-drawer
+    width="61.8%"
+    :visible="scheduleDetailVisible"
     @cancel="handleCancel"
+    unmountOnClose
   >
     <template #title>
       <a-space direction="vertical" size="large">
         <a-radio-group v-model="viewType" type="button">
-          <a-radio value="execHistory">{{ $t('job.runHistory') }}</a-radio>
           <a-radio value="scheduleDetail">
             {{ $t('job.schedule.detail') }}
+          </a-radio>
+          <a-radio value="execHistory">
+            {{ $t('job.runHistory') }}
           </a-radio>
         </a-radio-group>
       </a-space>
@@ -230,10 +228,10 @@
       :disable-search="true"
     />
     <ScheduleDetail
-      v-if="viewType == 'scheduleDetail' && scheduleDetailVisible"
+      v-else-if="viewType == 'scheduleDetail' && scheduleDetailVisible"
       :value="form"
     />
-  </a-modal>
+  </a-drawer>
 </template>
 
 <script lang="ts" setup>
@@ -259,31 +257,32 @@
   import { useI18n } from 'vue-i18n';
 
   import ExecHistory from '@/views/run-status/components/once-exec-list.vue';
-  import ScheduleDetail from '@/views/run-status/schedule-list/components/schedule-detail.vue';
+  import ScheduleDetail from '@/views/run-status/schedule-list/components/schedule-detail2.vue';
 
   type SizeProps = 'mini' | 'small' | 'medium' | 'large';
   type Column = TableColumnData & { checked?: true };
   const scheduleDetailVisible = ref(false);
-  const viewType = ref('execHistory');
+  const viewType = ref('scheduleDetail');
 
   const state = reactive({
     form: {
       id: 0,
-      schedule_id: 'string',
-      name: 'string',
-      eid: 'string',
+      schedule_id: '',
+      name: '',
+      eid: '',
       dispatch_result: [],
-      schedule_type: 'string',
-      action: 'string',
+      schedule_type: '',
+      action: '',
       code: '',
       job_name: '',
+      job_type: '',
       actual_args: {},
-      dispatch_data: 'string',
-      snapshot_data: 'string',
-      created_user: 'string',
-      updated_user: 'string',
-      created_time: 'string',
-      updated_time: 'string',
+      dispatch_data: '',
+      snapshot_data: '',
+      created_user: '',
+      updated_user: '',
+      created_time: '',
+      updated_time: '',
       executor_id: 1,
     },
   });
@@ -453,10 +452,10 @@
       const job = record.snapshot_data;
       form.value = {
         ...record,
-        dispatch_result: (record.dispatch_result as any[]).map((v, i) => {
-          v.id = i;
-          return v;
-        }),
+        // dispatch_result: (record.dispatch_result as any[]).map((v, i) => {
+        //   v.id = i;
+        //   return v;
+        // }),
         code: job?.code,
         job_name: job?.name,
         executor_id: job?.executor_id,

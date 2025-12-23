@@ -461,6 +461,8 @@ export default {
   'form.add': 'Add',
   'form.submit': 'Submit',
   'form.submit.success': 'Submission Successful',
+  'form.update': 'Update',
+  'form.name': 'Name',
 
   'operations': 'Operations',
   'operations.create': 'Create',

@@ -457,6 +457,8 @@ export default {
   'form.add': '新增',
   'form.submit': '提交',
   'form.submit.success': '提交成功',
+  'form.update': '更新',
+  'form.name': '名称',
 
   'operations': '操作',
   'operations.create': '新建',
