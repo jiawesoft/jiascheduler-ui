@@ -205,6 +205,7 @@
     width="61.8%"
     :visible="scheduleDetailVisible"
     @cancel="handleCancel"
+    @ok="handleSaveSchedule"
     unmountOnClose
   >
     <template #title>
@@ -229,7 +230,7 @@
     />
     <ScheduleDetail
       v-else-if="viewType == 'scheduleDetail' && scheduleDetailVisible"
-      :value="form"
+      v-model="form"
     />
   </a-drawer>
 </template>
@@ -276,6 +277,7 @@
       code: '',
       job_name: '',
       job_type: '',
+      instance_ids: [],
       actual_args: {},
       dispatch_data: '',
       snapshot_data: '',
@@ -467,6 +469,10 @@
 
   const handleCancel = () => {
     scheduleDetailVisible.value = false;
+  };
+
+  const handleSaveSchedule = () => {
+    console.log('form:', form.value);
   };
 
   const search = () => {

@@ -1,17 +1,15 @@
 <template>
-  <a-form :model="$props.value" :auto-label-width="true">
+  <a-form :model="$props.modelValue" :auto-label-width="true">
     <a-form-item field="name" :label="$t('form.name')">
-      {{ $props.value.name }}
+      {{ $props.modelValue.name }}
     </a-form-item>
-    <a-form-item field="action" :label="$t('job.action')">
-      {{ $props.value.action }}
-    </a-form-item>
+
     <a-form-item field="job_name" :label="$t('job')">
       <a-space>
         <select-job
           :key="isUpdateJob"
-          v-model:eid="$props.value.eid"
-          v-model:job-type="$props.value.job_type"
+          v-model:eid="$props.modelValue.eid"
+          v-model:job-type="$props.modelValue.job_type"
           :disabled="!isUpdateJob"
           @change-job="changeJob"
         />
@@ -24,9 +22,17 @@
       <job-args :args="jobArgs" />
     </a-form-item>
 
+    <a-form-item
+      field="endpoints"
+      validate-trigger="blur"
+      :label="$t('job.endpoint')"
+    >
+      <SelectInstance v-model="scheduleForm.instances" />
+    </a-form-item>
+
     <a-form-item field="code" :label="$t('job.code')">
       <v-ace-editor
-        v-model:value="$props.value.code"
+        v-model:value="$props.modelValue.code"
         :style="{ height: '300px', width: '100%' }"
         :lang="getEditorLang"
         :print-margin="false"
@@ -53,12 +59,12 @@
   import 'ace-builds/src-noconflict/mode-sh';
   import 'ace-builds/src-noconflict/mode-powershell';
   import 'ace-builds/src-noconflict/theme-chaos';
-  import { TableColumnData } from '@arco-design/web-vue';
 
   import JobArgs from '@/components/job-args/index.vue';
   import SelectJob from '@/views/respository/components/select-job.vue';
+  import SelectInstance from '@/views/respository/components/select-instance.vue';
 
-  import { computed, ref } from 'vue';
+  import { computed, ref, watch } from 'vue';
   import { useI18n } from 'vue-i18n';
   import { JobArg, JobRecord } from '@/api/job';
 
@@ -77,6 +83,7 @@
     code: string;
     job_name: string;
     snapshot_data: any;
+    instance_ids: string[];
     actual_args: { [key: string]: any };
     created_user: string;
     updated_user: string;
@@ -93,43 +100,34 @@
     pageSize: 20,
   };
 
-  const scheduleForm = ref({
-    id: 0,
-    code: '',
-    eid: '',
-    job_args: [],
-  });
+  const props = defineProps<{ modelValue: ScheduleDetailProps }>();
 
-  const props = defineProps<{ value: ScheduleDetailProps }>();
+  const emit = defineEmits(['update:modelValue']);
+
   const jobArgs = computed(() => {
     if (
-      Array.isArray(props.value.snapshot_data.args) &&
-      props.value.snapshot_data.args.length > 0
+      Array.isArray(props.modelValue.snapshot_data.args) &&
+      props.modelValue.snapshot_data.args.length > 0
     ) {
-      return (props.value.snapshot_data.args as JobArg[]).map((v) => {
-        v.val = props.value.actual_args[v.name];
+      return (props.modelValue.snapshot_data.args as JobArg[]).map((v) => {
+        v.val = props.modelValue.actual_args[v.name];
         return v;
       });
     }
     return [];
   });
 
-  const dispatchResultColumns = computed<TableColumnData[]>(() => [
-    {
-      title: t('columns.index'),
-      dataIndex: 'index',
-      slotName: 'index',
-    },
-    {
-      title: t('job.bindIp'),
-      dataIndex: 'bind_ip',
-    },
-    {
-      title: t('instance.status'),
-      dataIndex: 'response',
-      slotName: 'response',
-    },
-  ]);
+  const scheduleForm = ref({
+    id: props.modelValue.id,
+    code: props.modelValue.code,
+    eid: props.modelValue.eid,
+    instances: props.modelValue.instance_ids.map((v) => {
+      return {
+        instance_id: v,
+      };
+    }),
+    job_args: [],
+  });
 
   const executorOptions = ref<ExecutorRecord[]>([]);
   const fetchExecutorData = async (params: {
@@ -143,15 +141,27 @@
     executorOptions.value = data.list;
   };
 
-  fetchExecutorData({ default_id: props.value.executor_id });
+  fetchExecutorData({ default_id: props.modelValue.executor_id });
 
   const getEditorLang = computed<string>(() => {
     const executorItem = executorOptions.value.find(
-      (item) => item.id === props.value.executor_id
+      (item) => item.id === props.modelValue.executor_id
     );
     const currentCommand = executorItem ? executorItem.command : 'bash';
     return getCommand(currentCommand);
   });
 
   const changeJob = (currentJob: JobRecord) => {};
+
+  watch(
+    () => scheduleForm.value,
+    (val) => {
+      emit('update:modelValue', {
+        ...props.modelValue,
+        ...val,
+        instance_ids: scheduleForm.value.instances.map((v) => v.instance_id),
+      });
+    },
+    { deep: true, immediate: true }
+  );
 </script>

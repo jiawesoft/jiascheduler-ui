@@ -122,10 +122,8 @@ export interface QueryUserServerListResp {
 }
 
 export function queryUserServerList(params: QueryUserServerReq) {
-  return axios.get<QueryUserServerListResp>('/api/instance/user-server-list', {
-    params,
-    paramsSerializer: (obj) => {
-      return qs.stringify(obj);
-    },
-  });
+  return axios.post<QueryUserServerListResp>(
+    '/api/instance/user-server-list',
+    params
+  );
 }

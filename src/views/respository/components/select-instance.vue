@@ -100,14 +100,6 @@
   const { loading, setLoading } = useLoading(true);
   const { t } = useI18n();
 
-  const generateFormModel = () => {
-    return {
-      ip: '',
-      status: 1,
-    };
-  };
-  const formModel = ref(generateFormModel());
-
   const basePagination: Pagination = {
     page: 1,
     pageSize: 20,
@@ -130,6 +122,15 @@
     },
   });
   const emit = defineEmits(['update:modelValue']);
+
+  const generateFormModel = () => {
+    return {
+      ip: '',
+      instance_ids: props.modelValue.map((v) => v.instance_id),
+      status: 1,
+    };
+  };
+  const formModel = ref(generateFormModel());
 
   const selectedKeys = ref<string[]>(
     props.modelValue.map((v) => v.instance_id)
@@ -181,7 +182,11 @@
   const instanceList = ref<InstanceRecord[]>([]);
 
   const fetchData = async (
-    params: QueryUserServerReq = { page: 1, page_size: 20, ip: '', status: 1 }
+    params: QueryUserServerReq = {
+      page: 1,
+      page_size: 20,
+      ...formModel.value,
+    }
   ) => {
     setLoading(true);
     try {
