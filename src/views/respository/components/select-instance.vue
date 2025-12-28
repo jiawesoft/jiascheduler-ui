@@ -88,7 +88,7 @@
   import useLoading from '@/hooks/loading';
   import { Pagination } from '@/types/global';
   import { useI18n } from 'vue-i18n';
-  import { ref, computed, reactive, watch, PropType } from 'vue';
+  import { ref, computed, reactive, watch, PropType, watchEffect } from 'vue';
   import { TableColumnData, TableRowSelection } from '@arco-design/web-vue';
 
   import {
@@ -126,11 +126,15 @@
   const generateFormModel = () => {
     return {
       ip: '',
-      instance_ids: props.modelValue.map((v) => v.instance_id),
+      instance_ids: [],
       status: 1,
     };
   };
-  const formModel = ref(generateFormModel());
+  const formModel = ref({
+    ip: '',
+    instance_ids: props.modelValue.map((v) => v.instance_id),
+    status: 1,
+  });
 
   const selectedKeys = ref<string[]>(
     props.modelValue.map((v) => v.instance_id)
@@ -180,6 +184,7 @@
   });
 
   const instanceList = ref<InstanceRecord[]>([]);
+  const selectInstances = ref<InstanceRecord[]>([]);
 
   const fetchData = async (
     params: QueryUserServerReq = {
@@ -188,6 +193,13 @@
       ...formModel.value,
     }
   ) => {
+    if (formModel.value.ip) {
+      params.ips = formModel.value.ip
+        .trim()
+        .split('\n')
+        .filter((v) => v);
+    }
+
     setLoading(true);
     try {
       const { data } = await queryUserServerList(params);
@@ -218,19 +230,24 @@
   };
 
   const reset = () => {
+    selectedKeys.value = [];
     formModel.value = generateFormModel();
   };
 
   fetchData();
 
-  watch(
-    () => selectedKeys.value,
-    (val) => {
-      const list = instanceList.value.filter((item) =>
-        val.includes(item.instance_id)
-      );
-      emit('update:modelValue', list);
-    },
-    { deep: true, immediate: true }
-  );
+  watchEffect(() => {
+    const keys = selectedKeys.value;
+    const list = instanceList.value.filter((item) =>
+      keys.includes(item.instance_id)
+    );
+    const origin = selectInstances.value;
+    origin.push(...list);
+
+    selectInstances.value = origin.filter((item) =>
+      keys.includes(item.instance_id)
+    );
+    const data = selectInstances.value;
+    emit('update:modelValue', data);
+  });
 </script>

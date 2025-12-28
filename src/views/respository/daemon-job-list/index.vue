@@ -310,7 +310,7 @@
   import {
     deleteJobSupervisor,
     dispatchJob,
-    endpoint,
+    Endpoint,
     JobAction,
     JobArg,
     JobRecord,
@@ -370,7 +370,7 @@
     schedule_type: string;
     action: string;
     args: JobArg[];
-    endpoints: endpoint[];
+    endpoints: Endpoint[];
   }
 
   const generateFormModel = () => {

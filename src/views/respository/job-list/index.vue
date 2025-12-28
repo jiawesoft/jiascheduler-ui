@@ -517,7 +517,7 @@
   import {
     deleteJob,
     dispatchJob,
-    endpoint,
+    Endpoint,
     JobAction,
     JobArg,
     JobBundleScriptRecord,
@@ -603,7 +603,7 @@
     formal_args: JobArg[];
     action: string;
     is_sync: boolean;
-    endpoints: endpoint[];
+    endpoints: Endpoint[];
   }
 
   const generateFormModel = () => {

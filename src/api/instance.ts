@@ -108,8 +108,8 @@ export function grantedUser(req: GrantedUserReq) {
 }
 
 export interface QueryUserServerReq extends Partial<InstanceRecord> {
-  ip?: string;
-  instance_id?: string;
+  ips?: string[];
+  instance_ids?: string[];
   instance_group_id?: number;
   status?: number;
   page: number;

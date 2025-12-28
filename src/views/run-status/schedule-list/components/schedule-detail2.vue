@@ -1,14 +1,14 @@
 <template>
-  <a-form :model="$props.modelValue" :auto-label-width="true">
+  <a-form :model="scheduleForm" :auto-label-width="true" ref="formRef">
     <a-form-item field="name" :label="$t('form.name')">
-      {{ $props.modelValue.name }}
+      <a-input v-model="scheduleForm.name" />
     </a-form-item>
 
     <a-form-item field="job_name" :label="$t('job')">
       <a-space>
         <select-job
           :key="isUpdateJob"
-          v-model:eid="$props.modelValue.eid"
+          v-model:eid="scheduleForm.eid"
           v-model:job-type="$props.modelValue.job_type"
           :disabled="!isUpdateJob"
           @change-job="changeJob"
@@ -18,21 +18,22 @@
       </a-space>
     </a-form-item>
 
-    <a-form-item field="args" :label="$t('job.arg')">
-      <job-args :args="jobArgs" />
+    <a-form-item
+      :key="scheduleForm.eid"
+      v-if="scheduleForm.jobArgs.length > 0"
+      field="args"
+      :label="$t('job.arg')"
+    >
+      <job-args :args="scheduleForm.jobArgs" />
     </a-form-item>
 
-    <a-form-item
-      field="endpoints"
-      validate-trigger="blur"
-      :label="$t('job.endpoint')"
-    >
+    <a-form-item field="instances" :label="$t('job.endpoint')" required>
       <SelectInstance v-model="scheduleForm.instances" />
     </a-form-item>
 
     <a-form-item field="code" :label="$t('job.code')">
       <v-ace-editor
-        v-model:value="$props.modelValue.code"
+        v-model:value="scheduleForm.code"
         :style="{ height: '300px', width: '100%' }"
         :lang="getEditorLang"
         :print-margin="false"
@@ -66,7 +67,8 @@
 
   import { computed, ref, watch } from 'vue';
   import { useI18n } from 'vue-i18n';
-  import { JobArg, JobRecord } from '@/api/job';
+  import { JobArg, JobRecord, SaveSchedule } from '@/api/job';
+  import { Message } from '@arco-design/web-vue';
 
   const theme = computed(() => {
     return useAppStore().theme;
@@ -94,6 +96,7 @@
 
   const { t } = useI18n();
   const isUpdateJob = ref(0);
+  const formRef = ref();
 
   const basePagination: Pagination = {
     page: 1,
@@ -104,29 +107,29 @@
 
   const emit = defineEmits(['update:modelValue']);
 
-  const jobArgs = computed(() => {
-    if (
-      Array.isArray(props.modelValue.snapshot_data.args) &&
-      props.modelValue.snapshot_data.args.length > 0
-    ) {
-      return (props.modelValue.snapshot_data.args as JobArg[]).map((v) => {
-        v.val = props.modelValue.actual_args[v.name];
-        return v;
-      });
-    }
-    return [];
-  });
-
   const scheduleForm = ref({
     id: props.modelValue.id,
+    name: props.modelValue.name,
     code: props.modelValue.code,
     eid: props.modelValue.eid,
+    snapshot_data: {},
+    jobArgs: (() => {
+      if (
+        Array.isArray(props.modelValue.snapshot_data.args) &&
+        props.modelValue.snapshot_data.args.length > 0
+      ) {
+        return (props.modelValue.snapshot_data.args as JobArg[]).map((v) => {
+          v.val = props.modelValue.actual_args[v.name];
+          return v;
+        });
+      }
+      return [];
+    })(),
     instances: props.modelValue.instance_ids.map((v) => {
       return {
         instance_id: v,
       };
     }),
-    job_args: [],
   });
 
   const executorOptions = ref<ExecutorRecord[]>([]);
@@ -151,7 +154,37 @@
     return getCommand(currentCommand);
   });
 
-  const changeJob = (currentJob: JobRecord) => {};
+  const changeJob = (currentJob: JobRecord) => {
+    scheduleForm.value.eid = currentJob.eid;
+    scheduleForm.value.snapshot_data = currentJob;
+    scheduleForm.value.jobArgs = currentJob.args || [];
+    scheduleForm.value.code = currentJob.code;
+  };
+
+  const submit = async () => {
+    if (!formRef.value.validate()) {
+      return;
+    }
+    try {
+      await SaveSchedule({
+        id: scheduleForm.value.id!,
+        name: scheduleForm.value.name,
+        endpoints: scheduleForm.value.instances as any,
+        eid: scheduleForm.value.eid,
+        args: Object.fromEntries(
+          new Map(scheduleForm.value.jobArgs.map((v) => [v.name, v.val]))
+        ),
+      });
+    } catch (err) {
+      return;
+    }
+
+    Message.success(t('form.submit.success'));
+  };
+
+  defineExpose({
+    submit,
+  });
 
   watch(
     () => scheduleForm.value,
@@ -159,6 +192,9 @@
       emit('update:modelValue', {
         ...props.modelValue,
         ...val,
+        actual_args: new Map(
+          scheduleForm.value.jobArgs.map((v) => [v.name, v.val])
+        ) as { [key: string]: any },
         instance_ids: scheduleForm.value.instances.map((v) => v.instance_id),
       });
     },

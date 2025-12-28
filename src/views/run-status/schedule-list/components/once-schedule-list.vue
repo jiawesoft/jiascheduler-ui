@@ -206,6 +206,7 @@
     :visible="scheduleDetailVisible"
     @cancel="handleCancel"
     @ok="handleSaveSchedule"
+    hide-cancel
     unmountOnClose
   >
     <template #title>
@@ -231,6 +232,7 @@
     <ScheduleDetail
       v-else-if="viewType == 'scheduleDetail' && scheduleDetailVisible"
       v-model="form"
+      ref="scheduleFormRef"
     />
   </a-drawer>
 </template>
@@ -264,6 +266,7 @@
   type Column = TableColumnData & { checked?: true };
   const scheduleDetailVisible = ref(false);
   const viewType = ref('scheduleDetail');
+  const scheduleFormRef = ref();
 
   const state = reactive({
     form: {
@@ -471,10 +474,6 @@
     scheduleDetailVisible.value = false;
   };
 
-  const handleSaveSchedule = () => {
-    console.log('form:', form.value);
-  };
-
   const search = () => {
     fetchData({
       page: basePagination.page,
@@ -492,6 +491,14 @@
       ...formModel.value,
       tag_ids: tagIds.value,
     });
+  };
+
+  const handleSaveSchedule = async () => {
+    if (scheduleFormRef.value) {
+      await scheduleFormRef.value.submit();
+      scheduleDetailVisible.value = false;
+      search();
+    }
   };
 
   fetchData();

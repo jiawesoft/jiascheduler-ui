@@ -15,7 +15,7 @@ export interface JobRecord {
   timeout: number;
   display_on_dashboard: boolean;
   code: string;
-  eid?: string;
+  eid: string;
   job_type?: string;
   executor_id: number;
   args?: JobArg[];
@@ -74,7 +74,7 @@ export interface TimerExpr {
   year: string;
 }
 
-export interface endpoint {
+export interface Endpoint {
   namespace: string;
   ip: string;
   instance_id: string;
@@ -89,7 +89,7 @@ export interface DispatchJobReq {
   action: JobAction;
   is_sync: false;
   args?: { [key: string]: any };
-  endpoints: endpoint[];
+  endpoints: Endpoint[];
 }
 export interface DispatchJobResp {
   [key: string]: any;
@@ -462,4 +462,22 @@ export function deleteBundleScript(data: DeleteBundleScriptReq) {
     '/api/job/delete-bundle-script',
     data
   );
+}
+
+export interface SaveScheduleReq {
+  id: number;
+  name: string;
+  endpoints: Endpoint[];
+  eid: string;
+  args?: { [key: string]: any };
+  timer_expr?: TimerExpr;
+  restart_interval?: number;
+}
+
+export interface SaveScheduleResp {
+  ret: number;
+}
+
+export function SaveSchedule(data: SaveScheduleReq) {
+  return axios.post<SaveScheduleResp>('/api/job/save-schedule', data);
 }

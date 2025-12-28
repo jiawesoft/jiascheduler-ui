@@ -476,7 +476,7 @@
   import WorkflowUserVariablesTable from '@/components/workflow-user-variables/index.vue';
   import SelectInstance from '@/views/respository/components/select-instance.vue';
   import WorkflowNodeArgs from '@/components/workflow-node-args/index.vue';
-  import { endpoint } from '@/api/job';
+  import { Endpoint } from '@/api/job';
 
   type SizeProps = 'mini' | 'small' | 'medium' | 'large';
   type Column = TableColumnData & { checked?: true };
@@ -485,7 +485,7 @@
   const router = useRouter();
 
   const selectNodeExecutionEndpointModalVisible = ref(false);
-  const nodeTarget = ref<endpoint[]>([]);
+  const nodeTarget = ref<Endpoint[]>([]);
   const currentEditNodeId = ref('');
 
   interface WorkflowTimerForm {
@@ -498,7 +498,7 @@
     user_variables?: WorkflowUserVariables[];
     nodes?: NodeConfig[];
     edges?: EdgeConfig[];
-    default_target: endpoint[];
+    default_target: Endpoint[];
     process_args?: WorkflowProcessArgs;
   }
 
@@ -812,7 +812,7 @@
     selectNodeExecutionEndpointModalVisible.value = true;
     currentEditNodeId.value = i;
     nodeTarget.value = record.map((v) => {
-      return { instance_id: v } as endpoint;
+      return { instance_id: v } as Endpoint;
     });
   };
 

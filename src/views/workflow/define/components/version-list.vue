@@ -355,7 +355,7 @@
   import { useI18n } from 'vue-i18n';
   import { useRouter } from 'vue-router';
   import { getFormatTimeVersion } from '@/utils/time';
-  import { endpoint } from '@/api/job';
+  import { Endpoint } from '@/api/job';
   import {
     deleteWorkflowVersion,
     queryWorkflowVersionList,
@@ -384,7 +384,7 @@
     process_args: WorkflowProcessArgs;
     user_variables?: UserVariables[];
     nodes: NodeConfig[];
-    default_target: endpoint[];
+    default_target: Endpoint[];
     [key: string]: any;
   }>({
     workflow_id: 0,
@@ -400,7 +400,7 @@
   });
 
   const selectNodeExecutionEndpointModalVisible = ref(false);
-  const nodeTarget = ref<endpoint[]>([]);
+  const nodeTarget = ref<Endpoint[]>([]);
   const currentEditNodeId = ref('');
 
   const theme = computed(() => {
@@ -633,7 +633,7 @@
     selectNodeExecutionEndpointModalVisible.value = true;
     currentEditNodeId.value = i;
     nodeTarget.value = record.map((v) => {
-      return { instance_id: v } as endpoint;
+      return { instance_id: v } as Endpoint;
     });
   };
 

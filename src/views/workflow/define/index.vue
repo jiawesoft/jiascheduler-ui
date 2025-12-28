@@ -238,7 +238,7 @@
 </template>
 
 <script lang="ts" setup>
-  import { deleteJob, endpoint, QueryJobReq } from '@/api/job';
+  import { deleteJob, Endpoint, QueryJobReq } from '@/api/job';
 
   import useLoading from '@/hooks/loading';
 
@@ -289,7 +289,7 @@
     schedule_type: string;
     action: string;
     is_sync: boolean;
-    endpoints: endpoint[];
+    endpoints: Endpoint[];
   }
 
   const generateFormModel = () => {

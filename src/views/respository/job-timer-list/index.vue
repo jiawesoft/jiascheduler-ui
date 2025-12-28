@@ -367,7 +367,7 @@
   import {
     deleteJobTimer,
     dispatchJob,
-    endpoint,
+    Endpoint,
     JobAction,
     JobArg,
     JobRecord,
@@ -428,7 +428,7 @@
     schedule_type: string;
     action: string;
     is_sync: boolean;
-    endpoints: endpoint[];
+    endpoints: Endpoint[];
   }
 
   const defaultTimerExpr: TimerExpr = {
