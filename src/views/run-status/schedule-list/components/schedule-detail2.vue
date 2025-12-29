@@ -41,6 +41,11 @@
         :theme="theme === 'dark' ? 'chaos' : 'chrome'"
       />
     </a-form-item>
+    <a-form-item>
+      <a-button @click="submit" type="primary">
+        {{ $t('form.submit') }}
+      </a-button>
+    </a-form-item>
   </a-form>
 </template>
 
@@ -105,7 +110,7 @@
 
   const props = defineProps<{ modelValue: ScheduleDetailProps }>();
 
-  const emit = defineEmits(['update:modelValue']);
+  const emit = defineEmits(['update:modelValue', 'submitForm']);
 
   const scheduleForm = ref({
     id: props.modelValue.id,
@@ -179,6 +184,7 @@
       return;
     }
 
+    emit('submitForm');
     Message.success(t('form.submit.success'));
   };
 

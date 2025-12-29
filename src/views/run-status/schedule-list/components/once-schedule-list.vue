@@ -207,6 +207,7 @@
     @cancel="handleCancel"
     @ok="handleSaveSchedule"
     hide-cancel
+    :footer="false"
     unmountOnClose
   >
     <template #title>
@@ -233,6 +234,7 @@
       v-else-if="viewType == 'scheduleDetail' && scheduleDetailVisible"
       v-model="form"
       ref="scheduleFormRef"
+      @submit-form="handleSubmitScheduleForm"
     />
   </a-drawer>
 </template>
@@ -245,7 +247,6 @@
     ScheduleType,
     queryScheduleList,
     redispatchJob,
-    deleteExecHistory,
     deleteScheduleHistory,
   } from '@/api/job';
   import { queryCountResource, TagRecord } from '@/api/tag';
@@ -577,6 +578,11 @@
 
     search();
     return true;
+  };
+
+  const handleSubmitScheduleForm = async () => {
+    scheduleDetailVisible.value = false;
+    search();
   };
 
   watch(
