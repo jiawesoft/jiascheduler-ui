@@ -72,7 +72,7 @@
 
   import { computed, ref, watch } from 'vue';
   import { useI18n } from 'vue-i18n';
-  import { JobArg, JobRecord, SaveSchedule } from '@/api/job';
+  import { JobArg, JobRecord, saveSchedule } from '@/api/job';
   import { Message } from '@arco-design/web-vue';
 
   const theme = computed(() => {
@@ -171,7 +171,7 @@
       return;
     }
     try {
-      await SaveSchedule({
+      await saveSchedule({
         id: scheduleForm.value.id!,
         name: scheduleForm.value.name,
         endpoints: scheduleForm.value.instances as any,

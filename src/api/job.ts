@@ -478,6 +478,15 @@ export interface SaveScheduleResp {
   ret: number;
 }
 
-export function SaveSchedule(data: SaveScheduleReq) {
+export function saveSchedule(data: SaveScheduleReq) {
   return axios.post<SaveScheduleResp>('/api/job/save-schedule', data);
+}
+
+export interface ScheduleJobReq {
+  schedule_pid: number;
+  action: string;
+}
+
+export function scheduleJob(req: ScheduleJobReq) {
+  return axios.post('/api/job/schedule', req);
 }

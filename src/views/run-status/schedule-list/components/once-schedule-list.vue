@@ -165,12 +165,6 @@
         >
           {{ $t('operations.edit') }}
         </a-button>
-        <a-button
-          size="mini"
-          @click="handleViewScheduleDetailModal($event, record)"
-        >
-          {{ $t('operations.view') }}
-        </a-button>
 
         <a-popconfirm
           :content="$t('job.action.confirm.start')"
@@ -230,7 +224,7 @@
       :schedule-id="form.schedule_id"
       :disable-search="true"
     />
-    <ScheduleDetail
+    <ScheduleForm
       v-else-if="viewType == 'scheduleDetail' && scheduleDetailVisible"
       v-model="form"
       ref="scheduleFormRef"
@@ -248,6 +242,7 @@
     queryScheduleList,
     redispatchJob,
     deleteScheduleHistory,
+    scheduleJob,
   } from '@/api/job';
   import { queryCountResource, TagRecord } from '@/api/tag';
   import useLoading from '@/hooks/loading';
@@ -261,7 +256,8 @@
   import { useI18n } from 'vue-i18n';
 
   import ExecHistory from '@/views/run-status/components/once-exec-list.vue';
-  import ScheduleDetail from '@/views/run-status/schedule-list/components/schedule-detail2.vue';
+  import ScheduleForm from '@/views/run-status/schedule-list/components/schedule-form.vue';
+  import { Message } from '@arco-design/web-vue';
 
   type SizeProps = 'mini' | 'small' | 'medium' | 'large';
   type Column = TableColumnData & { checked?: true };
@@ -453,15 +449,11 @@
     fetchData();
   };
 
-  const handleViewScheduleDetailModal = (e: any, record: any) => {
+  const handleViewScheduleDetailModal = (ScheduleDetail: any, record: any) => {
     if (record) {
       const job = record.snapshot_data;
       form.value = {
         ...record,
-        // dispatch_result: (record.dispatch_result as any[]).map((v, i) => {
-        //   v.id = i;
-        //   return v;
-        // }),
         code: job?.code,
         job_name: job?.name,
         executor_id: job?.executor_id,
@@ -556,11 +548,16 @@
     record: any,
     action: 'exec' | 'kill' | 'start_timer' | 'stop_timer'
   ) => {
-    await redispatchJob({
-      schedule_id: record.schedule_id,
-      action,
-    });
+    try {
+      await scheduleJob({
+        schedule_pid: record.id,
+        action,
+      });
+    } catch (err) {
+      return false;
+    }
 
+    Message.success(t('form.submit.success'));
     search();
     return true;
   };
