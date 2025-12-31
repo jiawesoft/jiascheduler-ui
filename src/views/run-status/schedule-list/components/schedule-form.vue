@@ -162,7 +162,9 @@
   const changeJob = (currentJob: JobRecord) => {
     scheduleForm.value.eid = currentJob.eid;
     scheduleForm.value.snapshot_data = currentJob;
-    scheduleForm.value.jobArgs = currentJob.args || [];
+    scheduleForm.value.jobArgs = Array.isArray(currentJob.args)
+      ? currentJob.args
+      : [];
     scheduleForm.value.code = currentJob.code;
   };
 
