@@ -463,6 +463,7 @@ export default {
   'form.submit.success': 'Submission Successful',
   'form.update': 'Update',
   'form.name': 'Name',
+  'form.updateSuccess': 'Update Successful',
 
   'operations': 'Operations',
   'operations.create': 'Create',

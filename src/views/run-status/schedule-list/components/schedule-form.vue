@@ -10,8 +10,9 @@
           :key="isUpdateJob"
           v-model:eid="scheduleForm.eid"
           v-model:job-type="$props.modelValue.job_type"
-          :disabled="!isUpdateJob"
+          disabled
           @change-job="changeJob"
+          :trigger-change="isUpdateJob === 1"
         />
 
         <a-button @click="isUpdateJob = 1">{{ $t('form.update') }}</a-button>
@@ -166,6 +167,7 @@
       ? currentJob.args
       : [];
     scheduleForm.value.code = currentJob.code;
+    Message.success(t('form.updateSuccess'));
   };
 
   const submit = async () => {

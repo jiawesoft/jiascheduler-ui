@@ -15,7 +15,7 @@
               <a-radio-group
                 v-model="formModel.job_type"
                 type="button"
-                @change="search"
+                @change="handleChangeJobType"
               >
                 <a-radio value="default">{{ $t('job.type.default') }}</a-radio>
                 <a-radio value="bundle">{{ $t('job.type.bundle') }}</a-radio>
@@ -285,6 +285,7 @@
       updated_user: 'string',
       created_time: 'string',
       updated_time: 'string',
+      actual_args: [],
       executor_id: 1,
     },
   });
@@ -407,6 +408,9 @@
 
   const initTagList = async () => {
     try {
+      if (formModel.value.job_type === 'bundle') {
+        resourceType.value = 'bundle_job';
+      }
       const { data } = await queryCountResource({
         resource_type: resourceType.value,
       });
@@ -567,6 +571,11 @@
 
     search();
     return true;
+  };
+
+  const handleChangeJobType = async () => {
+    initTagList();
+    search();
   };
 
   watch(
