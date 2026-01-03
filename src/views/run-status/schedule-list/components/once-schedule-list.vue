@@ -163,7 +163,7 @@
           size="mini"
           @click="handleViewScheduleDetailModal($event, record)"
         >
-          {{ $t('operations.edit') }}
+          {{ $t('operations.manage') }}
         </a-button>
 
         <a-popconfirm
@@ -220,8 +220,7 @@
       v-if="viewType == 'execHistory' && scheduleDetailVisible"
       :job-type="formModel.job_type"
       :hide-job-type-switch="true"
-      :eid="form.eid"
-      :schedule-id="form.schedule_id"
+      :schedule-pid="form.id"
       :disable-search="true"
     />
     <ScheduleForm

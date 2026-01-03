@@ -169,9 +169,11 @@
   };
 
   const submit = async () => {
-    if (!formRef.value.validate()) {
-      return;
+    const ret = await formRef.value.validate();
+    if (ret) {
+      return false;
     }
+
     try {
       await saveSchedule({
         id: scheduleForm.value.id!,
@@ -183,11 +185,12 @@
         ),
       });
     } catch (err) {
-      return;
+      return false;
     }
 
     emit('submitForm');
     Message.success(t('form.submit.success'));
+    return true;
   };
 
   defineExpose({

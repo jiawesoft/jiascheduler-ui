@@ -468,6 +468,7 @@ export default {
   'operations.create': 'Create',
   'operations.view': 'View',
   'operations.edit': 'Edit',
+  'operations.manage': 'Manage',
   'operations.dispatch': 'Dispatch',
   'operations.download': 'Download',
   'operations.websshLogin': 'Login',

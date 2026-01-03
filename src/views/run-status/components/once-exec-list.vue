@@ -337,6 +337,7 @@
 
   const props = defineProps<{
     scheduleId?: string;
+    schedulePid?: number;
     bindIp?: string;
     title?: string;
     eid?: string;
@@ -655,6 +656,7 @@
       page_size: 20,
       schedule_id: props.scheduleId,
       schedule_type: formModel.value.schedule_type,
+      schedule_pid: props.schedulePid,
       eid: props.eid,
       job_type: formModel.value.job_type,
       tag_ids: tagIds.value,
@@ -704,6 +706,7 @@
       page_size: basePagination.pageSize,
       ...formModel.value,
       schedule_id: props.scheduleId,
+      schedule_pid: props.schedulePid,
       schedule_type: formModel.value.schedule_type,
       job_type: formModel.value.job_type,
       eid: props.eid,
@@ -717,6 +720,7 @@
       page: current,
       ...formModel.value,
       schedule_id: props.scheduleId,
+      schedule_pid: props.schedulePid,
       schedule_type: formModel.value.schedule_type,
       eid: props.eid,
       job_type: formModel.value.job_type,

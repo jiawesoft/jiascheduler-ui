@@ -464,6 +464,7 @@ export default {
   'operations.create': '新建',
   'operations.view': '查看',
   'operations.edit': '编辑',
+  'operations.manage': '管理',
   'operations.dispatch': '启动',
   'operations.download': '下载',
   'operations.websshLogin': '登录',

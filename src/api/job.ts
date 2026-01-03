@@ -191,6 +191,7 @@ export interface BundleScriptResult {
 export interface ExecRecord {
   id: number;
   schedule_id: string;
+  schedule_pid: number;
   job_type: string;
   bundle_script_result: BundleScriptResult[];
   eid: string;
