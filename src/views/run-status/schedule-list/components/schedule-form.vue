@@ -20,12 +20,11 @@
     </a-form-item>
 
     <a-form-item
-      :key="scheduleForm.eid"
       v-if="scheduleForm.jobArgs.length > 0"
       field="args"
       :label="$t('job.arg')"
     >
-      <job-args :args="scheduleForm.jobArgs" />
+      <job-args :key="isUpdateJob" :args="scheduleForm.jobArgs" />
     </a-form-item>
 
     <a-form-item field="instances" :label="$t('job.endpoint')" required>
@@ -44,7 +43,7 @@
     </a-form-item>
     <a-form-item>
       <a-button @click="submit" type="primary">
-        {{ $t('form.submit') }}
+        {{ $t('form.update') }}
       </a-button>
     </a-form-item>
   </a-form>
@@ -161,12 +160,13 @@
   });
 
   const changeJob = (currentJob: JobRecord) => {
-    scheduleForm.value.eid = currentJob.eid;
-    scheduleForm.value.snapshot_data = currentJob;
-    scheduleForm.value.jobArgs = Array.isArray(currentJob.args)
-      ? currentJob.args
-      : [];
-    scheduleForm.value.code = currentJob.code;
+    scheduleForm.value = {
+      ...scheduleForm.value,
+      snapshot_data: currentJob,
+      jobArgs: Array.isArray(currentJob.args) ? currentJob.args : [],
+      code: currentJob.code,
+    };
+    isUpdateJob.value = 0;
     Message.success(t('form.updateSuccess'));
   };
 
