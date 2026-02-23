@@ -417,6 +417,15 @@ export function deleteScheduleHistory(data: DeleteScheduleHistoryReq) {
   return axios.post('/api/job/delete-schedule-history', data);
 }
 
+export interface DeleteScheduleReq {
+  schedule_id: string;
+  eid: string;
+}
+
+export function deleteSchedule(data: DeleteScheduleReq) {
+  return axios.post('/api/job/delete-schedule', data);
+}
+
 export interface DeleteRunningStatusReq {
   instance_id: string;
   eid: string;
