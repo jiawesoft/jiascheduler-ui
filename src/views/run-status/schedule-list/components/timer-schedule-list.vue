@@ -156,7 +156,7 @@
     </template>
 
     <template #operations="{ record }">
-      <a-space direction="horizontal">
+      <a-space direction="horizontal" size="mini">
         <a-button
           size="mini"
           @click="handleViewScheduleDetailModal($event, record)"
@@ -196,11 +196,11 @@
 
   <a-drawer
     :visible="scheduleDetailVisible"
-    :draggable="true"
-    title-align="start"
     width="61.8%"
-    hide-cancel
     @cancel="handleCancel"
+    hide-cancel
+    :footer="false"
+    unmountOnClose
   >
     <template #title>
       <a-space direction="vertical" size="large">
