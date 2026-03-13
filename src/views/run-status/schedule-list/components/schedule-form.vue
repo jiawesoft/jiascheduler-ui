@@ -27,6 +27,24 @@
       <job-args :key="isUpdateJob" :args="scheduleForm.jobArgs" />
     </a-form-item>
 
+    <a-form-item
+      v-if="scheduleForm.timer_expr"
+      field="timer_expr"
+      :tooltip="$t('job.timerExpr.tooltips')"
+      :label="$t('job.timerExpr')"
+      required
+    >
+      <a-input
+        :style="{ width: '320px' }"
+        v-model="scheduleForm.timer_expr.expr"
+        allow-clear
+      >
+        <template #prepend>
+          {{ scheduleForm.timer_expr.timezone }}
+        </template>
+      </a-input>
+    </a-form-item>
+
     <a-form-item field="instances" :label="$t('job.endpoint')" required>
       <SelectInstance v-model="scheduleForm.instances" />
     </a-form-item>
@@ -89,6 +107,7 @@
     action: string;
     code: string;
     job_name: string;
+    timer_expr?: { expr: string; timezone: string };
     snapshot_data: any;
     instance_ids: string[];
     actual_args: { [key: string]: any };
@@ -118,6 +137,7 @@
     code: props.modelValue.code,
     eid: props.modelValue.eid,
     snapshot_data: {},
+    timer_expr: props.modelValue.timer_expr,
     jobArgs: (() => {
       if (
         Array.isArray(props.modelValue.snapshot_data.args) &&

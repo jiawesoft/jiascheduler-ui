@@ -239,8 +239,6 @@
     QueryScheduleListReq,
     ScheduleType,
     queryScheduleList,
-    redispatchJob,
-    deleteScheduleHistory,
     scheduleJob,
     deleteSchedule,
   } from '@/api/job';
@@ -452,7 +450,7 @@
     fetchData();
   };
 
-  const handleViewScheduleDetailModal = (ScheduleDetail: any, record: any) => {
+  const handleViewScheduleDetailModal = (e: any, record: any) => {
     if (record) {
       const job = record.snapshot_data;
       form.value = {
