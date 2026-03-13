@@ -112,6 +112,8 @@ const localeJob = {
   'job.arg.tips':
     'By implementing parameter templating based on the "Handlebars templating language" (https://handlebarsjs.com/), you can directly access defined parameters in your code using {name}',
 
+  'job.arg.updateNeedSave': 'Update job arguments requires saving the job',
+
   'job.timer': 'Timer',
   'job.saveTimer': 'Save Timer',
   'job.timerExpr': 'Timer Expression',

@@ -43,7 +43,7 @@
     </a-form-item>
     <a-form-item>
       <a-button @click="submit" type="primary">
-        {{ $t('form.update') }}
+        {{ $t('form.save') }}
       </a-button>
     </a-form-item>
   </a-form>
@@ -167,7 +167,7 @@
       code: currentJob.code,
     };
     isUpdateJob.value = 0;
-    Message.success(t('form.updateSuccess'));
+    Message.success(t('job.arg.updateNeedSave'));
   };
 
   const submit = async () => {

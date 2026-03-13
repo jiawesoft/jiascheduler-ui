@@ -185,7 +185,7 @@
         </a-popconfirm>
         <a-popconfirm
           :content="$t('job.action.confirm.deleteSchedule')"
-          @before-ok="handleDeleteScheduleHistory($event, record)"
+          @before-ok="handleDeleteSchedule($event, record)"
         >
           <a-button type="dashed" size="mini" status="danger">
             {{ $t('operations.delete') }}
@@ -242,6 +242,7 @@
     redispatchJob,
     deleteScheduleHistory,
     scheduleJob,
+    deleteSchedule,
   } from '@/api/job';
   import { queryCountResource, TagRecord } from '@/api/tag';
   import useLoading from '@/hooks/loading';
@@ -564,11 +565,11 @@
     return true;
   };
 
-  const handleDeleteScheduleHistory = async (e: any, record: any) => {
+  const handleDeleteSchedule = async (e: any, record: any) => {
     setLoading(true);
     try {
-      await deleteScheduleHistory({
-        schedule_id: record.schedule_id,
+      await deleteSchedule({
+        schedule_pid: record.id,
         eid: record.eid,
       });
     } finally {

@@ -418,7 +418,7 @@ export function deleteScheduleHistory(data: DeleteScheduleHistoryReq) {
 }
 
 export interface DeleteScheduleReq {
-  schedule_id: string;
+  schedule_pid: number;
   eid: string;
 }
 
