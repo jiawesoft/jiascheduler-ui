@@ -402,9 +402,6 @@
 
   const initTagList = async () => {
     try {
-      if (formModel.value.job_type === 'bundle') {
-        resourceType.value = 'bundle_job';
-      }
       const { data } = await queryCountResource({
         resource_type: resourceType.value,
       });
@@ -583,7 +580,12 @@
     }
   };
 
-  const handleChangeJobType = async () => {
+  const handleChangeJobType = async (val: any) => {
+    if (val === 'default') {
+      resourceType.value = 'job';
+    } else {
+      resourceType.value = 'bundle_job';
+    }
     initTagList();
     search();
   };

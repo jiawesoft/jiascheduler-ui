@@ -47,7 +47,7 @@ const localeJob = {
   'menu.repository.jobBundleScript': 'Batch Task',
   'menu.repository.daemonJob': 'Daemon Job',
   'menu.runStatus.runList': 'Run List',
-  'menu.runStatus.scheduleList': 'Schedule List',
+  'menu.runStatus.scheduleList': 'Schedule Manage',
   'menu.runStatus.execList': 'Execution List',
 
   'job': 'Job',

@@ -48,7 +48,7 @@ const localeJob = {
   'menu.repository.jobBundleScript': '脚本',
   'menu.repository.daemonJob': '常驻任务',
   'menu.runStatus.runList': '运行列表',
-  'menu.runStatus.scheduleList': '调度记录',
+  'menu.runStatus.scheduleList': '调度管理',
   'menu.runStatus.execList': '执行记录',
 
   'job': '作业',

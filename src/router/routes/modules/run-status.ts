@@ -24,7 +24,7 @@ const RUN_STATUS: AppRouteRecordRaw = {
       },
     },
     {
-      path: 'schedule-history', // The midline path complies with SEO specifications
+      path: 'schedule', // The midline path complies with SEO specifications
       name: 'ScheduleList',
       component: () => import('@/views/run-status/schedule-list/index.vue'),
       meta: {
