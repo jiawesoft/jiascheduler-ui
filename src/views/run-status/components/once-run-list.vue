@@ -296,6 +296,7 @@
   import { Pagination } from '@/types/global';
   import { computed, nextTick, reactive, ref, toRefs, watch } from 'vue';
   import { useI18n } from 'vue-i18n';
+  import { useRoute } from 'vue-router';
   import jiconOffline from '@/components/icon/jicon-offline.vue';
 
   import { Message } from '@arco-design/web-vue';
@@ -312,6 +313,7 @@
   const runModalVisible = ref(false);
   const viewType = ref('execHistory');
   const runDetailModalVisible = ref(false);
+  const route = useRoute();
 
   const props = defineProps({
     jobType: {
@@ -518,11 +520,12 @@
   const resourceType = ref('job');
   const tagIds = ref<number[]>([]);
 
+  if (route.query?.jobType === 'bundle') {
+    resourceType.value = 'bundle_job';
+  }
+
   const initTagList = async () => {
     try {
-      if (formModel.value.job_type === 'bundle') {
-        resourceType.value = 'bundle_job';
-      }
       const { data } = await queryCountResource({
         resource_type: resourceType.value,
       });
@@ -707,7 +710,12 @@
     }
   };
 
-  const handleChangeJobType = async () => {
+  const handleChangeJobType = async (val: any) => {
+    if (val === 'default') {
+      resourceType.value = 'job';
+    } else {
+      resourceType.value = 'bundle_job';
+    }
     initTagList();
     search();
   };

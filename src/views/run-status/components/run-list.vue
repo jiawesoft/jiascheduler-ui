@@ -14,7 +14,7 @@
 
 <script lang="ts" setup>
   import { useI18n } from 'vue-i18n';
-  import { defineProps, ref } from 'vue';
+  import { ref } from 'vue';
   import { useRouter, useRoute } from 'vue-router';
   import OnceRunList from './once-run-list.vue';
   import TimerRunList from './timer-run-list.vue';
