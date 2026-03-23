@@ -847,9 +847,6 @@
 
   const initTagList = async () => {
     try {
-      if (formModel.value.job_type === 'bundle') {
-        resourceType.value = 'bundle_job';
-      }
       const { data } = await queryCountResource({
         resource_type: resourceType.value,
       });
@@ -1045,7 +1042,7 @@
     }
 
     const args = {};
-    if (dispatchJobForm.value.formal_args) {
+    if (Array.isArray(dispatchJobForm.value.formal_args)) {
       dispatchJobForm.value.formal_args.forEach((v) => {
         args[v.name] = v.val;
       });
@@ -1173,7 +1170,12 @@
     }
   };
 
-  const handleChangeJobType = async () => {
+  const handleChangeJobType = async (val: any) => {
+    if (val === 'default') {
+      resourceType.value = 'job';
+    } else {
+      resourceType.value = 'bundle_job';
+    }
     initTagList();
     search();
   };

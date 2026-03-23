@@ -650,7 +650,7 @@
     if (v && !jobTimerForm.value.name) {
       jobTimerForm.value.name = v?.name || '';
     }
-    jobTimerForm.value.job_args = v.args ?? [];
+    jobTimerForm.value.job_args = Array.isArray(v.args) ? v.args : [];
   };
 
   const changeTimer = (v: JobTimerRecord) => {
@@ -730,7 +730,7 @@
       return false;
     }
     const args = {};
-    if (dispatchJobTimerForm.value.args) {
+    if (Array.isArray(dispatchJobTimerForm.value.args)) {
       dispatchJobTimerForm.value.args.forEach((v) => {
         args[v.name] = v.val;
       });
@@ -835,7 +835,12 @@
     }
   };
 
-  const handleChangeJobType = async () => {
+  const handleChangeJobType = async (val: any) => {
+    if (val === 'default') {
+      resourceType.value = 'job';
+    } else {
+      resourceType.value = 'bundle_job';
+    }
     initTagList();
     search();
   };
