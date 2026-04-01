@@ -237,7 +237,7 @@
     QueryScheduleListReq,
     ScheduleType,
     queryScheduleList,
-    redispatchJob,
+    scheduleJob,
     deleteSchedule,
   } from '@/api/job';
   import { queryCountResource, TagRecord } from '@/api/tag';
@@ -253,6 +253,7 @@
 
   import ExecHistory from '@/views/run-status/components/timer-exec-list.vue';
   import ScheduleForm from '@/views/run-status/schedule-list/components/schedule-form.vue';
+  import { Message } from '@arco-design/web-vue';
 
   type SizeProps = 'mini' | 'small' | 'medium' | 'large';
   type Column = TableColumnData & { checked?: true };
@@ -543,11 +544,16 @@
     record: any,
     action: 'exec' | 'kill' | 'start_timer' | 'stop_timer'
   ) => {
-    await redispatchJob({
-      schedule_id: record.schedule_id,
-      action,
-    });
+    try {
+      await scheduleJob({
+        schedule_pid: record.id,
+        action,
+      });
+    } catch (err) {
+      return false;
+    }
 
+    Message.success(t('form.submit.success'));
     search();
     return true;
   };
