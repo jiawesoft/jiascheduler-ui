@@ -329,7 +329,15 @@
   import type { TableColumnData } from '@arco-design/web-vue/es/table/interface';
   import cloneDeep from 'lodash/cloneDeep';
   import Sortable from 'sortablejs';
-  import { computed, nextTick, reactive, ref, toRefs, watch } from 'vue';
+  import {
+    computed,
+    nextTick,
+    onMounted,
+    reactive,
+    ref,
+    toRefs,
+    watch,
+  } from 'vue';
   import { useI18n } from 'vue-i18n';
   // import { VAceEditor } from 'vue3-ace-editor';
   // import 'ace-builds/src-noconflict/mode-text';
@@ -652,6 +660,15 @@
   const resourceType = ref('job');
   const tagIds = ref<number[]>([]);
 
+  onMounted(() => {
+    if (props.jobType === 'default') {
+      resourceType.value = 'job';
+    } else {
+      resourceType.value = 'bundle_job';
+    }
+    initTagList();
+  });
+
   const initTagList = async () => {
     try {
       const { data } = await queryCountResource({
@@ -662,7 +679,6 @@
       // you can report use errorHandler or other
     }
   };
-  initTagList();
 
   const fetchData = async (
     params: QueryExecListReq = {
