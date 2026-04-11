@@ -233,7 +233,7 @@
               <a-form-item
                 v-else-if="
                   value.task_type === 'standard' &&
-                  value.task.custom?.formal_args?.length
+                  value.task.standard?.formal_args?.length
                 "
                 :field="`node[${i}].formal_args`"
                 validate-trigger="blur"
@@ -370,6 +370,7 @@
 
   import WorkflowUserVariables from '@/components/workflow-user-variables/index.vue';
   import WorkflowNodeArgs from '@/components/workflow-node-args/index.vue';
+  import { Message } from '@arco-design/web-vue';
 
   const props = defineProps<{
     workflowId: number;
@@ -694,7 +695,7 @@
                 args: v.task.custom?.formal_args,
               };
             }),
-          default_target: startProcessForm.value.map((v) => {
+          default_target: startProcessForm.value.default_target.map((v) => {
             return v.instance_id;
           }),
         },
@@ -702,7 +703,7 @@
     } catch (err) {
       return false;
     }
-    // Message.success(t('form.submit.success'));
+    Message.success(t('form.submit.success'));
 
     setTimeout(() => {
       router.push({
