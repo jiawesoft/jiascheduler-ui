@@ -17,11 +17,11 @@ importers:
         specifier: ^2.55.1
         version: 2.55.1(vue@3.4.26(typescript@4.9.5))
       '@logicflow/core':
-        specifier: ^2.0.13
-        version: 2.0.13
+        specifier: ^2.2.1
+        version: 2.2.1
       '@logicflow/extension':
-        specifier: ^2.0.18
-        version: 2.0.18(@logicflow/core@2.0.13)
+        specifier: ^2.2.1
+        version: 2.2.1(@logicflow/core@2.2.1)
       '@types/splitpanes':
         specifier: ^2.2.6
         version: 2.2.6
@@ -571,13 +571,13 @@ packages:
   '@jridgewell/trace-mapping@0.3.9':
     resolution: {integrity: sha512-3Belt6tdc8bPgAtbcmdtNJlirVoTmEb5e2gC94PnkwEW9jI6CAHUeoG85tjWP5WquqfavoMtMwiG4P926ZKKuQ==}
 
-  '@logicflow/core@2.0.13':
-    resolution: {integrity: sha512-/aLGRrJPO5ZiI+39l5WXDsfM1q8UAbpbjf6lVx4OR0ie4fZDgNF9BJ23BvgLEoU3quYoOL0DCi8t/u6P15YWsw==}
+  '@logicflow/core@2.2.1':
+    resolution: {integrity: sha512-VzLPrCrT4eXnOLjoGQ5v4GUSay3+6rd3YNZD0qOJw4vME5e4WjQ5fd+hKK2zlIzgdRI4D54dXiEFJrS6xdV6yQ==}
 
-  '@logicflow/extension@2.0.18':
-    resolution: {integrity: sha512-a7KH56XPMc2Yws8h6YfdCwXeNwrh6LsgOKD75pUYWItOS/m8803SXGfOSjcVoM8Zl4NrPMPdWnfFO4t1+eaIPw==}
+  '@logicflow/extension@2.2.1':
+    resolution: {integrity: sha512-Qc2n514UzQlbpFtUnU7ggaKwCEMFDNY20fQyAww/MFLevP5y1+IfVKOUXyfbfKg6UITZsazEBEhgivwqV1sasw==}
     peerDependencies:
-      '@logicflow/core': 2.0.13
+      '@logicflow/core': 2.2.1
 
   '@mrmlnc/readdir-enhanced@2.2.1':
     resolution: {integrity: sha512-bPHp6Ji8b41szTOcaP63VlnbbO5Ny6dwAATtY6JTjh5N2OLrb5Qk/Th5cRkRQhkWCt+EJsYrNB0MiL+Gpn6e3g==}
@@ -5525,7 +5525,7 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.1
       '@jridgewell/sourcemap-codec': 1.4.15
 
-  '@logicflow/core@2.0.13':
+  '@logicflow/core@2.2.1':
     dependencies:
       classnames: 2.5.1
       lodash-es: 4.17.21
@@ -5536,10 +5536,10 @@ snapshots:
       preact: 10.26.6
       uuid: 9.0.1
 
-  '@logicflow/extension@2.0.18(@logicflow/core@2.0.13)':
+  '@logicflow/extension@2.2.1(@logicflow/core@2.2.1)':
     dependencies:
       '@antv/hierarchy': 0.6.14
-      '@logicflow/core': 2.0.13
+      '@logicflow/core': 2.2.1
       classnames: 2.5.1
       lodash-es: 4.17.21
       medium-editor: 5.23.3
@@ -8683,7 +8683,7 @@ snapshots:
     dependencies:
       hosted-git-info: 4.1.0
       is-core-module: 2.12.0
-      semver: 7.4.0
+      semver: 7.6.2
       validate-npm-package-license: 3.0.4
 
   normalize-path@3.0.0: {}
@@ -8979,7 +8979,7 @@ snapshots:
     dependencies:
       htmlparser2: 3.10.1
       postcss: 7.0.39
-      postcss-syntax: 0.36.2(postcss-html@0.36.0(postcss-syntax@0.36.2(postcss-html@1.5.0)(postcss@8.4.21))(postcss@7.0.39))(postcss-jsx@0.36.4(postcss-syntax@0.36.2(postcss-html@1.5.0)(postcss@8.4.21))(postcss@7.0.39))(postcss-less@3.1.4)(postcss-markdown@0.36.0(postcss-syntax@0.36.2(postcss-html@1.5.0)(postcss@8.4.21))(postcss@7.0.39))(postcss-scss@2.1.1)(postcss@7.0.39)
+      postcss-syntax: 0.36.2(postcss-html@0.36.0)(postcss-jsx@0.36.4(postcss-syntax@0.36.2(postcss-html@1.5.0)(postcss@8.4.21))(postcss@7.0.39))(postcss-less@3.1.4)(postcss-markdown@0.36.0(postcss-syntax@0.36.2(postcss-html@1.5.0)(postcss@8.4.21))(postcss@7.0.39))(postcss-scss@2.1.1)(postcss@7.0.39)
 
   postcss-html@1.5.0:
     dependencies:
@@ -8992,7 +8992,7 @@ snapshots:
     dependencies:
       '@babel/core': 7.21.4
       postcss: 7.0.39
-      postcss-syntax: 0.36.2(postcss-html@0.36.0(postcss-syntax@0.36.2(postcss-html@1.5.0)(postcss@8.4.21))(postcss@7.0.39))(postcss-jsx@0.36.4(postcss-syntax@0.36.2(postcss-html@1.5.0)(postcss@8.4.21))(postcss@7.0.39))(postcss-less@3.1.4)(postcss-markdown@0.36.0(postcss-syntax@0.36.2(postcss-html@1.5.0)(postcss@8.4.21))(postcss@7.0.39))(postcss-scss@2.1.1)(postcss@7.0.39)
+      postcss-syntax: 0.36.2(postcss-html@0.36.0)(postcss-jsx@0.36.4(postcss-syntax@0.36.2(postcss-html@1.5.0)(postcss@8.4.21))(postcss@7.0.39))(postcss-less@3.1.4)(postcss-markdown@0.36.0(postcss-syntax@0.36.2(postcss-html@1.5.0)(postcss@8.4.21))(postcss@7.0.39))(postcss-scss@2.1.1)(postcss@7.0.39)
     transitivePeerDependencies:
       - supports-color
 
@@ -9003,7 +9003,7 @@ snapshots:
   postcss-markdown@0.36.0(postcss-syntax@0.36.2(postcss-html@1.5.0)(postcss@8.4.21))(postcss@7.0.39):
     dependencies:
       postcss: 7.0.39
-      postcss-syntax: 0.36.2(postcss-html@0.36.0(postcss-syntax@0.36.2(postcss-html@1.5.0)(postcss@8.4.21))(postcss@7.0.39))(postcss-jsx@0.36.4(postcss-syntax@0.36.2(postcss-html@1.5.0)(postcss@8.4.21))(postcss@7.0.39))(postcss-less@3.1.4)(postcss-markdown@0.36.0(postcss-syntax@0.36.2(postcss-html@1.5.0)(postcss@8.4.21))(postcss@7.0.39))(postcss-scss@2.1.1)(postcss@7.0.39)
+      postcss-syntax: 0.36.2(postcss-html@0.36.0)(postcss-jsx@0.36.4(postcss-syntax@0.36.2(postcss-html@1.5.0)(postcss@8.4.21))(postcss@7.0.39))(postcss-less@3.1.4)(postcss-markdown@0.36.0(postcss-syntax@0.36.2(postcss-html@1.5.0)(postcss@8.4.21))(postcss@7.0.39))(postcss-scss@2.1.1)(postcss@7.0.39)
       remark: 10.0.1
       unist-util-find-all-after: 1.0.5
 
@@ -9055,7 +9055,7 @@ snapshots:
     dependencies:
       postcss: 8.4.21
 
-  postcss-syntax@0.36.2(postcss-html@0.36.0(postcss-syntax@0.36.2(postcss-html@1.5.0)(postcss@8.4.21))(postcss@7.0.39))(postcss-jsx@0.36.4(postcss-syntax@0.36.2(postcss-html@1.5.0)(postcss@8.4.21))(postcss@7.0.39))(postcss-less@3.1.4)(postcss-markdown@0.36.0(postcss-syntax@0.36.2(postcss-html@1.5.0)(postcss@8.4.21))(postcss@7.0.39))(postcss-scss@2.1.1)(postcss@7.0.39):
+  postcss-syntax@0.36.2(postcss-html@0.36.0)(postcss-jsx@0.36.4(postcss-syntax@0.36.2(postcss-html@1.5.0)(postcss@8.4.21))(postcss@7.0.39))(postcss-less@3.1.4)(postcss-markdown@0.36.0(postcss-syntax@0.36.2(postcss-html@1.5.0)(postcss@8.4.21))(postcss@7.0.39))(postcss-scss@2.1.1)(postcss@7.0.39):
     dependencies:
       postcss: 7.0.39
     optionalDependencies:
@@ -9801,7 +9801,7 @@ snapshots:
       postcss-sass: 0.3.5
       postcss-scss: 2.1.1
       postcss-selector-parser: 3.1.2
-      postcss-syntax: 0.36.2(postcss-html@0.36.0(postcss-syntax@0.36.2(postcss-html@1.5.0)(postcss@8.4.21))(postcss@7.0.39))(postcss-jsx@0.36.4(postcss-syntax@0.36.2(postcss-html@1.5.0)(postcss@8.4.21))(postcss@7.0.39))(postcss-less@3.1.4)(postcss-markdown@0.36.0(postcss-syntax@0.36.2(postcss-html@1.5.0)(postcss@8.4.21))(postcss@7.0.39))(postcss-scss@2.1.1)(postcss@7.0.39)
+      postcss-syntax: 0.36.2(postcss-html@0.36.0)(postcss-jsx@0.36.4(postcss-syntax@0.36.2(postcss-html@1.5.0)(postcss@8.4.21))(postcss@7.0.39))(postcss-less@3.1.4)(postcss-markdown@0.36.0(postcss-syntax@0.36.2(postcss-html@1.5.0)(postcss@8.4.21))(postcss@7.0.39))(postcss-scss@2.1.1)(postcss@7.0.39)
       postcss-value-parser: 3.3.1
       resolve-from: 4.0.0
       signal-exit: 3.0.7
