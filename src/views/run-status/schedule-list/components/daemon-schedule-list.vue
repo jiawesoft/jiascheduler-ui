@@ -227,6 +227,7 @@
     queryScheduleList,
     redispatchJob,
     deleteSchedule,
+    scheduleJob,
   } from '@/api/job';
   import { queryCountResource, TagRecord } from '@/api/tag';
   import useLoading from '@/hooks/loading';
@@ -242,6 +243,7 @@
   import ExecHistory from '@/views/run-status/components/daemon-exec-list.vue';
   import ScheduleDetail from '@/views/run-status/schedule-list/components/schedule-detail.vue';
   import ScheduleForm from '@/views/run-status/schedule-list/components/schedule-form.vue';
+  import { Message } from '@arco-design/web-vue';
 
   type SizeProps = 'mini' | 'small' | 'medium' | 'large';
   type Column = TableColumnData & { checked?: true };
@@ -526,12 +528,21 @@
     }
   };
 
-  const handleAction = async (e: any, record: any, action: string) => {
-    await redispatchJob({
-      schedule_id: record.schedule_id,
-      action,
-    });
+  const handleAction = async (
+    e: any,
+    record: any,
+    action: 'start_supervising' | 'stop_supervising'
+  ) => {
+    try {
+      await scheduleJob({
+        schedule_pid: record.id,
+        action,
+      });
+    } catch (err) {
+      return false;
+    }
 
+    Message.success(t('form.submit.success'));
     search();
     return true;
   };
