@@ -504,7 +504,7 @@
 
   const defaultTimerExpr: CustomTimerExpr = {
     timezone: 'local',
-    expr: '* * * * *',
+    expr: '* * * * * *',
   };
 
   const generateFormModel = () => {
