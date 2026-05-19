@@ -13,14 +13,9 @@
           <a-row :gutter="5">
             <a-col :span="15">
               <a-form-item field="ip" :label="$t('instance.ip')">
-                <!-- <a-input
+                <a-input
                   v-model="formModel.ip"
                   :placeholder="$t('instance.ip.placeholder')"
-                /> -->
-                <a-textarea
-                  :placeholder="$t('instance.ip.placeholder')"
-                  v-model="formModel.ip"
-                  auto-size
                 />
               </a-form-item>
             </a-col>
@@ -88,7 +83,7 @@
   import useLoading from '@/hooks/loading';
   import { Pagination } from '@/types/global';
   import { useI18n } from 'vue-i18n';
-  import { ref, computed, reactive, watch, PropType, watchEffect } from 'vue';
+  import { ref, computed, reactive, watch, PropType } from 'vue';
   import { TableColumnData, TableRowSelection } from '@arco-design/web-vue';
 
   import {
@@ -100,6 +95,24 @@
   const { loading, setLoading } = useLoading(true);
   const { t } = useI18n();
 
+  const generateFormModel = () => {
+    return {
+      ip: '',
+      status: 1,
+    };
+  };
+  const formModel = ref(generateFormModel());
+  const props = defineProps({
+    modelValue: {
+      type: Array as PropType<string[]>,
+      default() {
+        return [];
+      },
+    },
+  });
+
+  const selectedKeys = ref<string[]>(props.modelValue);
+
   const basePagination: Pagination = {
     page: 1,
     pageSize: 20,
@@ -108,37 +121,7 @@
     ...basePagination,
   });
 
-  const props = defineProps({
-    modelValue: {
-      type: Object as PropType<
-        {
-          instance_id: string;
-          [key: string]: string;
-        }[]
-      >,
-      default() {
-        return [];
-      },
-    },
-  });
   const emit = defineEmits(['update:modelValue']);
-
-  const generateFormModel = () => {
-    return {
-      ip: '',
-      instance_ids: [],
-      status: 1,
-    };
-  };
-  const formModel = ref({
-    ip: '',
-    instance_ids: props.modelValue.map((v) => v.instance_id),
-    status: 1,
-  });
-
-  const selectedKeys = ref<string[]>(
-    props.modelValue.map((v) => v.instance_id)
-  );
 
   const columns = computed<TableColumnData[]>(() => [
     {
@@ -184,22 +167,10 @@
   });
 
   const instanceList = ref<InstanceRecord[]>([]);
-  const selectInstances = ref<InstanceRecord[]>([]);
 
   const fetchData = async (
-    params: QueryUserServerReq = {
-      page: 1,
-      page_size: 20,
-      ...formModel.value,
-    }
+    params: QueryUserServerReq = { page: 1, page_size: 20, ip: '', status: 1 }
   ) => {
-    if (formModel.value.ip) {
-      params.ips = formModel.value.ip
-        .trim()
-        .split('\n')
-        .filter((v) => v);
-    }
-
     setLoading(true);
     try {
       const { data } = await queryUserServerList(params);
@@ -230,24 +201,16 @@
   };
 
   const reset = () => {
-    selectedKeys.value = [];
     formModel.value = generateFormModel();
   };
 
   fetchData();
 
-  watchEffect(() => {
-    const keys = selectedKeys.value;
-    const list = instanceList.value.filter((item) =>
-      keys.includes(item.instance_id)
-    );
-    const origin = selectInstances.value;
-    origin.push(...list);
-
-    selectInstances.value = origin.filter((item) =>
-      keys.includes(item.instance_id)
-    );
-    const data = selectInstances.value;
-    emit('update:modelValue', data);
-  });
+  watch(
+    () => selectedKeys.value,
+    (val) => {
+      emit('update:modelValue', val);
+    },
+    { deep: true, immediate: true }
+  );
 </script>

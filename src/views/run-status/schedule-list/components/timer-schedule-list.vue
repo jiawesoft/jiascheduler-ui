@@ -15,7 +15,7 @@
               <a-radio-group
                 v-model="formModel.job_type"
                 type="button"
-                @change="search"
+                @change="handleChangeJobType"
               >
                 <a-radio value="default">{{ $t('job.type.default') }}</a-radio>
                 <a-radio value="bundle">{{ $t('job.type.bundle') }}</a-radio>
@@ -156,70 +156,59 @@
     </template>
 
     <template #operations="{ record }">
-      <a-space direction="horizontal">
-        <a-space>
-          <a-dropdown-button
-            :hide-on-select="false"
-            size="mini"
-            @click="handleViewScheduleDetailModal($event, record)"
-          >
-            {{ $t('operations.view') }}
-            <template #icon>
-              <icon-down />
-            </template>
-            <template #content>
-              <a-doption>
-                <a-popconfirm
-                  :content="$t('job.action.confirm.start')"
-                  @before-ok="handleAction($event, record, 'start_timer')"
-                >
-                  <a-button type="dashed" size="mini" status="success">
-                    {{ $t('job.startTimer') }}
-                  </a-button>
-                </a-popconfirm>
-              </a-doption>
-              <a-doption>
-                <a-popconfirm
-                  :content="$t('job.action.confirm.stop')"
-                  @before-ok="handleAction($event, record, 'stop_timer')"
-                >
-                  <a-button type="dashed" size="mini" status="warning">
-                    {{ $t('job.stopTimer') }}
-                  </a-button>
-                </a-popconfirm>
-              </a-doption>
-            </template>
-          </a-dropdown-button>
-        </a-space>
-        <a-space>
-          <a-popconfirm
-            :content="$t('job.action.confirm.deleteSchedule')"
-            @before-ok="handleDeleteScheduleHistory($event, record)"
-          >
-            <a-button type="dashed" size="mini" status="danger">
-              {{ $t('operations.delete') }}
-            </a-button>
-          </a-popconfirm>
-        </a-space>
+      <a-space direction="horizontal" size="mini">
+        <a-button
+          size="mini"
+          @click="handleViewScheduleDetailModal($event, record)"
+        >
+          {{ $t('operations.manage') }}
+        </a-button>
+
+        <a-popconfirm
+          :content="$t('job.action.confirm.start')"
+          @before-ok="handleAction($event, record, 'start_timer')"
+        >
+          <a-button type="dashed" size="mini" status="success">
+            {{ $t('job.start') }}
+          </a-button>
+        </a-popconfirm>
+
+        <a-popconfirm
+          :content="$t('job.action.confirm.stop')"
+          @before-ok="handleAction($event, record, 'stop_timer')"
+        >
+          <a-button type="dashed" size="mini" status="warning">
+            {{ $t('job.stop') }}
+          </a-button>
+        </a-popconfirm>
+
+        <a-popconfirm
+          :content="$t('job.action.confirm.deleteSchedule')"
+          @before-ok="handleDeleteSchedule($event, record)"
+        >
+          <a-button type="dashed" size="mini" status="danger">
+            {{ $t('operations.delete') }}
+          </a-button>
+        </a-popconfirm>
       </a-space>
     </template>
   </a-table>
 
-  <a-modal
-    v-model:visible="scheduleDetailVisible"
-    title-align="start"
-    :draggable="true"
-    width="80%"
-    hide-cancel
+  <a-drawer
+    :visible="scheduleDetailVisible"
+    width="61.8%"
     @cancel="handleCancel"
+    hide-cancel
+    :footer="false"
+    unmountOnClose
   >
     <template #title>
       <a-space direction="vertical" size="large">
         <a-radio-group v-model="viewType" type="button">
-          <a-radio value="execHistory">{{ $t('job.runHistory') }}</a-radio>
           <a-radio value="scheduleDetail">{{
             $t('job.schedule.detail')
           }}</a-radio>
+          <a-radio value="execHistory">{{ $t('job.runHistory') }}</a-radio>
         </a-radio-group>
       </a-space>
     </template>
@@ -231,11 +220,14 @@
       :schedule-id="form.schedule_id"
       :disable-search="true"
     />
-    <ScheduleDetail
-      v-if="viewType == 'scheduleDetail' && scheduleDetailVisible"
-      :value="form"
+
+    <ScheduleForm
+      v-else-if="viewType == 'scheduleDetail' && scheduleDetailVisible"
+      v-model="form"
+      ref="scheduleFormRef"
+      @submit-form="handleSubmitScheduleForm"
     />
-  </a-modal>
+  </a-drawer>
 </template>
 
 <script lang="ts" setup>
@@ -245,9 +237,8 @@
     QueryScheduleListReq,
     ScheduleType,
     queryScheduleList,
-    redispatchJob,
-    deleteExeHistory,
-    deleteScheduleHistory,
+    scheduleJob,
+    deleteSchedule,
   } from '@/api/job';
   import { queryCountResource, TagRecord } from '@/api/tag';
   import useLoading from '@/hooks/loading';
@@ -261,12 +252,14 @@
   import { useI18n } from 'vue-i18n';
 
   import ExecHistory from '@/views/run-status/components/timer-exec-list.vue';
-  import ScheduleDetail from '@/views/run-status/schedule-list/components/schedule-detail.vue';
+  import ScheduleForm from '@/views/run-status/schedule-list/components/schedule-form.vue';
+  import { Message } from '@arco-design/web-vue';
 
   type SizeProps = 'mini' | 'small' | 'medium' | 'large';
   type Column = TableColumnData & { checked?: true };
   const scheduleDetailVisible = ref(false);
-  const viewType = ref('execHistory');
+  const viewType = ref('scheduleDetail');
+  const scheduleFormRef = ref();
 
   const state = reactive({
     form: {
@@ -274,17 +267,20 @@
       schedule_id: 'string',
       name: 'string',
       eid: 'string',
+      instance_ids: [],
       dispatch_result: [],
       schedule_type: 'timer',
       action: 'string',
       code: '',
       job_name: '',
+      job_type: '',
       dispatch_data: 'string',
       snapshot_data: 'string',
       created_user: 'string',
       updated_user: 'string',
       created_time: 'string',
       updated_time: 'string',
+      actual_args: [],
       executor_id: 1,
     },
   });
@@ -453,12 +449,15 @@
   const handleViewScheduleDetailModal = (e: any, record: any) => {
     if (record) {
       const job = record.snapshot_data;
+
       form.value = {
         ...record,
-        dispatch_result: (record.dispatch_result as any[]).map((v, i) => {
-          v.id = i;
-          return v;
-        }),
+        dispatch_result: ((record.dispatch_result as any[]) || []).map(
+          (v, i) => {
+            v.id = i;
+            return v;
+          }
+        ),
         code: job?.code,
         job_name: job?.name,
         executor_id: job?.executor_id,
@@ -545,20 +544,25 @@
     record: any,
     action: 'exec' | 'kill' | 'start_timer' | 'stop_timer'
   ) => {
-    await redispatchJob({
-      schedule_id: record.schedule_id,
-      action,
-    });
+    try {
+      await scheduleJob({
+        schedule_pid: record.id,
+        action,
+      });
+    } catch (err) {
+      return false;
+    }
 
+    Message.success(t('form.submit.success'));
     search();
     return true;
   };
 
-  const handleDeleteScheduleHistory = async (e: any, record: any) => {
+  const handleDeleteSchedule = async (e: any, record: any) => {
     setLoading(true);
     try {
-      await deleteScheduleHistory({
-        schedule_id: record.schedule_id,
+      await deleteSchedule({
+        schedule_pid: record.id,
         eid: record.eid,
       });
     } finally {
@@ -567,6 +571,29 @@
 
     search();
     return true;
+  };
+
+  const handleSubmitScheduleForm = async () => {
+    scheduleDetailVisible.value = false;
+    search();
+  };
+
+  const handleSaveSchedule = async () => {
+    if (scheduleFormRef.value) {
+      await scheduleFormRef.value.submit();
+      scheduleDetailVisible.value = false;
+      search();
+    }
+  };
+
+  const handleChangeJobType = async (val: any) => {
+    if (val === 'default') {
+      resourceType.value = 'job';
+    } else {
+      resourceType.value = 'bundle_job';
+    }
+    initTagList();
+    search();
   };
 
   watch(

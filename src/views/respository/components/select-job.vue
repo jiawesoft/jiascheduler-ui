@@ -5,6 +5,7 @@
     :style="{ width: '320px' }"
     :filter-option="false"
     :fallback-option="false"
+    :disabled="disabled"
     allow-clear
     allow-search
     @search="handleSearchJob"
@@ -22,19 +23,30 @@
   import { ref, watch } from 'vue';
 
   const props = defineProps<{
-    eid: string;
+    eid?: string;
     jobType: string;
+    disabled?: boolean;
+    triggerChange?: boolean;
   }>();
 
   const emit = defineEmits(['update:eid', 'changeJob']);
 
   const eid = ref(props.eid);
   const loading = ref(false);
+  const disabled = ref(props.disabled || false);
+  const triggerChanage = ref(props.triggerChange || false);
 
   const jobOptions = ref<JobRecord[]>([]);
   const basePagination: Pagination = {
     page: 1,
     pageSize: 20,
+  };
+
+  const changeJob = (val: any) => {
+    const currentJob = jobOptions.value.find((item) => item.eid === val);
+    if (currentJob) {
+      emit('changeJob', currentJob);
+    }
   };
 
   const fetchData = async (params: {
@@ -49,18 +61,16 @@
       ...params,
     } as unknown as QueryJobReq);
     jobOptions.value = data.list;
-
     loading.value = false;
+
+    if (triggerChanage.value) {
+      changeJob(eid.value);
+      triggerChanage.value = false;
+    }
   };
 
   const handleSearchJob = async (val: string) => {
     await fetchData({ name: val, job_type: props.jobType });
-  };
-
-  const changeJob = (val: any) => {
-    const currentName = jobOptions.value.find((item) => item.eid === val);
-    const jobName = currentName?.name || '';
-    emit('changeJob', jobName);
   };
 
   fetchData({ default_eid: props.eid, job_type: props.jobType });
@@ -69,6 +79,10 @@
     () => eid,
     (val) => {
       emit('update:eid', val.value);
+      // const currentJob = jobOptions.value.find(
+      //   (item) => item.eid === val.value
+      // );
+      // emit('changeJob', currentJob);
     },
     { deep: true, immediate: false }
   );

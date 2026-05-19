@@ -16,7 +16,7 @@
               <a-radio-group
                 v-model="formModel.job_type"
                 type="button"
-                @change="search"
+                @change="handleChangeJobType"
               >
                 <a-radio value="default">{{ $t('job.type.default') }}</a-radio>
                 <a-radio value="bundle">{{ $t('job.type.bundle') }}</a-radio>
@@ -312,7 +312,7 @@
 
 <script lang="ts" setup>
   import {
-    deleteExeHistory,
+    deleteExecHistory,
     ExecRecord,
     queryExecList,
     QueryExecListReq,
@@ -327,8 +327,16 @@
   import { Message } from '@arco-design/web-vue';
   import type { TableColumnData } from '@arco-design/web-vue/es/table/interface';
   import cloneDeep from 'lodash/cloneDeep';
-  import Sortable from 'sortablejs';
-  import { computed, nextTick, reactive, ref, toRefs, watch } from 'vue';
+  import Sortable, { mount } from 'sortablejs';
+  import {
+    computed,
+    nextTick,
+    onMounted,
+    reactive,
+    ref,
+    toRefs,
+    watch,
+  } from 'vue';
   import { useI18n } from 'vue-i18n';
   // import { VAceEditor } from 'vue3-ace-editor';
   // import 'ace-builds/src-noconflict/mode-text';
@@ -337,6 +345,7 @@
 
   const props = defineProps<{
     scheduleId?: string;
+    schedulePid?: number;
     bindIp?: string;
     title?: string;
     eid?: string;
@@ -637,6 +646,15 @@
   const resourceType = ref('job');
   const tagIds = ref<number[]>([]);
 
+  onMounted(() => {
+    if (props.jobType === 'default') {
+      resourceType.value = 'job';
+    } else {
+      resourceType.value = 'bundle_job';
+    }
+    initTagList();
+  });
+
   const initTagList = async () => {
     try {
       const { data } = await queryCountResource({
@@ -647,7 +665,6 @@
       // you can report use errorHandler or other
     }
   };
-  initTagList();
 
   const fetchData = async (
     params: QueryExecListReq = {
@@ -655,6 +672,7 @@
       page_size: 20,
       schedule_id: props.scheduleId,
       schedule_type: formModel.value.schedule_type,
+      schedule_pid: props.schedulePid,
       eid: props.eid,
       job_type: formModel.value.job_type,
       tag_ids: tagIds.value,
@@ -704,6 +722,7 @@
       page_size: basePagination.pageSize,
       ...formModel.value,
       schedule_id: props.scheduleId,
+      schedule_pid: props.schedulePid,
       schedule_type: formModel.value.schedule_type,
       job_type: formModel.value.job_type,
       eid: props.eid,
@@ -717,6 +736,7 @@
       page: current,
       ...formModel.value,
       schedule_id: props.scheduleId,
+      schedule_pid: props.schedulePid,
       schedule_type: formModel.value.schedule_type,
       eid: props.eid,
       job_type: formModel.value.job_type,
@@ -747,7 +767,7 @@
 
   const handleClearExecHistory = async (e: any) => {
     try {
-      await deleteExeHistory({
+      await deleteExecHistory({
         schedule_id: props.scheduleId,
         schedule_type: 'once',
         eid: props.eid,
@@ -789,6 +809,16 @@
         });
       });
     }
+  };
+
+  const handleChangeJobType = async (val: any) => {
+    if (val === 'default') {
+      resourceType.value = 'job';
+    } else {
+      resourceType.value = 'bundle_job';
+    }
+    initTagList();
+    search();
   };
 
   watch(

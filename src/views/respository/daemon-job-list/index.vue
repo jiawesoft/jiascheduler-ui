@@ -61,7 +61,7 @@
             <a-button
               type="primary"
               size="small"
-              @click="handleOpenDeamonJobModal($event, null)"
+              @click="handleOpenDaemonJobModal($event, null)"
             >
               <template #icon>
                 <icon-plus />
@@ -164,7 +164,7 @@
             <a-space>
               <a-button
                 size="mini"
-                @click="handleOpenDeamonJobModal($event, record)"
+                @click="handleOpenDaemonJobModal($event, record)"
               >
                 {{ $t('operations.view') }}
               </a-button>
@@ -231,6 +231,14 @@
             size="large"
           />
         </a-form-item>
+        <a-form-item
+          v-if="jobSupervisorForm.job_args?.length > 0"
+          field="args"
+          :label="$t('job.arg')"
+          :tooltip="$t('job.arg.tips', { name: '{{name}}' })"
+        >
+          <job-args :args="jobSupervisorForm.job_args" />
+        </a-form-item>
         <a-form-item field="eid" validate-trigger="blur" :label="$t('job')">
           <select-job
             v-if="jobSupervisorModalVisible"
@@ -272,6 +280,17 @@
             v-model:job-type="dispatchJobSupervisorForm.job_type"
           />
         </a-form-item>
+
+        <a-form-item
+          v-if="
+            dispatchJobSupervisorModalVisible && dispatchJobSupervisorForm.args
+          "
+          field="args"
+          :label="$t('job.arg')"
+          :tooltip="$t('job.arg.tips', { name: '{{name}}' })"
+        >
+          <job-args :args="dispatchJobSupervisorForm.args" />
+        </a-form-item>
         <a-form-item
           field="endpoints"
           validate-trigger="blur"
@@ -291,8 +310,10 @@
   import {
     deleteJobSupervisor,
     dispatchJob,
-    endpoint,
+    Endpoint,
     JobAction,
+    JobArg,
+    JobRecord,
     JobSupervisorRecord,
     QueryJobReq,
     queryJobSupervisorList,
@@ -314,6 +335,7 @@
 
   import { useRouter } from 'vue-router';
 
+  import JobArgs from '@/components/job-args/index.vue';
   import TableTagItem from '@/components/table-tag-item/index.vue';
   import TagItem from '@/components/tag-item/index.vue';
   import { genVersionFromTime } from '@/utils/time';
@@ -333,6 +355,7 @@
     id: number;
     name: string;
     eid: string;
+    job_args: JobArg[];
     executor_id: number;
     info: string;
     restart_interval: number;
@@ -346,7 +369,8 @@
     restart_interval: number;
     schedule_type: string;
     action: string;
-    endpoints: endpoint[];
+    args: JobArg[];
+    endpoints: Endpoint[];
   }
 
   const generateFormModel = () => {
@@ -374,6 +398,7 @@
       eid: '',
       restart_interval: 1,
       info: '',
+      job_args: [],
     },
     dispatchJobSupervisorForm: {
       eid: '',
@@ -382,6 +407,7 @@
       job_type: 'default',
       schedule_type: 'daemon',
       action: 'exec',
+      args: [],
       endpoints: [],
       restart_interval: 0,
     },
@@ -537,10 +563,11 @@
     fetchData();
   };
 
-  const changeJob = (str: string) => {
-    if (str && !jobSupervisorForm.value.name) {
-      jobSupervisorForm.value.name = str;
+  const changeJob = (currentJob: JobRecord) => {
+    if (currentJob && !jobSupervisorForm.value.name) {
+      jobSupervisorForm.value.name = currentJob?.name || '';
     }
+    jobSupervisorForm.value.job_args = currentJob.args ?? [];
   };
 
   const handleDeleteJobSupervisor = async (e: any, record: any) => {
@@ -557,7 +584,7 @@
     return true;
   };
 
-  const handleOpenDeamonJobModal = (e: any, record: any) => {
+  const handleOpenDaemonJobModal = (e: any, record: any) => {
     saveJobSupervisorRef.value.clearValidate();
     if (record) {
       jobSupervisorForm.value = { ...record };
@@ -566,6 +593,7 @@
         id: 0,
         name: '',
         eid: '',
+        job_args: [],
         executor_id: 1,
         restart_interval: 1,
         info: '',
@@ -583,6 +611,7 @@
       schedule_name: `${record.name}-${genVersionFromTime()}`,
       action: 'start_supervising',
       schedule_type: 'daemon',
+      args: record.job_args,
     };
     dispatchJobSupervisorModalVisible.value = true;
   };
@@ -611,6 +640,14 @@
     if (ret) {
       return false;
     }
+
+    const args = {};
+    if (dispatchJobSupervisorForm.value.args) {
+      dispatchJobSupervisorForm.value.args.forEach((v) => {
+        args[v.name] = v.val;
+      });
+    }
+
     try {
       await dispatchJob({
         schedule_type: dispatchJobSupervisorForm.value
@@ -620,6 +657,7 @@
         schedule_name: dispatchJobSupervisorForm.value.schedule_name,
         action: dispatchJobSupervisorForm.value.action as JobAction,
         is_sync: false,
+        args,
         endpoints: dispatchJobSupervisorForm.value.endpoints,
       });
     } catch (err) {

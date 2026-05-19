@@ -1,6 +1,12 @@
 import axios from 'axios';
 import qs from 'query-string';
 
+export interface JobArg {
+  name: string;
+  val: string;
+  info: string;
+}
+
 export interface JobRecord {
   id?: number;
   name: string;
@@ -9,10 +15,10 @@ export interface JobRecord {
   timeout: number;
   display_on_dashboard: boolean;
   code: string;
-  eid?: string;
+  eid: string;
   job_type?: string;
   executor_id: number;
-  args?: { [key: string]: string };
+  args?: JobArg[];
   info: string;
 }
 
@@ -68,9 +74,10 @@ export interface TimerExpr {
   year: string;
 }
 
-export interface endpoint {
+export interface Endpoint {
   namespace: string;
   ip: string;
+  instance_id: string;
 }
 
 export interface DispatchJobReq {
@@ -81,7 +88,8 @@ export interface DispatchJobReq {
   restart_interval?: number;
   action: JobAction;
   is_sync: false;
-  endpoints: endpoint[];
+  args?: { [key: string]: any };
+  endpoints: Endpoint[];
 }
 export interface DispatchJobResp {
   [key: string]: any;
@@ -183,6 +191,7 @@ export interface BundleScriptResult {
 export interface ExecRecord {
   id: number;
   schedule_id: string;
+  schedule_pid: number;
   job_type: string;
   bundle_script_result: BundleScriptResult[];
   eid: string;
@@ -278,6 +287,7 @@ export interface JobTimerRecord {
   id?: number;
   name: string;
   job_name: string;
+  job_args: JobArg[];
   code: string;
   eid: string;
   info: string;
@@ -342,6 +352,7 @@ export interface JobSupervisorRecord {
   code: string;
   eid: string;
   info: string;
+  job_args?: JobArg[];
   restart_interval: string;
   executor_id: number;
   executor_name: string;
@@ -393,8 +404,8 @@ export interface DeleteExeHistoryReq {
   eid?: string;
   bind_ip?: string;
 }
-export function deleteExeHistory(data: DeleteExeHistoryReq) {
-  return axios.post<DeleteExeHistoryReq>('/api/job/delete-exec-history', data);
+export function deleteExecHistory(data: DeleteExeHistoryReq) {
+  return axios.post('/api/job/delete-exec-history', data);
 }
 
 export interface DeleteScheduleHistoryReq {
@@ -403,10 +414,16 @@ export interface DeleteScheduleHistoryReq {
 }
 
 export function deleteScheduleHistory(data: DeleteScheduleHistoryReq) {
-  return axios.post<DeleteExeHistoryReq>(
-    '/api/job/delete-schedule-history',
-    data
-  );
+  return axios.post('/api/job/delete-schedule-history', data);
+}
+
+export interface DeleteScheduleReq {
+  schedule_pid: number;
+  eid: string;
+}
+
+export function deleteSchedule(data: DeleteScheduleReq) {
+  return axios.post('/api/job/delete-schedule', data);
 }
 
 export interface DeleteRunningStatusReq {
@@ -455,4 +472,31 @@ export function deleteBundleScript(data: DeleteBundleScriptReq) {
     '/api/job/delete-bundle-script',
     data
   );
+}
+
+export interface SaveScheduleReq {
+  id: number;
+  name: string;
+  endpoints: Endpoint[];
+  eid: string;
+  args?: { [key: string]: any };
+  timer_expr?: TimerExpr;
+  restart_interval?: number;
+}
+
+export interface SaveScheduleResp {
+  ret: number;
+}
+
+export function saveSchedule(data: SaveScheduleReq) {
+  return axios.post<SaveScheduleResp>('/api/job/save-schedule', data);
+}
+
+export interface ScheduleJobReq {
+  schedule_pid: number;
+  action: string;
+}
+
+export function scheduleJob(req: ScheduleJobReq) {
+  return axios.post('/api/job/schedule', req);
 }

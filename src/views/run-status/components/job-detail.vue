@@ -62,7 +62,9 @@
           <a-input-number
             mode="button"
             :default-value="
-              $props.value.dispatch_data.params.restart_interval ?? 0
+              $props.value.dispatch_data.params.restart_interval
+                ? $props.value.dispatch_data.params.restart_interval.secs
+                : 0
             "
           />
         </a-form-item>
@@ -74,7 +76,7 @@
         v-for="(val, index) in $props.value.bundle_script"
         :key="index"
         :field="`bundle_script[${index}]`"
-        :label="$t('job.task') + '-' + (index + 1)"
+        :label="$t('job.script') + '-' + (index + 1)"
         validate-trigger="blur"
         :tooltip="$t('jobBundleScript.condExpr.tooltips')"
       >
@@ -101,13 +103,13 @@
         />
       </a-form-item>
       <a-form-item
-        field="upload_file"
-        :label="$t('job.upload_file')"
-        :tooltip="$t('job.upload_file.tooltip')"
         v-if="
           $props.value.schedule_type == 'job' ||
           $props.value.schedule_type == 'timer'
         "
+        field="upload_file"
+        :label="$t('job.upload_file')"
+        :tooltip="$t('job.upload_file.tooltip')"
       >
         <a-space direction="vertical" :style="{ width: '100%' }">
           <a-upload

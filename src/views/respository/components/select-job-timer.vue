@@ -7,9 +7,10 @@
     :fallback-option="false"
     allow-clear
     allow-search
+    @change="changeTimer"
     @search="handleSearchJob"
   >
-    <a-option v-for="item of jobOptions" :key="item.eid" :value="item.eid">{{
+    <a-option v-for="item of timerOptions" :key="item.eid" :value="item.eid">{{
       item.name
     }}</a-option>
   </a-select>
@@ -29,15 +30,20 @@
     jobType: string;
   }>();
 
-  const emit = defineEmits(['update:eid']);
+  const emit = defineEmits(['update:eid', 'changeTimer']);
 
   const eid = ref(props.eid);
   const loading = ref(false);
 
-  const jobOptions = ref<JobTimerRecord[]>([]);
+  const timerOptions = ref<JobTimerRecord[]>([]);
   const basePagination: Pagination = {
     page: 1,
     pageSize: 20,
+  };
+
+  const changeTimer = (val: any) => {
+    const currentTimer = timerOptions.value.find((item) => item.eid === val);
+    emit('changeTimer', currentTimer);
   };
 
   const fetchData = async (params: {
@@ -51,16 +57,23 @@
       ...basePagination,
       ...params,
     } as unknown as QueryJobTimerReq);
-    jobOptions.value = data.list;
+    timerOptions.value = data.list;
 
     loading.value = false;
+
+    if (params.default_eid) {
+      const currentTimer = timerOptions.value.find(
+        (item) => item.eid === props.eid
+      );
+      if (currentTimer) {
+        emit('changeTimer', currentTimer);
+      }
+    }
   };
 
   const handleSearchJob = async (val: string) => {
     await fetchData({ name: val, job_type: props.jobType });
   };
-
-  fetchData({ default_eid: props.eid, job_type: props.jobType });
 
   watch(
     () => eid,

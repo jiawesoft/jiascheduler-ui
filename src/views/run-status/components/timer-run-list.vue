@@ -16,7 +16,7 @@
               <a-radio-group
                 v-model="formModel.job_type"
                 type="button"
-                @change="search"
+                @change="handleChangeJobType"
               >
                 <a-radio value="default">{{ $t('job.type.default') }}</a-radio>
                 <a-radio value="bundle">{{ $t('job.type.bundle') }}</a-radio>
@@ -316,16 +316,9 @@
   import jiconOffline from '@/components/icon/jicon-offline.vue';
   import useLoading from '@/hooks/loading';
   import { Pagination } from '@/types/global';
-  import {
-    computed,
-    defineProps,
-    nextTick,
-    reactive,
-    ref,
-    toRefs,
-    watch,
-  } from 'vue';
+  import { computed, nextTick, reactive, ref, toRefs, watch } from 'vue';
   import { useI18n } from 'vue-i18n';
+  import { useRoute } from 'vue-router';
 
   import TableTagItem from '@/components/table-tag-item/index.vue';
   import TagItem from '@/components/tag-item/index.vue';
@@ -338,6 +331,7 @@
 
   type SizeProps = 'mini' | 'small' | 'medium' | 'large';
   type Column = TableColumnData & { checked?: true };
+  const route = useRoute();
   const runModalVisible = ref(false);
   const viewType = ref('execHistory');
   const runDetailModalVisible = ref(false);
@@ -571,6 +565,10 @@
   const resourceType = ref('job');
   const tagIds = ref<number[]>([]);
 
+  if (route.query?.jobType === 'bundle') {
+    resourceType.value = 'bundle_job';
+  }
+
   const initTagList = async () => {
     try {
       const { data } = await queryCountResource({
@@ -756,6 +754,16 @@
         });
       });
     }
+  };
+
+  const handleChangeJobType = async (val: any) => {
+    if (val === 'default') {
+      resourceType.value = 'job';
+    } else {
+      resourceType.value = 'bundle_job';
+    }
+    initTagList();
+    search();
   };
 
   watch(

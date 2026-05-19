@@ -108,8 +108,8 @@ export function grantedUser(req: GrantedUserReq) {
 }
 
 export interface QueryUserServerReq extends Partial<InstanceRecord> {
-  ip?: string;
-  instance_id?: string;
+  ips?: string[];
+  instance_ids?: string[];
   instance_group_id?: number;
   status?: number;
   page: number;
@@ -122,10 +122,8 @@ export interface QueryUserServerListResp {
 }
 
 export function queryUserServerList(params: QueryUserServerReq) {
-  return axios.get<QueryUserServerListResp>('/api/instance/user-server-list', {
-    params,
-    paramsSerializer: (obj) => {
-      return qs.stringify(obj);
-    },
-  });
+  return axios.post<QueryUserServerListResp>(
+    '/api/instance/user-server-list',
+    params
+  );
 }

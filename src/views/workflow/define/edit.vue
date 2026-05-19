@@ -1,0 +1,1338 @@
+<template>
+  <div class="container">
+    <Breadcrumb :items="['menu.repository', 'menu.repository.jobList']" />
+    <a-card class="general-card">
+      <a-tabs default-active-key="processDefine">
+        <a-tab-pane key="basicInfo" :title="$t('workflow.basicInfo')">
+          <a-form
+            :style="{ width: '550px' }"
+            ref="saveWorkflowBasicInfoRef"
+            :key="workflowBasicInfoForm.id"
+            :rules="workflowBasicInfoFormValidateRules"
+            :model="workflowBasicInfoForm"
+            auto-label-width
+            @submit="handleSaveWorkflowBasicInfo"
+          >
+            <a-form-item
+              field="name"
+              required
+              validate-trigger="blur"
+              :label="$t('workflow.name')"
+            >
+              <a-input v-model="workflowBasicInfoForm.name" />
+            </a-form-item>
+            <a-form-item field="info" :label="$t('workflow.info')">
+              <a-textarea v-model="workflowBasicInfoForm.info" />
+            </a-form-item>
+
+            <a-form-item
+              field="user_variables"
+              :label="$t('workflow.userVariables')"
+              :tooltip="$t('workflow.userVariables.tips')"
+            >
+              <workflow-user-variables
+                :key="workflowBasicInfoForm.name"
+                v-model:args="workflowBasicInfoForm.user_variables"
+                controlled
+              />
+            </a-form-item>
+            <a-form-item>
+              <a-space>
+                <a-button type="primary" html-type="submit">
+                  {{ $t('form.submit') }}
+                </a-button>
+              </a-space>
+            </a-form-item>
+          </a-form>
+        </a-tab-pane>
+        <a-tab-pane key="processDefine" :title="$t('workflow.processDefine')">
+          <div class="workflow-container" ref="container"></div>
+        </a-tab-pane>
+      </a-tabs>
+    </a-card>
+  </div>
+
+  <!-- workflow condition -->
+  <a-drawer
+    width="50%"
+    :visible="editEdgeModalVisible"
+    placement="right"
+    @before-ok="saveEdgeConfig"
+    @cancel="editEdgeModalVisible = false"
+    unmountOnClose
+  >
+    <template #title> {{ $t('workflow.condition') }} </template>
+
+    <a-form
+      ref="saveEdgeConfigRef"
+      :rules="edgeConfigCheckRules"
+      :key="edgeConfig.id"
+      :model="edgeConfig"
+      :auto-label-width="true"
+    >
+      <a-form-item field="name" :label="$t('workflow.condition.name')">
+        <a-input v-model="edgeConfig.name" />
+      </a-form-item>
+      <a-form-item
+        v-for="(rule, index) of edgeConfig.condition?.rules"
+        :field="`condition.rules[${index}]`"
+        :label="`C${index + 1}`"
+        :key="index"
+      >
+        <a-space direction="horizontal" size="mini">
+          <a-select v-model="rule.left_val.val_type">
+            <a-option value="exit_code">
+              {{ $t('workflow.nodeConfig.exitCode') }}
+            </a-option>
+            <a-option value="output">
+              {{ $t('workflow.nodeConfig.output') }}
+            </a-option>
+            <a-option value="user_variables">
+              {{ $t('workflow.userVariables') }}
+            </a-option>
+            <a-option value="custom">
+              {{ $t('workflow.nodeConfig.operation.custom') }}
+            </a-option>
+          </a-select>
+          <a-input
+            v-if="
+              rule.left_val.val_type == 'custom' ||
+              rule.left_val.val_type == 'user_variables'
+            "
+            :placeholder="$t('workflow.nodeConfig.operation.setVal')"
+            v-model="rule.left_val.val"
+          />
+
+          <a-select
+            v-else
+            v-model="rule.left_val.val"
+            :placeholder="$t('workflow.nodeConfig.operation.selectNode')"
+            allow-search
+          >
+            <a-option
+              v-for="(node, index) of nodeConfigs.filter((v) => {
+                return v.node_type === 'bpmn:serviceTask';
+              })"
+              :key="index"
+              :value="node.id"
+            >
+              {{ node.name }}
+            </a-option>
+          </a-select>
+
+          <a-select style="width: 83px" v-model="rule.op">
+            <a-option value=">">{{ '>' }}</a-option>
+            <a-option value=">=">{{ '>=' }}</a-option>
+            <a-option value="<">{{ '<' }}</a-option>
+            <a-option value="<=">{{ '<=' }}</a-option>
+            <a-option value="contains">contains</a-option>
+            <a-option value="!=">{{ '!=' }}</a-option>
+            <a-option value="==">{{ '==' }}</a-option>
+          </a-select>
+          <a-select v-model="rule.right_val.val_type">
+            <a-option value="exit_code">
+              {{ $t('workflow.nodeConfig.exitCode') }}
+            </a-option>
+            <a-option value="output">
+              {{ $t('workflow.nodeConfig.output') }}
+            </a-option>
+            <a-option value="user_variables">
+              {{ $t('workflow.userVariables') }}
+            </a-option>
+            <a-option value="custom">
+              {{ $t('workflow.nodeConfig.operation.custom') }}
+            </a-option>
+          </a-select>
+          <a-input
+            v-if="
+              rule.right_val.val_type == 'custom' ||
+              rule.right_val.val_type == 'user_variables'
+            "
+            :placeholder="$t('workflow.nodeConfig.operation.setVal')"
+            v-model="rule.right_val.val"
+          />
+
+          <a-select
+            v-else
+            v-model="rule.right_val.val"
+            :placeholder="$t('workflow.nodeConfig.operation.selectNode')"
+            allow-search
+          >
+            <a-option
+              v-for="(node, index) of nodeConfigs.filter((v) => {
+                return v.node_type === 'bpmn:serviceTask';
+              })"
+              :key="index"
+              :value="node.id"
+            >
+              {{ node.name }}
+            </a-option>
+          </a-select>
+          <a-button v-if="index > 0" @click="handleDeleteConditionRule(index)">
+            -
+          </a-button>
+          <a-button @click="handleAddConditionRule">+</a-button>
+        </a-space>
+      </a-form-item>
+      <a-form-item :label="$t('workflow.nodeConfig.operation')">
+        <a-space direction="vertical" style="width: 100%">
+          <a-radio-group
+            type="button"
+            v-model="edgeConfig.condition!.logical_op"
+            @change="handleChangeLogicalOperation"
+          >
+            <a-radio value="and">
+              {{ $t('workflow.nodeConfig.operation.and') }}
+            </a-radio>
+            <a-radio value="or">
+              {{ $t('workflow.nodeConfig.operation.or') }}
+            </a-radio>
+            <a-radio value="custom">
+              {{ $t('workflow.nodeConfig.operation.custom') }}
+            </a-radio>
+          </a-radio-group>
+          <a-input
+            v-model="edgeConfig.condition!.expr"
+            size="large"
+            style="height: 100px"
+            allow-clear
+          />
+        </a-space>
+      </a-form-item>
+    </a-form>
+  </a-drawer>
+
+  <!-- node config -->
+  <a-drawer
+    width="60%"
+    :visible="editNodeModalVisible"
+    placement="right"
+    @before-ok="saveNodeConfig"
+    @cancel="editNodeModalVisible = false"
+    unmountOnClose
+  >
+    <template #title> {{ $t('workflow.nodeConfig') }} </template>
+
+    <a-form
+      ref="saveNodeConfigRef"
+      :rules="nodeConfigCheckRules"
+      :model="nodeConfig"
+      :auto-label-width="true"
+      @submit="saveNodeConfig"
+    >
+      <a-form-item
+        field="name"
+        validate-trigger="blur"
+        :label="$t('workflow.nodeConfig.name')"
+      >
+        <a-input v-model="nodeConfig.name" @press-enter="saveNodeConfig" />
+      </a-form-item>
+      <a-form-item
+        field="name"
+        validate-trigger="blur"
+        :tooltip="$t('workflow.nodeConfig.id.tips')"
+        :label="$t('workflow.nodeConfig.id')"
+      >
+        <a-input v-model="nodeConfig.id" />
+      </a-form-item>
+
+      <a-form-item field="taskType" :label="$t('workflow.nodeConfig.TaskType')">
+        <a-radio-group
+          v-model="nodeConfig.task_type"
+          @change="changeNodeTaskType"
+        >
+          <a-radio value="standard">
+            {{ $t('workflow.nodeConfig.TaskType.job') }}
+          </a-radio>
+          <a-radio value="custom">
+            {{ $t('workflow.nodeConfig.TaskType.custom') }}
+          </a-radio>
+        </a-radio-group>
+      </a-form-item>
+
+      <template v-if="nodeConfig.task_type === 'standard'">
+        <a-form-item field="eid" validate-trigger="blur" :label="$t('job')">
+          <SelectJob
+            v-model:eid="nodeConfig.task.standard!.eid"
+            job-type="default"
+            @change-job="handleChangeJob"
+          />
+        </a-form-item>
+        <a-form-item
+          v-if="
+            nodeConfig.task.standard?.formal_args &&
+            nodeConfig.task.standard?.formal_args.length > 0
+          "
+          field="args"
+          :label="$t('job.arg')"
+          :tooltip="$t('job.arg.tips', { name: '{{name}}' })"
+        >
+          <workflow-node-args
+            :args="nodeConfig.task.standard.formal_args"
+            :tasks="
+              nodeConfigs.filter((v) => {
+                return (
+                  v.node_type === 'bpmn:serviceTask' && v.id !== nodeConfig.id
+                );
+              })
+            "
+          />
+        </a-form-item>
+
+        <a-form-item
+          field="endpoints"
+          validate-trigger="blur"
+          :label="$t('job.endpoint')"
+        >
+          <SelectInstanceId v-model="nodeConfig.task.standard!.target" />
+        </a-form-item>
+      </template>
+
+      <template v-else>
+        <a-row :gutter="6">
+          <a-col :span="6">
+            <a-form-item field="executor_id" :label="$t('job.executor')">
+              <SelectExecutor v-model="nodeConfig.task.custom!.executor_id" />
+            </a-form-item>
+          </a-col>
+          <a-col :span="6">
+            <a-form-item
+              field="work_user"
+              validate-trigger="blur"
+              :label="$t('job.workUser')"
+              :tooltip="$t('job.workUser.tips')"
+            >
+              <a-input v-model="nodeConfig.task.custom!.work_user" />
+            </a-form-item>
+          </a-col>
+          <a-col :span="6">
+            <a-form-item
+              field="work_dir"
+              validate-trigger="blur"
+              :tooltip="$t('job.workDir.tips')"
+              :label="$t('job.workDir')"
+            >
+              <a-input v-model="nodeConfig.task.custom!.work_dir" />
+            </a-form-item>
+          </a-col>
+          <a-col :span="6">
+            <a-form-item
+              field="timeout"
+              :tooltip="$t('job.timeout.tips')"
+              validate-trigger="blur"
+              :label="$t('job.timeout')"
+            >
+              <a-input-number v-model="nodeConfig.task.custom!.timeout" />
+            </a-form-item>
+          </a-col>
+        </a-row>
+
+        <a-form-item
+          field="args"
+          :label="$t('job.arg')"
+          :tooltip="$t('job.arg.tips', { name: '{{name}}' })"
+        >
+          <workflow-node-args
+            :args="nodeConfig.task.custom!.formal_args"
+            controlled
+            :tasks="
+              nodeConfigs.filter((v) => {
+                return (
+                  v.node_type === 'bpmn:serviceTask' && v.id !== nodeConfig.id
+                );
+              })
+            "
+          />
+        </a-form-item>
+
+        <a-form-item field="code" :label="$t('job.code')">
+          <v-ace-editor
+            :key="nodeConfig.task.custom?.executor_id"
+            v-model:value="nodeConfig.task.custom!.code"
+            :style="{ height: '300px', width: '100%' }"
+            :lang="getEditorLang"
+            :print-margin="false"
+            :theme="theme === 'dark' ? 'chaos' : 'chrome'"
+          />
+        </a-form-item>
+        <a-form-item
+          field="upload_file"
+          :label="$t('job.upload_file')"
+          :tooltip="$t('job.upload_file.tooltip')"
+        >
+          <a-space direction="vertical" :style="{ width: '100%' }">
+            <a-upload
+              v-model="uploadFileList"
+              action="/api/file/upload"
+              :limit="1"
+              :default-file-list="defaultFileList()"
+              :file-list="uploadFileList"
+              @before-remove="removeUploadfile"
+              @success="onUploadSuccess"
+            />
+          </a-space>
+        </a-form-item>
+        <a-form-item
+          field="endpoints"
+          validate-trigger="blur"
+          :label="$t('job.endpoint')"
+        >
+          <SelectInstanceId v-model="nodeConfig.task.custom!.target" />
+        </a-form-item>
+      </template>
+
+      <a-form-item field="is_join_all" validate-trigger="blur">
+        <a-checkbox v-model="nodeConfig.is_join_all"
+          >{{ t('workflow.condition.isJoinAll') }}
+        </a-checkbox>
+      </a-form-item>
+    </a-form>
+  </a-drawer>
+  <!-- save version -->
+  <a-modal
+    v-model:visible="workflowVersionModalVisible"
+    title-align="start"
+    style="width: auto"
+    :draggable="true"
+    :ok-text="$t('form.save')"
+    unmount-on-close
+    width="500px"
+    @before-ok="handleReleaseWorkflowVersion"
+    @cancel="handleCancelReleaseModal"
+  >
+    <template #title> {{ $t('workflow.saveVersion') }}</template>
+    <a-form
+      ref="saveWorkflowVersionRef"
+      :key="workflowVersionForm.workflow_id"
+      :rules="workflowVersionFormValidateRules"
+      :model="workflowVersionForm"
+      :auto-label-width="true"
+    >
+      <a-form-item
+        field="version"
+        required
+        validate-trigger="blur"
+        :label="$t('workflow.version')"
+      >
+        <a-input v-model="workflowVersionForm.version" />
+      </a-form-item>
+
+      <a-form-item field="info" :label="$t('workflow.info')">
+        <a-textarea v-model="workflowVersionForm.version_info" />
+      </a-form-item>
+    </a-form>
+  </a-modal>
+</template>
+
+<script lang="ts" setup>
+  import { useAppStore } from '@/store';
+  import LogicFlow from '@logicflow/core';
+  import '@logicflow/core/lib/style/index.css';
+  import {
+    Menu,
+    Control,
+    MiniMap,
+    DndPanel,
+    SelectionSelect,
+    BpmnElement,
+    Snapshot,
+    CurvedEdge,
+    CurvedEdgeModel,
+  } from '@logicflow/extension';
+  import '@logicflow/extension/lib/style/index.css';
+  import { computed, nextTick, onMounted, ref, reactive, toRefs } from 'vue';
+  import { useRoute, useRouter } from 'vue-router';
+
+  import { useI18n } from 'vue-i18n';
+  import { VAceEditor } from 'vue3-ace-editor';
+
+  import 'ace-builds/src-noconflict/mode-powershell';
+  import 'ace-builds/src-noconflict/mode-python';
+  import 'ace-builds/src-noconflict/mode-sh';
+  import 'ace-builds/src-noconflict/theme-chaos';
+  import 'ace-builds/src-noconflict/theme-chrome';
+
+  import {
+    ExecutorRecord,
+    queryExecutorList,
+    QueryExecutorReq,
+  } from '@/api/executor';
+  import { Pagination } from '@/types/global';
+  import { getCommand } from '@/utils';
+  import { FileItem, Message } from '@arco-design/web-vue';
+  import useLoading from '@/hooks/loading';
+  import {
+    EdgeConfig,
+    getWorkflowDetail,
+    NodeConfig,
+    releaseWorkflowVersion,
+    saveWorkflow,
+    Task,
+  } from '@/api/workflow';
+  import { genVersionFromTime } from '@/utils/time';
+  import WorkflowNodeArgs from '@/components/workflow-node-args/index.vue';
+  import WorkflowUserVariables from '@/components/workflow-user-variables/index.vue';
+  import SelectJob from '@/views/respository/components/select-job.vue';
+  import SelectExecutor from '@/views/respository//components/select-executor.vue';
+  import { JobRecord } from '@/api/job';
+  import SelectInstanceId from '../components/select-instance-id.vue';
+
+  const { t } = useI18n();
+  const route = useRoute();
+  const router = useRouter();
+  const { loading, setLoading } = useLoading(true);
+
+  const basePagination: Pagination = {
+    page: 1,
+    pageSize: 20,
+  };
+
+  const saveWorkflowBasicInfoRef = ref();
+  const saveWorkflowVersionRef = ref();
+  const minimapVisible = ref(false);
+  const gridVisible = ref(false);
+  const editNodeModalVisible = ref(false);
+  const editEdgeModalVisible = ref(false);
+  const workflowVersionModalVisible = ref(false);
+  const saveNodeConfigRef = ref();
+  const saveEdgeConfigRef = ref();
+  const lf = ref<LogicFlow>();
+  const uploadFileList = ref<FileItem[]>([]);
+
+  const state = reactive({
+    workflowBasicInfoForm: {
+      id: Number(route.query.id) || 0,
+      name: '',
+      info: '',
+      user_variables: [] as any[],
+    },
+  });
+
+  const { workflowBasicInfoForm } = toRefs(state);
+
+  const workflowBasicInfoFormValidateRules = {
+    name: {
+      required: true,
+    },
+    user_variables: {
+      type: 'Array' as any,
+      validator: (value: any, cb: (error?: string) => void) => {
+        if (!workflowBasicInfoForm.value.user_variables) {
+          return;
+        }
+        workflowBasicInfoForm.value.user_variables.forEach((v) => {
+          if (v.name === '') {
+            cb(t('workflow.userVariables.validation.error'));
+          }
+        });
+      },
+    },
+  };
+
+  const workflowVersionForm = ref<{
+    workflow_id: number;
+    version: string;
+    version_id?: number;
+    version_info?: string;
+    nodes: NodeConfig[];
+    edges: EdgeConfig[];
+  }>({
+    workflow_id: Number(route.query.id) || 0,
+    version_id: route.query.version_id
+      ? Number(route.query.version_id)
+      : undefined,
+    version: '',
+    version_info: '',
+    nodes: [],
+    edges: [],
+  });
+
+  const workflowVersionFormValidateRules = {
+    version: { required: true },
+  };
+
+  const CustomCurved = {
+    type: 'curvedEdge',
+    model: class CustomCurvedEdgeModel extends CurvedEdgeModel {
+      initEdgeData(data: LogicFlow.EdgeData) {
+        super.initEdgeData(data);
+        this.radius = 10;
+      }
+
+      getEdgeStyle() {
+        const style = super.getEdgeStyle();
+        style.strokeWidth = 2;
+        return style;
+      }
+    },
+    view: CurvedEdge,
+  };
+
+  interface GraphConfig {
+    nodes: NodeConfig[];
+    edges: EdgeConfig[];
+  }
+
+  const nodeConfig = ref<NodeConfig>({
+    id: '',
+    name: '',
+    node_type: '',
+    is_join_all: false,
+    task_type: 'standard',
+    task: {
+      standard: {
+        eid: '',
+        formal_args: [],
+      },
+    },
+    data: {},
+  });
+  const nodeConfigs = ref<NodeConfig[]>([]);
+  const edgeConfigs = ref<EdgeConfig[]>([]);
+  const edgeConfig = ref<EdgeConfig>({
+    id: '',
+    name: '',
+    source_node_id: '',
+    target_node_id: '',
+    data: {},
+  });
+
+  const theme = computed(() => {
+    return useAppStore().theme;
+  });
+
+  const container: any = ref(null);
+
+  const nodeConfigCheckRules = {
+    name: {
+      required: true,
+    },
+  };
+
+  const edgeConfigCheckRules = {
+    expr: {
+      required: true,
+    },
+  };
+
+  const executorOptions = ref<ExecutorRecord[]>([]);
+
+  const fetchExecutorData = async (params: {
+    name?: string;
+    default_id?: number;
+  }) => {
+    const { data } = await queryExecutorList({
+      ...basePagination,
+      ...params,
+    } as unknown as QueryExecutorReq);
+    executorOptions.value = data.list;
+  };
+
+  const getEditorLang = computed<string>(() => {
+    const executorItem = executorOptions.value.find(
+      (item) => item.id === nodeConfig.value.task.custom?.executor_id
+    );
+    const currentCommand = executorItem ? executorItem.command : 'bash';
+    return getCommand(currentCommand);
+  });
+
+  const saveNodeConfig = async () => {
+    const ret = await saveNodeConfigRef.value.validate();
+    if (ret) {
+      return false;
+    }
+
+    if (nodeConfig.value.task_type === 'custom') {
+      nodeConfig.value.task.standard = undefined;
+    } else {
+      nodeConfig.value.task.custom = undefined;
+    }
+
+    const originNodeId: string = nodeConfig.value.data.id;
+
+    lf.value
+      ?.getNodeModelById(nodeConfig.value.id)
+      ?.updateText(nodeConfig.value.name);
+
+    if (originNodeId !== nodeConfig.value.id) {
+      lf.value?.changeNodeId(originNodeId, nodeConfig.value.id);
+    }
+
+    const nodeData = lf.value?.getNodeDataById(nodeConfig.value.id);
+
+    nodeConfigs.value = nodeConfigs.value.filter((v) => v.id !== originNodeId);
+    nodeConfigs.value.push({
+      ...nodeConfig.value,
+      data: { ...nodeData },
+    });
+
+    editNodeModalVisible.value = false;
+    return true;
+  };
+
+  const saveEdgeConfig = async () => {
+    const ret = await saveEdgeConfigRef.value.validate();
+    if (ret) {
+      return false;
+    }
+
+    const originEdgeId: string = edgeConfig.value.data.id;
+
+    lf.value
+      ?.getEdgeModelById(edgeConfig.value.id)
+      ?.updateText(edgeConfig.value.name);
+
+    if (originEdgeId !== edgeConfig.value.id) {
+      lf.value?.changeEdgeId(originEdgeId, edgeConfig.value.id);
+    }
+
+    const edgeData = lf.value?.getEdgeDataById(edgeConfig.value.id);
+
+    edgeConfigs.value = edgeConfigs.value.filter((v) => v.id !== originEdgeId);
+    edgeConfigs.value.push({
+      ...edgeConfig.value,
+      data: { ...edgeData },
+    });
+
+    editEdgeModalVisible.value = false;
+    return true;
+  };
+
+  const defaultFileList = (): FileItem[] => {
+    const uploadFile = nodeConfig.value.task.custom?.upload_file;
+    if (uploadFile !== '') {
+      return [
+        {
+          uid: '1',
+          url: uploadFile,
+          name: uploadFile,
+        },
+      ];
+    }
+    return [];
+  };
+
+  const onUploadSuccess = (response: FileItem) => {
+    if (response.response.code === 20000) {
+      if (nodeConfig.value.task.custom) {
+        nodeConfig.value.task.custom.upload_file =
+          response.response.data.result;
+      }
+      uploadFileList.value = [response];
+      Message.success(t('form.submit.success'));
+      return;
+    }
+    uploadFileList.value = [];
+    Message.error(response.response.msg);
+  };
+
+  const changeNodeTaskType = (val: any) => {
+    if (val === 'custom') {
+      if (!nodeConfig.value.task.custom) {
+        nodeConfig.value.task.custom = {
+          work_dir: '',
+          work_user: '',
+          timeout: 5,
+          upload_file: '',
+          formal_args: [],
+          code: '',
+          executor_id: 0,
+        };
+      }
+      fetchExecutorData({
+        default_id: nodeConfig.value.task.custom.executor_id,
+      });
+    } else if (!nodeConfig.value.task.standard) {
+      nodeConfig.value.task.standard = {
+        eid: '',
+        formal_args: [],
+      };
+    }
+  };
+
+  const removeUploadfile = async (file: FileItem) => {
+    nodeConfig.value.task.custom!.upload_file = '';
+    return true;
+  };
+
+  const handleReleaseWorkflowVersion = async () => {
+    const ret = await saveWorkflowVersionRef.value.validate();
+    if (ret) {
+      return false;
+    }
+    const data = workflowVersionForm.value;
+    try {
+      await releaseWorkflowVersion({
+        workflow_id: data.workflow_id,
+        version: data.version,
+        version_info: data.version_info,
+        nodes: data.nodes.map((v) => {
+          if (v.task_type === 'standard') {
+            delete v.task.custom;
+          }
+          if (v.task_type === 'custom') {
+            delete v.task.standard;
+          }
+          return v;
+        }),
+        edges: data.edges,
+        user_variables: workflowBasicInfoForm.value.user_variables,
+      });
+    } catch (err) {
+      return false;
+    }
+
+    workflowVersionForm.value = { ...data, version: '', version_info: '' };
+
+    Message.success(t('form.submit.success'));
+
+    setTimeout(() => {
+      router.push(`/workflow/define`);
+    }, 500);
+
+    return true;
+  };
+
+  const handleSaveWorkflowBasicInfo = async () => {
+    const ret = await saveWorkflowBasicInfoRef.value.validate();
+    if (ret) {
+      return false;
+    }
+    try {
+      const data = workflowBasicInfoForm.value;
+      await saveWorkflow({
+        id: data.id,
+        name: data.name,
+        info: data.info,
+        user_variables: data.user_variables,
+      });
+    } catch (err) {
+      return false;
+    }
+    Message.success(t('form.submit.success'));
+    return true;
+  };
+
+  const handleSaveWorkflowDraft = async () => {
+    const ret = await saveWorkflowBasicInfoRef.value.validate();
+    if (ret) {
+      return false;
+    }
+    try {
+      const data = workflowBasicInfoForm.value;
+      await saveWorkflow({
+        id: data.id,
+        name: data.name,
+        info: data.info,
+        nodes: workflowVersionForm.value.nodes.map((v) => {
+          if (v.task_type === 'standard') {
+            delete v.task.custom;
+          }
+          if (v.task_type === 'custom') {
+            delete v.task.standard;
+          }
+          return v;
+        }),
+        edges: workflowVersionForm.value.edges,
+      });
+    } catch (err) {
+      return false;
+    }
+    Message.success(t('form.submit.success'));
+    if (workflowVersionForm.value.version_id) {
+      router.push(`/workflow/define/edit?id=${workflowBasicInfoForm.value.id}`);
+    }
+    return true;
+  };
+
+  const handleCancelReleaseModal = () => {
+    workflowVersionModalVisible.value = false;
+  };
+
+  const fetchWorkflowVersionDetail = async (
+    workflowId: number,
+    versionId?: number
+  ) => {
+    if (!lf.value) {
+      return;
+    }
+    setLoading(true);
+    try {
+      const { data } = await getWorkflowDetail({
+        workflow_id: workflowId,
+        version_id: versionId,
+      });
+      nodeConfigs.value = (data.nodes as any) ?? [];
+      edgeConfigs.value = (data.edges as any) ?? [];
+      const graphData = {
+        nodes: nodeConfigs.value.map((v) => v.data) as any,
+        edges: edgeConfigs.value.map((v) => v.data) as any,
+      };
+
+      workflowBasicInfoForm.value = {
+        id: workflowId,
+        name: data.workflow_name,
+        info: data.workflow_info,
+        user_variables: data.user_variables || [],
+      };
+
+      lf.value.render(graphData);
+      lf.value.translateCenter();
+    } catch (err) {
+      // you can report use errorHandler or other
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleAddConditionRule = () => {
+    if (!edgeConfig.value.condition) {
+      edgeConfig.value.condition = { rules: [], expr: '', logical_op: 'and' };
+    }
+
+    edgeConfig.value.condition.rules.push({
+      name: '',
+      left_val: {
+        val: '',
+        val_type: 'exit_code',
+      },
+      op: '>',
+      right_val: {
+        val: '',
+        val_type: 'custom',
+      },
+      compute_type: '',
+    });
+    edgeConfig.value.condition?.rules.forEach((v, i) => {
+      v.name = `C${i + 1}`;
+    });
+    const names = edgeConfig.value.condition.rules.map((v) => v.name);
+    edgeConfig.value.condition.expr = names.join(' && ');
+  };
+
+  const handleDeleteConditionRule = (index: number) => {
+    edgeConfig.value.condition?.rules.splice(index, 1);
+    edgeConfig.value.condition?.rules.forEach((v, i) => {
+      v.name = `C${i + 1}`;
+    });
+    if (!edgeConfig.value.condition) {
+      return;
+    }
+    const names = edgeConfig.value.condition.rules.map((v) => v.name);
+    edgeConfig.value.condition.expr = names.join(' && ');
+  };
+
+  const handleChangeLogicalOperation = (val: any) => {
+    if (!edgeConfig.value.condition) {
+      return;
+    }
+    edgeConfig.value.condition.rules.forEach((v, i) => {
+      v.name = `C${i + 1}`;
+    });
+    let op = '&&';
+    if (val === 'or') {
+      op = '||';
+    }
+
+    const names = edgeConfig.value.condition.rules.map((v) => v.name);
+    edgeConfig.value.condition.expr = names.join(` ${op} `);
+  };
+
+  const handleChangeJob = (v: JobRecord) => {
+    if (v.args) {
+      nodeConfig.value.task.standard!.formal_args = v.args.map((v) => {
+        return {
+          name: v.name,
+          val: v.val,
+          val_type: 'default',
+          info: v.info,
+        };
+      });
+    } else {
+      nodeConfig.value.task.standard!.formal_args = [];
+    }
+  };
+
+  onMounted(() => {
+    nextTick(() => {
+      lf.value = new LogicFlow({
+        isSilentMode: false,
+        stopScrollGraph: true,
+        stopZoomGraph: true,
+        snapToGrid: true,
+        container: container.value,
+        grid: false,
+        multipleSelectKey: 'shift',
+        // disabledTools: ['multipleSelect'],
+        autoExpand: true,
+        adjustEdgeStartAndEnd: true,
+        allowRotate: true,
+        edgeTextEdit: true,
+        keyboard: {
+          enabled: true,
+        },
+        animation: true,
+        partial: true,
+        // background: {
+        //   // background: theme.value === 'dark' ? '#29292c' : '#fff',
+        //   background: '#fff',
+        // },
+        edgeType: 'curvedEdge',
+        edgeTextDraggable: true,
+        // idGenerator(type) {
+        //   return `${type}_${Math.random()}`;
+        // },
+        edgeGenerator: (sourceNode) => {
+          return 'curvedEdge';
+        },
+        plugins: [
+          BpmnElement,
+          DndPanel,
+          SelectionSelect,
+          Control,
+          MiniMap,
+          Menu,
+          Snapshot,
+        ],
+      });
+
+      if (theme.value === 'dark') {
+        lf.value.setTheme({}, 'dark');
+      } else {
+        lf.value.setTheme({}, 'default');
+      }
+
+      lf.value.register(CustomCurved);
+
+      (lf.value.extension.menu as any).addMenuConfig({
+        nodeMenu: [
+          {
+            text: '属性',
+            callback(node: any) {
+              alert(`
+                 节点id：${node.id}
+                 节点类型：${node.type}
+                 节点坐标：(x: ${node.x}, y: ${node.y})
+               `);
+            },
+          },
+        ],
+        edgeMenu: [
+          {
+            text: '属性',
+            callback(edge: any) {
+              const {
+                id,
+                type,
+                startPoint,
+                endPoint,
+                sourceNodeId,
+                targetNodeId,
+              } = edge;
+              alert(`
+                 边id：${id}
+                 边类型：${type}
+                 边起点坐标：(startPoint: [${startPoint.x}, ${startPoint.y}])
+                 边终点坐标：(endPoint: [${endPoint.x}, ${endPoint.y}])
+                 源节点id：${sourceNodeId}
+                 目标节点id：${targetNodeId}
+               `);
+            },
+          },
+        ],
+        graphMenu: [
+          {
+            text: '网格',
+            callback() {
+              if (gridVisible.value) {
+                gridVisible.value = false;
+                lf.value?.graphModel.updateGridOptions({ visible: false });
+              } else {
+                gridVisible.value = true;
+                lf.value?.graphModel.updateGridOptions({ visible: true });
+              }
+            },
+          },
+        ],
+      });
+
+      (lf.value?.extension.control as Control).addItem({
+        key: 'mini-map',
+        iconClass: 'custom-minimap',
+        title: '导航',
+        text: '导航',
+        onClick: (lf, ev) => {
+          if (!minimapVisible.value) {
+            minimapVisible.value = true;
+            (lf.extension.miniMap as MiniMap).show();
+          } else {
+            minimapVisible.value = false;
+            (lf.extension.miniMap as MiniMap).hide();
+          }
+        },
+      });
+
+      (lf.value?.extension.control as Control).addItem({
+        key: 'reset-translate',
+        iconClass: 'reset-translate',
+        title: '',
+        text: '居中',
+        onClick: (lf, ev) => {
+          // lf.resetTranslate();
+          lf.translateCenter();
+        },
+      });
+      (lf.value?.extension.control as Control).addItem({
+        key: 'save-workflow',
+        iconClass: 'save-workflow',
+        title: '',
+        text: '保存',
+        onClick: (lf, ev) => {
+          const data = lf.getGraphData();
+          workflowVersionForm.value.nodes = (data as any).nodes;
+          workflowVersionForm.value.edges = (data as any).edges;
+          handleSaveWorkflowDraft();
+        },
+      });
+
+      (lf.value?.extension.control as Control).addItem({
+        key: 'release',
+        iconClass: 'release-workflow',
+        title: '',
+        text: '发布',
+        onClick: (lf, ev) => {
+          const data = lf.getGraphData();
+
+          workflowVersionForm.value = {
+            ...workflowVersionForm.value,
+            version: `${
+              workflowBasicInfoForm.value.name
+            }-${genVersionFromTime()}`,
+            nodes: (data as any).nodes,
+            edges: (data as any).edges,
+          };
+          workflowVersionForm.value.nodes = (data as any).nodes;
+          workflowVersionForm.value.edges = (data as any).edges;
+          workflowVersionModalVisible.value = true;
+        },
+      });
+
+      lf.value?.setPatternItems([
+        {
+          label: '选区',
+          icon: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAAH6ji2bAAAABGdBTUEAALGPC/xhBQAAAOVJREFUOBGtVMENwzAIjKP++2026ETdpv10iy7WFbqFyyW6GBywLCv5gI+Dw2Bluj1znuSjhb99Gkn6QILDY2imo60p8nsnc9bEo3+QJ+AKHfMdZHnl78wyTnyHZD53Zzx73MRSgYvnqgCUHj6gwdck7Zsp1VOrz0Uz8NbKunzAW+Gu4fYW28bUYutYlzSa7B84Fh7d1kjLwhcSdYAYrdkMQVpsBr5XgDGuXwQfQr0y9zwLda+DUYXLaGKdd2ZTtvbolaO87pdo24hP7ov16N0zArH1ur3iwJpXxm+v7oAJNR4JEP8DoAuSFEkYH7cAAAAASUVORK5CYII=',
+          callback: () => {
+            lf.value?.openSelectionSelect();
+            lf.value?.once('selection:selected', () => {
+              lf.value?.closeSelectionSelect();
+            });
+          },
+        },
+        {
+          type: 'bpmn:startEvent',
+          label: '开始',
+          text: '开始',
+          icon: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAAH6ji2bAAAABGdBTUEAALGPC/xhBQAAAnBJREFUOBGdVL1rU1EcPfdGBddmaZLiEhdx1MHZQXApraCzQ7GKLgoRBxMfcRELuihWKcXFRcEWF8HBf0DdDCKYRZpnl7p0svLe9Zzbd29eQhTbC8nv+9zf130AT63jvooOGS8Vf9Nt5zxba7sXQwODfkWpkbjTQfCGUd9gIp3uuPP8bZ946g56dYQvnBg+b1HB8VIQmMFrazKcKSvFW2dQTxJnJdQ77urmXWOMBCmXM2Rke4S7UAW+/8ywwFoewmBps2tu7mbTdp8VMOkIRAkKfrVawalJTtIliclFbaOBqa0M2xImHeVIfd/nKAfVq/LGnPss5Kh00VEdSzfwnBXPUpmykNss4lUI9C1ga+8PNrBD5YeqRY2Zz8PhjooIbfJXjowvQJBqkmEkVnktWhwu2SM7SMx7Cj0N9IC0oQXRo8xwAGzQms+xrB/nNSUWVveI48ayrFGyC2+E2C+aWrZHXvOuz+CiV6iycWe1Rd1Q6+QUG07nb5SbPrL4426d+9E1axKjY3AoRrlEeSQo2Eu0T6BWAAr6COhTcWjRaYfKG5csnvytvUr/WY4rrPMB53Uo7jZRjXaG6/CFfNMaXEu75nG47X+oepU7PKJvvzGDY1YLSKHJrK7vFUwXKkaxwhCW3u+sDFMVrIju54RYYbFKpALZAo7sB6wcKyyrd+aBMryMT2gPyD6GsQoRFkGHr14TthZni9ck0z+Pnmee460mHXbRAypKNy3nuMdrWgVKj8YVV8E7PSzp1BZ9SJnJAsXdryw/h5ctboUVi4AFiCd+lQaYMw5z3LGTBKjLQOeUF35k89f58Vv/tGh+l+PE/wG0rgfIUbZK5AAAAABJRU5ErkJggg==',
+        },
+        // {
+        //   type: 'bpmn:userTask',
+        //   label: '用户任务',
+        //   text: '用户任务',
+        //   icon: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABMAAAATCAYAAAEFVwZaAAAABGdBTUEAALGPC/xhBQAAAqlJREFUOBF9VM9rE0EUfrMJNUKLihGbpLGtaCOIR8VjQMGDePCgCCIiCNqzCAp2MyYUCXhUtF5E0D+g1t48qAd7CCLqQUQKEWkStcEfVGlLdp/fm3aW2QQdyLzf33zz5m2IsAZ9XhDpyaaIZkTS4ASzK41TFao88GuJ3hsr2pAbipHxuSYyKRugagICGANkfFnNh3HeE2N0b3nN2cgnpcictw5veJIzxmDamSlxxQZicq/mflxhbaH8BLRbuRwNtZp0JAhoplVRUdzmCe/vO27wFuuA3S5qXruGdboy5/PRGFsbFGKo/haRtQHIrM83bVeTrOgNhZReWaYGnE4aUQgTJNvijJFF4jQ8BxJE5xfKatZWmZcTQ+BVgh7s8SgPlCkcec4mGTmieTP4xd7PcpIEg1TX6gdeLW8rTVMVLVvb7ctXoH0Cydl2QOPJBG21STE5OsnbweVYzAnD3A7PVILuY0yiiyDwSm2g441r6rMSgp6iK42yqroI2QoXeJVeA+YeZSa47gZdXaZWQKTrG93rukk/l2Al6Kzh5AZEl7dDQy+JjgFahQjRopSxPbrbvK7GRe9ePWBo1wcU7sYrFZtavXALwGw/7Dnc50urrHJuTPSoO2IMV3gUQGNg87IbSOIY9BpiT9HV7FCZ94nPXb3MSnwHn/FFFE1vG6DTby+r31KAkUktB3Qf6ikUPWxW1BkXSPQeMHHiW0+HAd2GelJsZz1OJegCxqzl+CLVHa/IibuHeJ1HAKzhuDR+ymNaRFM+4jU6UWKXorRmbyqkq/D76FffevwdCp+jN3UAN/C9JRVTDuOxC/oh+EdMnqIOrlYteKSfadVRGLJFJPSB/ti/6K8f0CNymg/iH2gO/f0DwE0yjAFO6l8JaR5j0VPwPwfaYHqOqrCI319WzwhwzNW/aQAAAABJRU5ErkJggg==',
+        // },
+        {
+          type: 'bpmn:serviceTask',
+          label: '系统任务',
+          text: '任务',
+          icon: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABMAAAATCAYAAAEFVwZaAAAABGdBTUEAALGPC/xhBQAAAqlJREFUOBF9VM9rE0EUfrMJNUKLihGbpLGtaCOIR8VjQMGDePCgCCIiCNqzCAp2MyYUCXhUtF5E0D+g1t48qAd7CCLqQUQKEWkStcEfVGlLdp/fm3aW2QQdyLzf33zz5m2IsAZ9XhDpyaaIZkTS4ASzK41TFao88GuJ3hsr2pAbipHxuSYyKRugagICGANkfFnNh3HeE2N0b3nN2cgnpcictw5veJIzxmDamSlxxQZicq/mflxhbaH8BLRbuRwNtZp0JAhoplVRUdzmCe/vO27wFuuA3S5qXruGdboy5/PRGFsbFGKo/haRtQHIrM83bVeTrOgNhZReWaYGnE4aUQgTJNvijJFF4jQ8BxJE5xfKatZWmZcTQ+BVgh7s8SgPlCkcec4mGTmieTP4xd7PcpIEg1TX6gdeLW8rTVMVLVvb7ctXoH0Cydl2QOPJBG21STE5OsnbweVYzAnD3A7PVILuY0yiiyDwSm2g441r6rMSgp6iK42yqroI2QoXeJVeA+YeZSa47gZdXaZWQKTrG93rukk/l2Al6Kzh5AZEl7dDQy+JjgFahQjRopSxPbrbvK7GRe9ePWBo1wcU7sYrFZtavXALwGw/7Dnc50urrHJuTPSoO2IMV3gUQGNg87IbSOIY9BpiT9HV7FCZ94nPXb3MSnwHn/FFFE1vG6DTby+r31KAkUktB3Qf6ikUPWxW1BkXSPQeMHHiW0+HAd2GelJsZz1OJegCxqzl+CLVHa/IibuHeJ1HAKzhuDR+ymNaRFM+4jU6UWKXorRmbyqkq/D76FffevwdCp+jN3UAN/C9JRVTDuOxC/oh+EdMnqIOrlYteKSfadVRGLJFJPSB/ti/6K8f0CNymg/iH2gO/f0DwE0yjAFO6l8JaR5j0VPwPwfaYHqOqrCI319WzwhwzNW/aQAAAABJRU5ErkJggg==',
+        },
+        {
+          type: 'bpmn:exclusiveGateway',
+          label: '条件',
+          text: '条件判断',
+          icon: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABUAAAAVCAYAAAHeEJUAAAAABGdBTUEAALGPC/xhBQAAAvVJREFUOBGNVEFrE0EU/mY3bQoiFlOkaUJrQUQoWMGePLX24EH0IIoHKQiCV0G8iE1covgLiqA/QTzVm1JPogc9tIJYFaQtlhQxqYjSpunu+L7JvmUTU3AgmTfvffPNN++9WSA1DO182f6xwILzD5btfAoQmwL5KJEwiQyVbSVZ0IgRyV6PTpIJ81E5ZvqfHQR0HUOBHW4L5Et2kQ6Zf7iAOhTFAA8s0pEP7AXO1uAA52SbqGk6h/6J45LaLhO64ByfcUzM39V7ZiAdS2yCePPEIQYvTUHqM/n7dgQNfBKWPjpF4ISk8q3J4nB11qw6X8l+FsF3EhlkEMfrjIer3wJTLwS2aCNcj4DbGxXTw00JmAuO+Ni6bBxVUCvS5d9aa04+so4pHW5jLTywuXAL7jJ+D06sl82Sgl2JuVBQn498zkc2bGKxULHjCnSMadBKYDYYHAtsby1EQ5lNGrQd4Y3v4Zo0XdGEmDno46yCM9Tk+RiJmUYHS/aXHPNTcjxcbTFna000PFJHIVZ5lFRqRpJWk9/+QtlOUYJj9HG5pVFEU7zqIYDVsw2s+AJaD8wTd2umgSCCyUxgGsS1Y6TBwXQQTFuZaHcd8gAGioE90hlsY+wMcs30RduYtxanjMGal8H5dMW67dmT1JFtYUEe8LiQLRsPZ6IIc7A4J5tqco3T0pnv/4u0kyzrYUq7gASuEyI8VXKvB9Odytv6jS/PNaZBln0nioJG/AVQRZvApOdhjj3Jt8QC8Im09SafwdBdvIpztpxWxpeKCC+EsFdS8DCyuCn2munFpL7ctHKp+Xc5cMybeIyMAN33SPL3ZR9QV1XVwLyzHm6Iv0/yeUuUb7PPlZC4D4HZkeu6dpF4v9j9MreGtMbxMMRLIcjJic9yHi7WQ3yVKzZVWUr5UrViJvn1FfUlwe/KYVfYyWRLSGNu16hR01U9IacajXPei0wx/5BqgInvJN+MMNtNme7ReU9SBbgntovn0kKHpFg7UogZvaZiOue/q1SBo9ktHzQAAAAASUVORK5CYII=',
+        },
+        {
+          type: 'bpmn:endEvent',
+          label: '结束',
+          text: '结束',
+          icon: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAAH6ji2bAAAABGdBTUEAALGPC/xhBQAAA1BJREFUOBFtVE1IVUEYPXOf+tq40Y3vPcmFIdSjIorWoRG0ERWUgnb5FwVhYQSl72oUoZAboxKNFtWiwKRN0M+jpfSzqJAQclHo001tKkjl3emc8V69igP3znzfnO/M9zcDcKT67azmjYWTwl9Vn7Vumeqzj1DVb6cleQY4oAVnIOPb+mKAGxQmKI5CWNJ2aLPatxWa3aB9K7/fB+/Z0jUF6TmMlFLQqrkECWQzOZxYGjTlOl8eeKaIY5yHnFn486xBustDjWT6dG7pmjHOJd+33t0iitTPkK6tEvjxq4h2MozQ6WFSX/LkDUGfFwfhEZj1Auz/U4pyAi5Sznd7uKzznXeVHlI/Aywmk6j7fsUsEuCGADrWARXXwjxWQsUbIupDHJI7kF5dRktg0eN81IbiZXiTESic50iwS+t1oJgL83jAiBupLDCQqwziaWSoAFSeIR3P5Xv5az00wyIn35QRYTwdSYbz8pH8fxUUAtxnFvYmEmgI0wYXUXcCCSpeEVpXlsRhBnCEATxWylL9+EKCAYhe1NGstUa6356kS9NVvt3DU2fd+Wtbm/+lSbylJqsqkSm9CRhvoJVlvKPvF1RKY/FcPn5j4UfIMLn8D4UYb54BNsilTDXKnF4CfTobA0FpoW/LSp306wkXM+XaOJhZaFkcNM82ASNAWMrhrUbRfmyeI1FvRBTpN06WKxa9BK0o2E4Pd3zfBBEwPsv9sQBnmLVbLEIZ/Xe9LYwJu/Er17W6HYVBc7vmuk0xUQ+pqxdom5Fnp55SiytXLPYoMXNM4u4SNSCFWnrVIzKG3EGyMXo6n/BQOe+bX3FClY4PwydVhthOZ9NnS+ntiLh0fxtlUJHAuGaFoVmttpVMeum0p3WEXbcll94l1wM/gZ0Ccczop77VvN2I7TlsZCsuXf1WHvWEhjO8DPtyOVg2/mvK9QqboEth+7pD6NUQC1HN/TwvydGBARi9MZSzLE4b8Ru3XhX2PBxf8E1er2A6516o0w4sIA+lwURhAON82Kwe2iDAC1Watq4XHaGQ7skLcFOtI5lDxuM2gZe6WFIotPAhbaeYlU4to5cuarF1QrcZ/lwrLaCJl66JBocYZnrNlvm2+MBCTmUymPrYZVbjdlr/BxlMjmNmNI3SAAAAAElFTkSuQmCC',
+        },
+      ]);
+
+      lf.value.adapterOut = (data) => {
+        const convertData: GraphConfig = {
+          nodes: data.nodes.map((data1) => {
+            const v = nodeConfigs.value.find((data2) => data1.id === data2.id);
+            return {
+              ...v!,
+              data: data1,
+            };
+          }),
+          edges: data.edges.map((data1) => {
+            const v = edgeConfigs.value.find((data2) => data1.id === data2.id);
+            return {
+              ...v!,
+              data: data1,
+            };
+          }),
+        };
+        return convertData;
+      };
+
+      lf.value.adapterIn = (data) => {
+        return data as LogicFlow.GraphData;
+      };
+
+      lf.value?.on('node:click', (e) => {
+        if (e.data.type !== 'bpmn:serviceTask') {
+          return;
+        }
+        editNodeModalVisible.value = true;
+        const selectNode = nodeConfigs.value.find((v) => v.id === e.data.id)!;
+        nodeConfig.value = {
+          ...selectNode,
+        };
+      });
+
+      lf.value?.on('node:dnd-add', (e) => {
+        let taskType: 'standard' | 'custom' | 'none';
+        const task: Task = {};
+        switch (e.data.type) {
+          case 'bpmn:serviceTask':
+            taskType = 'standard';
+            task.standard = { eid: '', formal_args: [] };
+            break;
+          case 'bpmn:startEvent':
+          case 'bpmn:endEvent':
+          case 'bpmn:exclusiveGateway':
+          default:
+            taskType = 'none';
+        }
+
+        nodeConfigs.value.push({
+          id: e.data.id,
+          name: e.data.text?.value || '',
+          node_type: e.data.type,
+          is_join_all: false,
+          task_type: taskType,
+          task,
+          data: e.data,
+        });
+      });
+
+      lf.value?.on('node:delete', (e) => {
+        console.log('node:delete', e.data);
+        nodeConfigs.value = nodeConfigs.value.filter((data) => {
+          return data.id !== e.data.id;
+        });
+      });
+
+      lf.value?.on('edge:click', (e) => {
+        const selectEdge = edgeConfigs.value.find((v) => v.id === e.data.id)!;
+
+        if (
+          lf.value?.getNodeDataById(e.data.sourceNodeId)?.type !==
+          'bpmn:exclusiveGateway'
+        ) {
+          return;
+        }
+
+        edgeConfig.value = {
+          ...selectEdge,
+        };
+        if (!edgeConfig.value.condition) {
+          edgeConfig.value.condition = {
+            rules: [
+              {
+                name: 'C1',
+                left_val: {
+                  val: '',
+                  val_type: 'exit_code',
+                },
+                op: '>',
+                right_val: {
+                  val: '',
+                  val_type: 'custom',
+                },
+                compute_type: '',
+              },
+            ],
+            expr: 'C1',
+            logical_op: 'and',
+          };
+        }
+
+        editEdgeModalVisible.value = true;
+      });
+
+      lf.value?.on('edge:add', (e) => {
+        console.log('edge:add', e.data);
+        edgeConfigs.value.push({
+          id: e.data.id,
+          name: e.data.text?.value || '',
+          source_node_id: e.data.sourceNodeId,
+          target_node_id: e.data.targetNodeId,
+          data: e.data,
+        });
+      });
+
+      lf.value?.on('edge:delete', (e) => {
+        console.log('edge:delete', e.data);
+        edgeConfigs.value = edgeConfigs.value.filter((data) => {
+          return data.id !== e.data.id;
+        });
+      });
+
+      fetchWorkflowVersionDetail(
+        Number(route.query.id),
+        workflowVersionForm.value.version_id
+      );
+    });
+  });
+</script>
+
+<style scoped lang="less">
+  .container {
+    padding: 0 20px 20px 20px;
+  }
+  .workflow-container {
+    width: 100%;
+    height: 680px;
+  }
+
+  :deep(.lf-dnd-text) {
+    color: dimgray;
+  }
+
+  :deep(.lf-control-item.disabled) {
+    filter: opacity(0.5);
+    pointer-events: none;
+    color: #7a7979;
+  }
+
+  :deep(.lf-dnd-shape) {
+    background-position: 50%;
+    background-repeat: no-repeat;
+    background-size: contain;
+    border-radius: 8px;
+    cursor: grab;
+    height: 30px;
+    margin: 0 auto;
+    opacity: 0.99;
+    width: 20px;
+  }
+
+  :deep(.custom-minimap) {
+    background-image: url("data:image/svg+xml,%3Csvg t='1776520666723' class='icon' viewBox='0 0 1024 1024' version='1.1' xmlns='http://www.w3.org/2000/svg' p-id='1697' width='200' height='200'%3E%3Cpath d='M605.848435 958.708971c-0.36225 0-0.724501-0.008186-1.088798-0.026606-9.098215-0.468674-16.872273-6.712889-19.288299-15.495926L476.898551 548.458353 80.07064 437.83486c-8.760524-2.442632-14.976086-10.218736-15.427364-19.304671-0.451278-9.083889 4.965082-17.437138 13.44215-20.73423L929.251056 66.728774c7.80885-3.038196 16.669658-1.174756 22.597671 4.750187 5.922896 5.92392 7.788383 14.789844 4.751211 22.597671L625.531729 945.241238C622.361527 953.390849 614.518908 958.708971 605.848435 958.708971zM152.537092 414.172951l347.232352 96.79658c7.148817 1.9934 12.726859 7.591909 14.696724 14.746866l94.821599 344.730369 290.525839-746.93166L152.537092 414.172951z' fill='%23272636' p-id='1698'%3E%3C/path%3E%3C/svg%3E");
+  }
+  :deep(.reset-translate) {
+    background-image: url("data:image/svg+xml,%3Csvg t='1776521928877' class='icon' viewBox='0 0 1024 1024' version='1.1' xmlns='http://www.w3.org/2000/svg' p-id='2681' width='200' height='200'%3E%3Cpath d='M162.304 186.88H865.28v63.488H162.304zM246.272 376.832h534.528V440.32H246.272zM162.304 567.296H865.28v63.488H162.304zM246.272 757.248h534.528v63.488H246.272z' fill='%23000000' p-id='2682'%3E%3C/path%3E%3C/svg%3E");
+  }
+  :deep(.save-workflow) {
+    background-image: url("data:image/svg+xml,%3Csvg t='1776522086012' class='icon' viewBox='0 0 1024 1024' version='1.1' xmlns='http://www.w3.org/2000/svg' p-id='3668' width='200' height='200'%3E%3Cpath d='M814.805 128a51.179 51.179 0 0 1 51.179 51.179V844.01a51.179 51.179 0 0 1-51.179 51.157H201.173a51.179 51.179 0 0 1-51.178-51.157V179.179A51.179 51.179 0 0 1 201.173 128h613.654zM329.024 434.837a51.093 51.093 0 0 1-51.179-51.093V179.157h-76.672v664.854h613.76V179.179H738.22v204.48a51.179 51.179 0 0 1-51.179 51.178H329.024z m0-51.093h357.995V179.157H329.024v204.587z m357.91 204.501a25.557 25.557 0 1 1 0.085 51.072H329.024a25.536 25.536 0 1 1 0-51.072h357.91z' fill='%23333333' p-id='3669'%3E%3C/path%3E%3C/svg%3E");
+  }
+  :deep(.release-workflow) {
+    background-image: url("data:image/svg+xml,%3Csvg t='1776522189380' class='icon' viewBox='0 0 1024 1024' version='1.1' xmlns='http://www.w3.org/2000/svg' p-id='4736' width='200' height='200'%3E%3Cpath d='M864 128h-56.64a32 32 0 0 0 0 64H864a32 32 0 0 1 32 32v640a32 32 0 0 1-32 32H160a32 32 0 0 1-32-32V224a32 32 0 0 1 32-32h62.272a32 32 0 0 0 0-64H160a96 96 0 0 0-96 96v640a96 96 0 0 0 96 96h704a96 96 0 0 0 96-96V224a96 96 0 0 0-96-96z' p-id='4737'%3E%3C/path%3E%3Cpath d='M341.216 308.32L480 185.312V688a32 32 0 0 0 64 0V185.312l138.784 123.008a32.032 32.032 0 0 0 42.464-47.904l-192-170.208a32 32 0 0 0-42.464 0l-192 170.208a32 32 0 1 0 42.432 47.904z' p-id='4738'%3E%3C/path%3E%3C/svg%3E");
+  }
+</style>

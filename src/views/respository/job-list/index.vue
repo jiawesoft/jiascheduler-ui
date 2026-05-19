@@ -18,7 +18,7 @@
                   <a-radio-group
                     v-model="formModel.job_type"
                     type="button"
-                    @change="search"
+                    @change="handleChangeJobType"
                   >
                     <a-radio value="default">
                       {{ $t('job.type.default') }}
@@ -217,12 +217,11 @@
       :draggable="true"
       :ok-text="$t('form.save')"
       unmount-on-close
-      width="60%"
+      width="auto"
       @before-ok="handleSubmitJob"
       @cancel="handleCancel"
     >
       <template #title> {{ $t('job.save') }}</template>
-
       <a-form
         ref="saveJobRef"
         :key="jobForm.id"
@@ -232,7 +231,7 @@
       >
         <a-tabs default-active-key="basic" type="rounded">
           <a-tab-pane key="basic" :title="$t('job.tab.basic')">
-            <a-form-item field="job_type" :label="$t('job.type')">
+            <!-- <a-form-item field="job_type" :label="$t('job.type')" >
               <a-radio-group
                 v-model="formModel.job_type"
                 type="button"
@@ -242,7 +241,7 @@
                 <a-radio value="default">{{ $t('job.type.default') }}</a-radio>
                 <a-radio value="bundle">{{ $t('job.type.bundle') }}</a-radio>
               </a-radio-group>
-            </a-form-item>
+            </a-form-item> -->
             <a-form-item
               field="name"
               required
@@ -285,6 +284,7 @@
               </a-col>
             </a-row>
 
+            <!-- bundle job -->
             <template v-if="formModel.job_type === 'bundle'">
               <a-row :gutter="16">
                 <a-col :span="8">
@@ -310,7 +310,7 @@
                 v-for="(val, index) in jobForm.bundle_script"
                 :key="index"
                 :field="`bundle_script[${index}]`"
-                :label="$t('job.task') + '-' + (index + 1)"
+                :label="$t('job.script') + '-' + (index + 1)"
                 validate-trigger="blur"
                 :rules="bundleScriptValidateRules"
                 :tooltip="$t('jobBundleScript.condExpr.tooltips')"
@@ -337,6 +337,7 @@
               </a-form-item>
             </template>
 
+            <!-- default job -->
             <template v-else-if="formModel.job_type === 'default'">
               <a-row :gutter="16">
                 <a-col :span="8">
@@ -365,6 +366,13 @@
                   </a-form-item>
                 </a-col>
               </a-row>
+              <a-form-item
+                field="args"
+                :label="$t('job.arg')"
+                :tooltip="$t('job.arg.tips', { name: '{{name}}' })"
+              >
+                <job-args :args="jobForm.formal_args" controlled />
+              </a-form-item>
               <a-form-item field="code" :label="$t('job.code')">
                 <v-ace-editor
                   v-if="jobModalVisible"
@@ -430,12 +438,12 @@
                 v-model="jobForm.completed_callback.trigger_on"
                 :placeholder="$t('job.completedCallback.triggerOn')"
               >
-                <a-option value="all">{{
-                  $t('job.completedCallback.triggerOn.all')
-                }}</a-option>
-                <a-option value="error">{{
-                  $t('job.completedCallback.triggerOn.error')
-                }}</a-option>
+                <a-option value="all">
+                  {{ $t('job.completedCallback.triggerOn.all') }}
+                </a-option>
+                <a-option value="error">
+                  {{ $t('job.completedCallback.triggerOn.error') }}
+                </a-option>
               </a-select>
             </a-form-item>
           </a-tab-pane>
@@ -478,6 +486,14 @@
           </a-select>
         </a-form-item>
         <a-form-item
+          v-if="
+            dispatchJobForm.formal_args &&
+            dispatchJobForm.formal_args.length > 0
+          "
+        >
+          <job-args v-model:args="dispatchJobForm.formal_args" />
+        </a-form-item>
+        <a-form-item
           field="endpoints"
           validate-trigger="blur"
           :label="$t('job.endpoint')"
@@ -501,8 +517,9 @@
   import {
     deleteJob,
     dispatchJob,
-    endpoint,
+    Endpoint,
     JobAction,
+    JobArg,
     JobBundleScriptRecord,
     JobRecord,
     queryJobList,
@@ -533,6 +550,7 @@
   import 'ace-builds/src-noconflict/theme-chaos';
   import 'ace-builds/src-noconflict/theme-chrome';
   import { useRouter } from 'vue-router';
+  import JobArgs from '@/components/job-args/index.vue';
   import SelectBundleScript from '../components/select-bundle-script.vue';
   import SelectExecutor from '../components/select-executor.vue';
   import SelectInstance from '../components/select-instance.vue';
@@ -567,11 +585,11 @@
     timeout: number;
     max_parallel: number;
     name: string;
+    formal_args: JobArg[];
     code: string;
     executor_id: number;
     upload_file: '';
     display_on_dashboard: false;
-    args: any;
     bundle_script?: (typeof defaultBundleScript)[];
     info: string;
     completed_callback: CompletedCallback;
@@ -582,9 +600,10 @@
     schedule_name: string;
     namespace: string;
     schedule_type: string;
+    formal_args: JobArg[];
     action: string;
     is_sync: boolean;
-    endpoints: endpoint[];
+    endpoints: Endpoint[];
   }
 
   const generateFormModel = () => {
@@ -625,6 +644,7 @@
       id: 0,
       job_type: formModel.value.job_type,
       name: '',
+      formal_args: [],
       code: 'echo hello world',
       executor_id: 1,
       work_dir: '',
@@ -633,7 +653,6 @@
       max_parallel: 1,
       upload_file: '',
       display_on_dashboard: false,
-      args: {},
       bundle_script: [],
       info: '',
       completed_callback: {
@@ -649,6 +668,7 @@
       namespace: 'default',
       schedule_type: 'once',
       action: 'exec',
+      formal_args: [],
       is_sync: false,
       endpoints: [],
     },
@@ -752,6 +772,21 @@
   const jobFormValidateRules = {
     name: {
       required: true,
+    },
+    args: {
+      validator(
+        value: JobArg[],
+        callback: (error?: string | undefined) => void
+      ) {
+        if (!value || value.length === 0) {
+          return;
+        }
+        value.forEach((v) => {
+          if (v.name === '') {
+            callback(t('job.arg.validator.name.required'));
+          }
+        });
+      },
     },
   };
   const dispatchJobFormValidateRules = {
@@ -895,8 +930,8 @@
             : '',
           enable: record.completed_callback?.enable,
         },
+        formal_args: Array.isArray(record.args) ? record.args : [],
       };
-      // jobType.value = record.job_type;
     } else {
       jobForm.value = {
         id: 0,
@@ -906,11 +941,11 @@
         work_user: '',
         max_parallel: 1,
         timeout: 60,
+        formal_args: [],
         code: '# type your code',
         executor_id: 1,
         display_on_dashboard: false,
         upload_file: '',
-        args: {},
         bundle_script: [{ ...defaultBundleScript }],
         info: '',
         completed_callback: {
@@ -958,7 +993,9 @@
       ip: [],
       action: 'exec',
       schedule_type: 'once',
+      formal_args: record.args,
     };
+
     dispatchJobModalVisible.value = true;
   };
 
@@ -980,6 +1017,7 @@
         ...jobForm.value,
         job_type: formModel.value.job_type,
         completed_callback: callbackParams,
+        args: jobForm.value.formal_args,
       };
       if (formModel.value.job_type === 'default') {
         data.bundle_script = undefined;
@@ -1002,6 +1040,14 @@
     if (ret) {
       return false;
     }
+
+    const args = {};
+    if (Array.isArray(dispatchJobForm.value.formal_args)) {
+      dispatchJobForm.value.formal_args.forEach((v) => {
+        args[v.name] = v.val;
+      });
+    }
+
     try {
       await dispatchJob({
         schedule_type: dispatchJobForm.value.schedule_type as ScheduleType,
@@ -1009,6 +1055,7 @@
         schedule_name: dispatchJobForm.value.schedule_name,
         action: dispatchJobForm.value.action as JobAction,
         is_sync: false,
+        args,
         endpoints: dispatchJobForm.value.endpoints,
       });
     } catch (err) {
@@ -1121,6 +1168,16 @@
         });
       });
     }
+  };
+
+  const handleChangeJobType = async (val: any) => {
+    if (val === 'default') {
+      resourceType.value = 'job';
+    } else {
+      resourceType.value = 'bundle_job';
+    }
+    initTagList();
+    search();
   };
 
   watch(

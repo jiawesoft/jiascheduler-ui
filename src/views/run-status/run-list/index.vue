@@ -16,7 +16,7 @@
   const scheduleType = ref<any>('once');
   const jobType = ref('');
 
-  const scheduleTypeList = ['flow', 'timer', 'once', 'daemon'];
+  const scheduleTypeList = ['timer', 'once', 'daemon'];
   const jobTypeList = ['default', 'bundle'];
   if (route.query) {
     const currentScheduleType = route.query?.scheduleType || 'once';

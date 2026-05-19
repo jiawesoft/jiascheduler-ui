@@ -4,6 +4,7 @@
     :loading="loading"
     :filter-option="false"
     :fallback-option="false"
+    :defaultActiveFirstOption="true"
     allow-search
     @search="handleSearchExecutor"
   >
@@ -28,7 +29,7 @@
 
   const emit = defineEmits(['update:modelValue']);
 
-  const id = ref(props.modelValue);
+  const id = ref(props.modelValue || undefined);
   const loading = ref(false);
 
   const executorOptions = ref<ExecutorRecord[]>([]);
@@ -45,6 +46,9 @@
       ...params,
     } as unknown as QueryExecutorReq);
     executorOptions.value = data.list;
+    if (!id.value && data.list.length > 0) {
+      id.value = data.list[0].id;
+    }
 
     loading.value = false;
   };

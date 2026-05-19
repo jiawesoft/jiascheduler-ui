@@ -42,12 +42,12 @@ const localeExecutor = {
 };
 
 const localeJob = {
-  'menu.repository.jobList': 'Job List',
+  'menu.repository.jobList': 'Job',
   'menu.repository.jobTimer': 'Timer',
   'menu.repository.jobBundleScript': 'Batch Task',
   'menu.repository.daemonJob': 'Daemon Job',
   'menu.runStatus.runList': 'Run List',
-  'menu.runStatus.scheduleList': 'Schedule List',
+  'menu.runStatus.scheduleList': 'Schedule Manage',
   'menu.runStatus.execList': 'Execution List',
 
   'job': 'Job',
@@ -66,7 +66,7 @@ const localeJob = {
   'job.scheduleType.once': 'Once',
   'job.scheduleType.timer': 'Timer',
   'job.scheduleType.daemon': 'Daemon',
-  'job.task': 'Task',
+  'job.script': 'Script',
   'job.schedule': 'Job Schedule',
   'job.schedule.name': 'Schedule Name',
   'job.schedule.detail': 'Schedule Details',
@@ -77,9 +77,13 @@ const localeJob = {
   'job.selectJob': 'Select Job',
   'job.bindIp': 'Execution IP',
   'job.endpoint': 'Endpoint',
+  'job.endpoint.title': 'Select execution endpoint',
+  'job.endpoint.tips': 'When manually inputting, line breaks separate data',
   'job.dispatch': 'Dispatch',
   'job.workDir': 'Working Directory',
+  'job.workDir.tips': 'Defalt is Jiascheduler agent working directory',
   'job.workUser': 'Working User',
+  'job.workUser.tips': 'Default is Jiascheduler agent working user',
   'job.timeout': 'Execution Timeout',
   'job.timeout.tips':
     'The script process will be automatically killed after the timeout, in seconds',
@@ -100,12 +104,21 @@ const localeJob = {
   'job.completedCallback.header.error':
     'Please fill in the data in JSON format',
   'job.completedCallback.url.error': 'Please enter a valid URL address',
+  'job.arg.name': 'Name',
+  'job.arg.validator.name.required': 'Job argument name required',
+  'job.arg.val': 'Value',
+  'job.arg.defaultVal': 'Default Value',
+  'job.arg.info': 'Description',
+  'job.arg.tips':
+    'By implementing parameter templating based on the "Handlebars templating language" (https://handlebarsjs.com/), you can directly access defined parameters in your code using {name}',
+
+  'job.arg.updateNeedSave': 'Update job arguments requires saving the job',
 
   'job.timer': 'Timer',
   'job.saveTimer': 'Save Timer',
   'job.timerExpr': 'Timer Expression',
   'job.timerExpr.tooltips':
-    'Comma-separated values (like 5,8,10) represent multiple time values. For example, a schedule of 0 2,14,26 * * * will execute at the 0th, 2nd, 14th, and 26th minutes of every hour.\nRanges can be specified with hyphens. A schedule of 0 0 * 5-10 * * will execute once an hour, but only on the 5th to 10th days of the month.\nThe day of the week can be specified as an abbreviation or full name. A schedule of 0 0 6 * * Sun,Sat will execute at 6 am on Sundays and Saturdays.',
+    'Using the cron format, the system can automatically verify the timer settings upon saving and generate a preview of the next execution time',
   'job.timer.info': 'Description',
   'job.timer.name': 'Name',
   'job.timer.name.placeholder': 'Please enter a name',
@@ -175,12 +188,93 @@ const localeJob = {
   'job.action.confirm.deleteBundleScript':
     'Are you sure you want to delete the bundle script? ',
   'job.action': 'Action',
-  'job.schedule.dispatchResult': 'Dispatch Status',
+  'job.schedule.dispatchResult': 'Dispatch Result',
 
   'job.runDetail': 'Run Details',
   'job.output': 'Output',
+  'job.elapsed': 'Elapsed',
+  'job.execResult': 'Execution Results',
 
   'job.scheduleName.placeholder': 'Please enter the name',
+};
+
+const localeWorkflow = {
+  'menu.workflow': 'Workflow',
+  'menu.workflow.define': 'Workflow Define',
+  'menu.workflow.edit': 'Workflow Edit',
+  'menu.workflow.processList': 'Process List',
+  'menu.workflow.timer': 'Timer List',
+
+  'workflow.name': 'Name',
+  'workflow.info': 'Info',
+  'workflow.version': 'Version',
+  'workflow.save': 'Save Workflow',
+  'workflow.startProcess': 'Start Process',
+  'workflow.versionName': 'Version Name',
+  'workflow.versionInfo': 'Version Info',
+  'workflow.saveVersion': 'Save Version',
+  'workflow.basicInfo': 'Base Info',
+  'workflow.processDefine': 'Process Define',
+  'workflow.nodeConfig': 'Node Config',
+  'workflow.nodeConfig.name': 'Node Name',
+  'workflow.nodeConfig.id': 'Node ID',
+  'workflow.nodeConfig.id.tips': 'Node IDs must be globally unique.',
+  'workflow.nodeConfig.TaskType': 'Task Type',
+  'workflow.nodeConfig.TaskType.job': 'Job',
+  'workflow.nodeConfig.TaskType.custom': 'Custom',
+  'workflow.nodeConfig.task.args': 'Job Args',
+  'workflow.processName': 'Process Name',
+  'workflow.processStatus': 'Process Status',
+  'workflow.processArgs': 'Process Args',
+  'workflow.processArgs.tips':
+    'Reset the job parameters or execution instance in the process node',
+  'workflow.node': 'Node',
+  'workflow.nodeStatus': 'Node Status',
+  'workflow.process.detail': 'Process Detail',
+  'workflow.condition': 'Condition',
+  'workflow.condition.isJoinAll':
+    'Wait for all prerequisites to be met before executing the current task.',
+  'workflow.bindIp': 'IP',
+  'workflow.nodeConfig.static': 'static',
+  'workflow.nodeConfig.dynamic': 'dynamic',
+  'workflow.nodeConfig.selectTasks.tips': 'Please select tasks',
+  'workflow.action.confirm.delete':
+    'Are you sure you want to delete the workflow? ',
+  'workflow.clear.records': 'Clear workflow process records',
+  'workflow.action.confirm.clear.records':
+    'Are you sure you want to clear the workflow process records?',
+  'workflow.defaultExecutionEndpoint': 'Execution instance',
+  'workflow.defaultExecutionEndpoint.tips':
+    'When there is no predefined execution instance in the process, you can set the default execution instance for all nodes here, or reset the execution instance in the process parameters',
+
+  'workflow.timer.save': 'Save Timer',
+  'workflow.timer.name': 'Name',
+  'workflow.timer.info': 'Info',
+  'workflow.timer.schedule': 'Schedule Timer',
+  'workflow.timer.timezone': 'Timezone',
+  'workflow.timer.expr': 'Expr',
+  'workflow.timer.refWorkflow': 'Workflow Referenced',
+  'workflow.timer.refWorkflow.workflowPlaceholder': 'please select workflow',
+  'workflow.timer.refWorkflow.versionPlaceholder':
+    'please select workflow version',
+  'workflow.timer.refWorkflow.validation.error':
+    'The timer is not associated with a workflow',
+  'workflow.timer.nextExecTimePreview': 'Next execution time preview',
+  'workflow.timer.status': 'Status',
+  'workflow.timer.running': 'Running',
+  'workflow.timer.notStarted': 'NotStarted',
+  'workflow.timer.startupError': 'StartupError',
+
+  'workflow.userVariables': 'User Variables',
+  'workflow.userVariables.name': 'Variable',
+  'workflow.userVariables.val': 'Value',
+  'workflow.userVariables.defVal': 'Default Value',
+  'workflow.userVariables.info': 'Info',
+  'workflow.userVariables.tips':
+    'These user variables can be accessed directly in the conditions of the definition workflow or in scripts. Note: they need to be accessed in the form of environment variables in scripts',
+  'workflow.userVariables.validation.error': 'Error in user variable setting',
+
+  'workflow.process.timer': 'Timer',
 };
 
 const localeBase = {
@@ -361,17 +455,23 @@ export default {
   'columns.createdUser': 'Creator',
   'columns.updatedUser': 'Updater',
 
+  'form.select': 'Select',
   'form.selectAll': 'Select All',
   'form.search': 'Search',
   'form.reset': 'Reset',
   'form.save': 'Save',
   'form.add': 'Add',
+  'form.submit': 'Submit',
   'form.submit.success': 'Submission Successful',
+  'form.update': 'Update',
+  'form.name': 'Name',
+  'form.updateSuccess': 'Update Successful',
 
   'operations': 'Operations',
   'operations.create': 'Create',
   'operations.view': 'View',
   'operations.edit': 'Edit',
+  'operations.manage': 'Manage',
   'operations.dispatch': 'Dispatch',
   'operations.download': 'Download',
   'operations.websshLogin': 'Login',
@@ -390,6 +490,7 @@ export default {
   'operations.next': 'Next',
 
   ...localeJob,
+  ...localeWorkflow,
   ...localeExecutor,
 
   ...localeUserAndPermissions,

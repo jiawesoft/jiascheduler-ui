@@ -5,4 +5,15 @@ export const genVersionFromTime = () => {
   return now.format('VYYYYMMDDHHmmss');
 };
 
+export const getFormatTimeVersion = () => {
+  const now = dayjs();
+  return now.format('VYYYY-MM-DD-HH-mm-ss');
+};
+
 export const getTimestamp = () => {};
+
+export const getSecondDiffNow = (prev: string, next: string) => {
+  console.log('here prev:', prev, next);
+  const now = dayjs(next);
+  return now.diff(prev, 'second');
+};

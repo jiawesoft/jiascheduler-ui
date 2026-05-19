@@ -198,7 +198,7 @@
         field="user_id"
         :label="$t('role.bind')"
       >
-        <role-permissions v-model="form.id" />
+        <role-permissions :key="form.id" v-model="form.id" />
       </a-form-item>
     </a-form>
   </a-modal>

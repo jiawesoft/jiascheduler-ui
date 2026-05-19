@@ -9,15 +9,6 @@
     <a-form-item field="job_name" :label="$t('job')">
       {{ $props.value.job_name }}
     </a-form-item>
-    <!-- <a-form-item
-          field="executor_id"
-          :label="$t('job.executor')"
-        >
-          <a-select v-model="form.executor_id">
-            <a-option :value="1">bash</a-option>
-            <a-option :value="2">python</a-option>
-          </a-select>
-        </a-form-item> -->
     <a-form-item
       field="dispatch_result"
       :label="$t('job.schedule.dispatchResult')"
@@ -38,6 +29,9 @@
           <a-tag v-else color="red"> {{ record.err }}</a-tag>
         </template>
       </a-table>
+    </a-form-item>
+    <a-form-item field="args" :label="$t('job.arg')">
+      <job-args :args="jobArgs" />
     </a-form-item>
 
     <a-form-item field="code" :label="$t('job.code')">
@@ -70,8 +64,12 @@
   import 'ace-builds/src-noconflict/mode-powershell';
   import 'ace-builds/src-noconflict/theme-chaos';
   import { TableColumnData } from '@arco-design/web-vue';
+
+  import JobArgs from '@/components/job-args/index.vue';
+
   import { computed, ref } from 'vue';
   import { useI18n } from 'vue-i18n';
+  import { JobArg } from '@/api/job';
 
   const theme = computed(() => {
     return useAppStore().theme;
@@ -88,7 +86,8 @@
     code: string;
     job_name: string;
     dispatch_data: string;
-    snapshot_data: string;
+    snapshot_data: any;
+    actual_args: { [key: string]: any };
     created_user: string;
     updated_user: string;
     created_time: string;
@@ -104,6 +103,18 @@
   };
 
   const props = defineProps<{ value: ScheduleDetailProps }>();
+  const jobArgs = computed(() => {
+    if (
+      Array.isArray(props.value.snapshot_data.args) &&
+      props.value.snapshot_data.args.length > 0
+    ) {
+      return (props.value.snapshot_data.args as JobArg[]).map((v) => {
+        v.val = props.value.actual_args[v.name];
+        return v;
+      });
+    }
+    return [];
+  });
 
   const dispatchResultColumns = computed<TableColumnData[]>(() => [
     {

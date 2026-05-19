@@ -11,6 +11,7 @@ const modules = import.meta.glob(
     './modules/user.ts',
     './modules/terminal.ts',
     './modules/install.ts',
+    './modules/workflow.ts',
   ],
   { eager: true }
 );

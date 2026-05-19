@@ -16,7 +16,7 @@
                   <a-radio-group
                     v-model="formModel.job_type"
                     type="button"
-                    @change="search"
+                    @change="handleChangeJobType"
                   >
                     <a-radio value="default">{{
                       $t('job.type.default')
@@ -225,7 +225,12 @@
           :model="jobTimerForm"
           :auto-label-width="true"
         >
-          <a-form-item field="job_type" required :label="$t('job.type')">
+          <a-form-item
+            field="job_type"
+            required
+            :label="$t('job.type')"
+            disabled
+          >
             <a-radio-group v-model="formModel.job_type" type="button">
               <a-radio value="default">{{ $t('job.type.default') }}</a-radio>
               <a-radio value="bundle">{{ $t('job.type.bundle') }}</a-radio>
@@ -285,12 +290,20 @@
           </a-form-item>
 
           <a-form-item field="eid" validate-trigger="blur" :label="$t('job')">
-            <SelectJob
+            <select-job
               v-if="jobTimerModalVisible"
               v-model:eid="jobTimerForm.eid"
               v-model:job-type="formModel.job_type"
               @change-job="changeJob"
             />
+          </a-form-item>
+          <a-form-item
+            v-if="jobTimerForm.job_args?.length > 0"
+            field="args"
+            :label="$t('job.arg')"
+            :tooltip="$t('job.arg.tips', { name: '{{name}}' })"
+          >
+            <job-args :args="jobTimerForm.job_args" />
           </a-form-item>
         </a-form>
       </a-space>
@@ -324,7 +337,16 @@
             v-if="dispatchJobTimerModalVisible"
             v-model:eid="dispatchJobTimerForm.eid"
             v-model:job-type="dispatchJobTimerForm.job_type"
+            @change-timer="changeTimer"
           />
+        </a-form-item>
+        <a-form-item
+          v-if="dispatchJobTimerForm.args"
+          field="args"
+          :label="$t('job.arg')"
+          :tooltip="$t('job.arg.tips', { name: '{{name}}' })"
+        >
+          <job-args :args="dispatchJobTimerForm.args" />
         </a-form-item>
         <a-form-item
           field="endpoints"
@@ -345,8 +367,10 @@
   import {
     deleteJobTimer,
     dispatchJob,
-    endpoint,
+    Endpoint,
     JobAction,
+    JobArg,
+    JobRecord,
     JobTimerRecord,
     QueryJobReq,
     queryJobTimerList,
@@ -366,6 +390,7 @@
 
   import { Message } from '@arco-design/web-vue';
 
+  import JobArgs from '@/components/job-args/index.vue';
   import TableTagItem from '@/components/table-tag-item/index.vue';
   import TagItem from '@/components/tag-item/index.vue';
   import { genVersionFromTime } from '@/utils/time';
@@ -384,6 +409,7 @@
 
   interface JobTimerForm {
     id: number;
+    job_args: JobArg[];
     job_type: string;
     name: string;
     timer_expr: TimerExpr;
@@ -396,12 +422,13 @@
     eid: string;
     job_type: string;
     schedule_name: string;
+    args: JobArg[];
     namespace: string;
     timer_expr: TimerExpr;
     schedule_type: string;
     action: string;
     is_sync: boolean;
-    endpoints: endpoint[];
+    endpoints: Endpoint[];
   }
 
   const defaultTimerExpr: TimerExpr = {
@@ -426,7 +453,6 @@
   const formModel = ref(generateFormModel());
   const cloneColumns = ref<Column[]>([]);
   const showColumns = ref<Column[]>([]);
-  const jobOptions = ref<SelectOptionData[]>([]);
 
   const state = reactive<{
     jobTimerForm: JobTimerForm;
@@ -439,6 +465,7 @@
       executor_id: 0,
       timer_expr: defaultTimerExpr,
       eid: '',
+      job_args: [],
       info: '',
     },
     dispatchJobTimerForm: {
@@ -447,6 +474,7 @@
       namespace: 'default',
       job_type: formModel.value.job_type,
       timer_expr: defaultTimerExpr,
+      args: [],
       schedule_type: 'once',
       action: 'exec',
       is_sync: false,
@@ -571,6 +599,9 @@
 
   const initTagList = async () => {
     try {
+      if (formModel.value.job_type === 'bundle') {
+        resourceType.value = 'bundle_job';
+      }
       const { data } = await queryCountResource({
         resource_type: resourceType.value,
       });
@@ -602,12 +633,6 @@
       renderData.value = data.list;
       pagination.page = params.page;
       pagination.total = data.total;
-      jobOptions.value = data.list.map((v) => {
-        return {
-          label: v.name,
-          value: v.eid,
-        };
-      });
     } catch (err) {
       // you can report use errorHandler or other
     } finally {
@@ -621,9 +646,16 @@
     fetchData();
   };
 
-  const changeJob = (str: string) => {
-    if (str && !jobTimerForm.value.name) {
-      jobTimerForm.value.name = str;
+  const changeJob = (v: JobRecord) => {
+    if (v && !jobTimerForm.value.name) {
+      jobTimerForm.value.name = v?.name || '';
+    }
+    jobTimerForm.value.job_args = Array.isArray(v.args) ? v.args : [];
+  };
+
+  const changeTimer = (v: JobTimerRecord) => {
+    if (v && v.job_args) {
+      dispatchJobTimerForm.value.args = v.job_args;
     }
   };
 
@@ -637,6 +669,7 @@
         job_type: formModel.value.job_type,
         name: '',
         eid: '',
+        job_args: [],
         timer_expr: defaultTimerExpr,
         executor_id: 1,
         info: '',
@@ -696,6 +729,13 @@
     if (ret) {
       return false;
     }
+    const args = {};
+    if (Array.isArray(dispatchJobTimerForm.value.args)) {
+      dispatchJobTimerForm.value.args.forEach((v) => {
+        args[v.name] = v.val;
+      });
+    }
+
     try {
       await dispatchJob({
         schedule_type: dispatchJobTimerForm.value.schedule_type as ScheduleType,
@@ -703,6 +743,7 @@
         schedule_name: dispatchJobTimerForm.value.schedule_name,
         timer_expr: dispatchJobTimerForm.value.timer_expr,
         action: dispatchJobTimerForm.value.action as JobAction,
+        args,
         is_sync: false,
         endpoints: dispatchJobTimerForm.value.endpoints,
       });
@@ -792,6 +833,16 @@
         });
       });
     }
+  };
+
+  const handleChangeJobType = async (val: any) => {
+    if (val === 'default') {
+      resourceType.value = 'job';
+    } else {
+      resourceType.value = 'bundle_job';
+    }
+    initTagList();
+    search();
   };
 
   watch(

@@ -2,7 +2,7 @@
   <a-row v-if="!$props.disableSearch">
     <a-col flex="auto">
       <a-form
-        key="search-daemon-exec-list"
+        key="search-once-exec-list"
         :model="formModel"
         :label-col-props="{ span: 6 }"
         :auto-label-width="true"
@@ -11,7 +11,7 @@
         @submit="search"
       >
         <a-row :gutter="5">
-          <a-col :span="10">
+          <a-col :span="7">
             <a-form-item field="schedule_name" :label="$t('job.scheduleName')">
               <a-input
                 v-model="formModel.schedule_name"
@@ -55,17 +55,16 @@
     <a-col :span="20">
       <tag-item :tag-list="tagList" @query-tag-list="queryTagList"></tag-item>
     </a-col>
-
     <a-col
       :span="2"
       style="display: flex; align-items: center; justify-content: end"
     >
       <a-popconfirm
-        :content="$t('job.action.confirm.clear.records')"
-        @before-ok="handleClearExecHistory($event)"
+        :content="$t('workflow.action.confirm.clear.records')"
+        @before-ok="handleClearProcessHistory($event)"
       >
         <a-button type="primary" size="mini" plain>
-          {{ $t('job.clear.records') }}
+          {{ $t('workflow.clear.records') }}
         </a-button>
       </a-popconfirm>
     </a-col>
@@ -132,56 +131,6 @@
   </a-row>
 
   <a-table
-    v-if="jobType == 'bundle' && scheduleId"
-    row-key="id"
-    :loading="loading"
-    :pagination="pagination"
-    :columns="(cloneColumns as TableColumnData[])"
-    :data="renderData"
-    :size="size"
-    :scrollbar="true"
-    :scroll="scroll"
-    :bordered="false"
-    @page-change="onPageChange"
-  >
-    <template #index="{ rowIndex }">
-      {{ rowIndex + 1 + (pagination.page - 1) * pagination.pageSize }}
-    </template>
-
-    <template #tags="{ record }">
-      <table-tag-item
-        :tag-list="record.tags"
-        :resource-id="record.id"
-        :resource-type="resourceType"
-        @refresh-page="refreshPage"
-      ></table-tag-item>
-    </template>
-
-    <template #validate="{ column, record }">
-      <a-tag
-        v-if="
-          record.bundle_script_result[getBundleScriptIndex(column.dataIndex)]
-            .result === true
-        "
-        color="green"
-        ><icon-check
-      /></a-tag>
-      <a-tag v-else color="red"><icon-close /></a-tag>
-    </template>
-
-    <template #operations="{ record }">
-      <a-button
-        type="text"
-        size="small"
-        @click="handleViewExecDetailModal($event, record)"
-      >
-        {{ $t('operations.view') }}
-      </a-button>
-    </template>
-  </a-table>
-
-  <a-table
-    v-else
     row-key="id"
     :loading="loading"
     :pagination="pagination"
@@ -204,105 +153,68 @@
       ></table-tag-item>
     </template>
 
+    <template #timerName="{ record }">
+      <a-typography-text v-if="record.timer_name">
+        {{ record.timer_name }}
+      </a-typography-text>
+      <a-typography-text v-else> -- </a-typography-text>
+    </template>
+
     <template #operations="{ record }">
       <a-button
         type="text"
         size="small"
-        @click="handleViewExecDetailModal($event, record)"
+        @click="handleViewProcessDetailModal($event, record)"
       >
         {{ $t('operations.view') }}
       </a-button>
     </template>
-
-    <template #exitStatus="{ record }">
-      <a-tooltip :content="record.exit_status">
-        <a-tag v-if="record.exit_status === 'exit status: 0'" color="green">
-          <icon-check />
-        </a-tag>
-        <a-tag v-else-if="record.exit_status === ''" color="orange"> -- </a-tag>
-        <a-tag
-          v-else
-          color="red"
-          style="display: block; text-overflow: ellipsis"
-        >
-          {{ record.exit_status }}
-        </a-tag>
-      </a-tooltip>
-    </template>
   </a-table>
 
-  <a-modal
+  <a-drawer
+    width="61.8%"
     v-model:visible="visible"
-    title-align="start"
-    style="width: auto"
-    :draggable="true"
-    width="60%"
-    hide-cancel
-    @cancel="handleCancel"
+    placement="right"
+    @cancel="visible = false"
+    unmountOnClose
   >
-    <template #title>{{ $t('job.runDetail') }}</template>
-    <a-form :model="form" :auto-label-width="true">
-      <a-form-item field="schedule_name" :label="$t('job.scheduleName')">
-        {{ form.schedule_name }}
-      </a-form-item>
-      <a-form-item field="bind_ip" :label="$t('job.bindIp')">
-        {{ form.bind_ip }}
-      </a-form-item>
-      <a-form-item field="start_time" :label="$t('job.startTime')">
-        {{ form.start_time }}
-      </a-form-item>
-      <a-form-item field="end_time" :label="$t('job.endTime')">
-        {{ form.end_time }}
-      </a-form-item>
-      <a-form-item field="exit_status" :label="$t('job.exitStatus')">
-        {{ form.exit_status }}
-      </a-form-item>
-      <a-form-item field="output" :label="$t('job.output')">
-        <output-area :output="form.output" v-if="visible" />
-        <!-- <v-ace-editor
-          v-if="visible"
-          v-model:value="form.output"
-          :style="{ height: '300px', width: '100%' }"
-          lang="text"
-          :print-margin="false"
-          :theme="theme === 'dark' ? 'chaos' : 'chrome'"
-        /> -->
-      </a-form-item>
-    </a-form>
-  </a-modal>
+    <template #title>{{ $t('workflow.process.detail') }}</template>
+    <process-detail
+      v-if="selectedProcess.process_id"
+      :process-id="selectedProcess.process_id"
+    />
+  </a-drawer>
 </template>
 
 <script lang="ts" setup>
-  import {
-    deleteExecHistory,
-    ExecRecord,
-    queryExecList,
-    QueryExecListReq,
-  } from '@/api/job';
+  import { deleteExecHistory } from '@/api/job';
   import { queryCountResource, TagRecord } from '@/api/tag';
-  import TableTagItem from '@/components/table-tag-item/index.vue';
-  import TagItem from '@/components/tag-item/index.vue';
-  import OutputArea from '@/components/output-area/index.vue';
+
   import useLoading from '@/hooks/loading';
   import { useAppStore } from '@/store';
   import { Pagination } from '@/types/global';
   import { Message } from '@arco-design/web-vue';
   import type { TableColumnData } from '@arco-design/web-vue/es/table/interface';
-
   import cloneDeep from 'lodash/cloneDeep';
   import Sortable from 'sortablejs';
   import { computed, nextTick, reactive, ref, toRefs, watch } from 'vue';
   import { useI18n } from 'vue-i18n';
-  // import { VAceEditor } from 'vue3-ace-editor';
-  // import 'ace-builds/src-noconflict/mode-text';
-  // import 'ace-builds/src-noconflict/theme-chaos';
-  // import 'ace-builds/src-noconflict/theme-chrome';
+  import {
+    deleteWorkflowProcess,
+    queryWorkflowProcessList,
+    QueryWorkflowProcessListReq,
+    WorkflowProcessRecord,
+  } from '@/api/workflow';
+  import TableTagItem from '@/components/table-tag-item/index.vue';
+  import TagItem from '@/components/tag-item/index.vue';
+  import ProcessDetail from './process-detail.vue';
 
   const props = defineProps<{
     scheduleId?: string;
     bindIp?: string;
     title?: string;
     eid?: string;
+    hideJobTypeSwitch?: boolean;
     disableSearch?: boolean;
     jobType?: string;
     bindNamespace?: string;
@@ -322,35 +234,29 @@
   });
 
   const state = reactive({
-    form: {
-      bind_ip: '',
-      created_time: '',
+    selectedProcess: {
+      process_id: '',
+      process_name: '',
       created_user: '',
-      end_time: '',
-      exit_code: 0,
-      bundle_script_result: [],
-      exit_status: '',
-      id: 0,
-      output: '',
-      schedule_id: '',
-      schedule_name: '',
-      start_time: '',
-      updated_time: '',
+      current_run_id: '',
+      current_node_id: '',
+      current_node_status: '',
+      process_status: '',
     },
   });
-  const { form } = toRefs(state);
+  const { selectedProcess } = toRefs(state);
 
   const generateFormModel = () => {
     return {
       schedule_name: '',
-      job_type: 'default',
-      schedule_type: 'daemon',
+      job_type: props.jobType || 'default',
+      schedule_type: 'once',
       start_time_range: [],
     };
   };
   const { loading, setLoading } = useLoading(true);
   const { t } = useI18n();
-  const renderData = ref<ExecRecord[]>([]);
+  const renderData = ref<WorkflowProcessRecord[]>([]);
   const formModel = ref(generateFormModel());
   const cloneColumns = ref<Column[]>([]);
   const showColumns = ref<Column[]>([]);
@@ -393,73 +299,50 @@
     },
 
     {
-      title: t('job.name'),
-      dataIndex: 'job_name',
-      // ellipsis: true,
+      title: t('workflow.processName'),
+      dataIndex: 'process_name',
+      ellipsis: true,
       width: 150,
-      // tooltip: true,
+      tooltip: true,
       fixed: 'left',
     },
     {
-      title: t('job.exitStatus'),
-      dataIndex: 'exit_status',
-      // ellipsis: true,
-      slotName: 'exitStatus',
-      width: 120,
-      // tooltip: true,
-      fixed: 'left',
+      title: t('workflow.node'),
+      dataIndex: 'current_node_name',
+      width: 100,
     },
     {
-      title: t('job.scheduleName'),
-      dataIndex: 'schedule_name',
-      // ellipsis: true,
-      width: 150,
-      // tooltip: true,
+      title: t('workflow.nodeStatus'),
+      dataIndex: 'current_node_status',
+      width: 80,
     },
-    {
-      title: t('job.bindIp'),
-      dataIndex: 'bind_ip',
-      width: 150,
-    },
-    // {
-    //   title: t('job.scheduleId'),
-    //   dataIndex: 'schedule_id',
-    // },
-    // {
-    //   title: t('job.type'),
-    //   dataIndex: 'job_type',
-    // },
-
     {
       title: t('tag.name'),
       dataIndex: 'tags',
       slotName: 'tags',
-      width: 180,
+      width: 120,
     },
-    {
-      title: t('job.startTime'),
-      dataIndex: 'start_time',
-      ellipsis: true,
-      width: 170,
-      tooltip: true,
-    },
-    {
-      title: t('job.endTime'),
-      dataIndex: 'end_time',
-      ellipsis: true,
-      width: 170,
-      tooltip: true,
-    },
+
     {
       title: t('team.name'),
       dataIndex: 'team_name',
-      ellipsis: true,
       width: 120,
+    },
+    {
+      title: t('workflow.process.timer'),
+      dataIndex: 'timer_name',
+      width: 120,
+      slotName: 'timerName',
     },
     {
       title: t('columns.createdUser'),
       dataIndex: 'created_user',
-      width: 120,
+      width: 100,
+    },
+    {
+      title: t('columns.createdTime'),
+      dataIndex: 'created_time',
+      width: 140,
     },
     {
       title: t('operations'),
@@ -470,20 +353,14 @@
     },
   ]);
 
-  const getBundleScriptIndex = (dataIndex: string): number => {
-    return Number(
-      dataIndex.replace('bundle_script_result[', '').replace('].result', '')
-    );
-  };
-
   const tagList = ref<TagRecord[]>([]);
-  const resourceType = ref('job');
+  const resourceType = 'workflow';
   const tagIds = ref<number[]>([]);
 
   const initTagList = async () => {
     try {
       const { data } = await queryCountResource({
-        resource_type: resourceType.value,
+        resource_type: resourceType,
       });
       tagList.value = data.list;
     } catch (err) {
@@ -491,23 +368,17 @@
     }
   };
   initTagList();
-
   const fetchData = async (
-    params: QueryExecListReq = {
+    params: QueryWorkflowProcessListReq = {
       page: 1,
       page_size: 20,
-      schedule_id: props.scheduleId,
-      schedule_type: formModel.value.schedule_type,
-      eid: props.eid,
-      job_type: formModel.value.job_type,
       tag_ids: tagIds.value,
-      bind_ip: props.bindIp,
-      bind_namespace: props.bindNamespace,
+      workflow_id: 0,
     }
   ) => {
     setLoading(true);
     try {
-      const { data } = await queryExecList(params);
+      const { data } = await queryWorkflowProcessList(params);
       renderData.value = data.list;
       pagination.page = params.page;
       pagination.total = data.total;
@@ -517,6 +388,7 @@
       setLoading(false);
     }
   };
+
   const queryTagList = (tag: number[]) => {
     tagIds.value = tag;
     fetchData();
@@ -528,11 +400,10 @@
     fetchData();
   };
 
-  const handleViewExecDetailModal = (e: any, record: any) => {
+  const handleViewProcessDetailModal = (e: any, record: any) => {
     if (record) {
-      form.value = { ...record };
+      selectedProcess.value = { ...record };
     }
-
     visible.value = true;
   };
 
@@ -545,26 +416,18 @@
       page: basePagination.page,
       page_size: basePagination.pageSize,
       ...formModel.value,
-      schedule_id: props.scheduleId,
-      schedule_type: formModel.value.schedule_type,
-      job_type: formModel.value.job_type,
-      eid: props.eid,
-      bind_ip: props.bindIp,
+      workflow_id: 0,
       tag_ids: tagIds.value,
-    } as unknown as QueryExecListReq);
+    });
   };
   const onPageChange = (current: number) => {
     fetchData({
       page_size: pagination.pageSize,
       page: current,
       ...formModel.value,
-      schedule_id: props.scheduleId,
-      schedule_type: formModel.value.schedule_type,
-      eid: props.eid,
-      job_type: formModel.value.job_type,
-      bind_ip: props.bindIp,
+      workflow_id: 0,
       tag_ids: tagIds.value,
-    } as unknown as QueryExecListReq);
+    });
   };
 
   fetchData();
@@ -587,14 +450,9 @@
     cloneColumns.value = showColumns.value.filter((item) => item.checked);
   };
 
-  const handleClearExecHistory = async (e: any) => {
+  const handleClearProcessHistory = async (e: any) => {
     try {
-      await deleteExecHistory({
-        schedule_id: props.scheduleId,
-        schedule_type: 'daemon',
-        eid: props.eid,
-        bind_ip: props.bindIp,
-      });
+      await deleteWorkflowProcess({});
     } catch (err) {
       return false;
     }
@@ -648,7 +506,7 @@
 
 <script lang="ts">
   export default {
-    name: 'ExecList',
+    name: 'WorkflowProcessList',
   };
 </script>
 

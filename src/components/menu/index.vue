@@ -43,10 +43,17 @@
           selectedKey.value = [item.name as string];
           return;
         }
+
         // Trigger router change
-        router.push({
-          name: item.name,
-        });
+        if (item.redirect) {
+          router.push({
+            path: item.redirect as string,
+          });
+        } else {
+          router.push({
+            name: item.name,
+          });
+        }
       };
       const findMenuOpenKeys = (target: string) => {
         const result: string[] = [];

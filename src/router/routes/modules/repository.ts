@@ -33,17 +33,6 @@ const REPOSITORY: AppRouteRecordRaw = {
       },
     },
     {
-      path: 'flow-job-list', // The midline path complies with SEO specifications
-      name: 'flowJobList',
-      component: () => import('@/views/respository/flow-job-list/index.vue'),
-      meta: {
-        locale: 'menu.repository.flowJobList',
-        requiresAuth: true,
-        hideInMenu: true,
-        roles: ['*'],
-      },
-    },
-    {
       path: 'daemon-job-list',
       name: 'daemonJobList',
       component: () => import('@/views/respository/daemon-job-list/index.vue'),
