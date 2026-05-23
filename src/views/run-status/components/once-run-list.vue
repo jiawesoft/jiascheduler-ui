@@ -198,45 +198,40 @@
 
     <template #operations="{ record }">
       <a-space direction="horizontal">
-        <a-space>
-          <a-button
-            type="dashed"
-            size="mini"
-            @click="handleOpenRunDetailModal($event, record)"
-          >
-            {{ $t('operations.view') }}
+        <a-button
+          type="dashed"
+          size="mini"
+          @click="handleOpenRunDetailModal($event, record)"
+        >
+          {{ $t('operations.view') }}
+        </a-button>
+
+        <a-popconfirm
+          :content="$t('job.action.confirm.start')"
+          @before-ok="handleAction($event, record, 'exec')"
+        >
+          <a-button type="dashed" size="mini" status="success">
+            {{ $t('operations.start') }}
           </a-button>
-        </a-space>
-        <a-space>
-          <a-popconfirm
-            :content="$t('job.action.confirm.start')"
-            @before-ok="handleAction($event, record, 'exec')"
-          >
-            <a-button type="dashed" size="mini" status="success">
-              {{ $t('operations.start') }}
-            </a-button>
-          </a-popconfirm>
-        </a-space>
-        <a-space>
-          <a-popconfirm
-            :content="$t('job.action.confirm.stop')"
-            @before-ok="handleAction($event, record, 'kill')"
-          >
-            <a-button type="dashed" size="mini" status="danger">
-              {{ $t('operations.stop') }}
-            </a-button>
-          </a-popconfirm>
-        </a-space>
-        <a-space>
-          <a-popconfirm
-            :content="$t('job.action.confirm.deleteRunningStatus')"
-            @before-ok="handleDeleteRunningStatus($event, record)"
-          >
-            <a-button type="dashed" size="mini" status="danger">
-              {{ $t('operations.delete') }}
-            </a-button>
-          </a-popconfirm>
-        </a-space>
+        </a-popconfirm>
+
+        <a-popconfirm
+          :content="$t('job.action.confirm.stop')"
+          @before-ok="handleAction($event, record, 'kill')"
+        >
+          <a-button type="dashed" size="mini" status="warning">
+            {{ $t('operations.stop') }}
+          </a-button>
+        </a-popconfirm>
+
+        <a-popconfirm
+          :content="$t('job.action.confirm.deleteRunningStatus')"
+          @before-ok="handleDeleteRunningStatus($event, record)"
+        >
+          <a-button type="dashed" size="mini" status="danger">
+            {{ $t('operations.delete') }}
+          </a-button>
+        </a-popconfirm>
       </a-space>
     </template>
   </a-table>
