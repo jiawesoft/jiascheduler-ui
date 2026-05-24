@@ -13,8 +13,8 @@
               label-align="left"
               @submit="search"
             >
-              <a-row :gutter="5">
-                <a-col :span="20">
+              <a-row :gutter="10">
+                <a-col :span="15">
                   <a-form-item field="name" :label="$t('workflow.name')">
                     <a-input v-model="formModel.name" @press-enter="search" />
                   </a-form-item>

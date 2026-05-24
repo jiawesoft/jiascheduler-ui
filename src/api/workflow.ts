@@ -218,7 +218,7 @@ export function startWorkflowProcess(data: StartWorkflowProcessReq) {
 
 export interface QueryWorkflowProcessListReq {
   process_name?: string;
-  workflow_id: number;
+  workflow_id?: number;
   default_id?: number;
   tag_ids?: number[];
   page: number;

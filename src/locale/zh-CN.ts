@@ -199,7 +199,7 @@ const localeWorkflow = {
   'menu.workflow.processList': '流程记录',
   'menu.workflow.timer': '定时流程',
 
-  'workflow.name': '流程名',
+  'workflow.name': '工作流',
   'workflow.info': '描述',
   'workflow.version': '版本',
   'workflow.save': '保存流程',
