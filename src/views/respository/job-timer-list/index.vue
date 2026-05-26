@@ -662,7 +662,7 @@
   const handleOpenJobTimerModal = (e: any, record: any) => {
     saveJobTimerRef.value.clearValidate();
     if (record) {
-      jobTimerForm.value = { ...record };
+      jobTimerForm.value = { ...record, job_args: record.job_args ?? [] };
     } else {
       jobTimerForm.value = {
         id: 0,

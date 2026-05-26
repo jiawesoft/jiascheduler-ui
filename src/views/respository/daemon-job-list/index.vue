@@ -622,7 +622,10 @@
       return false;
     }
     try {
-      const data = { ...jobSupervisorForm.value };
+      const data = {
+        ...jobSupervisorForm.value,
+        job_args: jobSupervisorForm.value.job_args ?? [],
+      };
       await saveJobSupervisor({
         ...data,
       });

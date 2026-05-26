@@ -10,8 +10,8 @@
             label-align="left"
             @submit="search"
           >
-            <a-row :gutter="5">
-              <a-col :span="7">
+            <a-row :gutter="10">
+              <a-col :span="12">
                 <a-form-item field="name" :label="$t('job.timer.name')">
                   <a-input
                     v-model="formModel.name"

@@ -10,21 +10,20 @@
         label-align="left"
         @submit="search"
       >
-        <a-row :gutter="5">
-          <a-col :span="7">
-            <a-form-item field="schedule_name" :label="$t('job.scheduleName')">
-              <a-input
-                v-model="formModel.schedule_name"
-                @press-enter="search"
-                :placeholder="$t('job.scheduleName.placeholder')"
-              />
+        <a-row :gutter="10">
+          <a-col :span="12">
+            <a-form-item
+              field="process_name"
+              :label="$t('workflow.processName')"
+            >
+              <a-input v-model="formModel.process_name" @press-enter="search" />
             </a-form-item>
           </a-col>
 
           <a-col :span="10">
             <a-form-item field="start_time" :label="$t('job.startTime')">
               <a-range-picker
-                v-model="formModel.start_time_range"
+                v-model="formModel.created_time_range"
                 style="width: 100%"
               />
             </a-form-item>
@@ -248,10 +247,8 @@
 
   const generateFormModel = () => {
     return {
-      schedule_name: '',
-      job_type: props.jobType || 'default',
-      schedule_type: 'once',
-      start_time_range: [],
+      process_name: '',
+      created_time_range: [],
     };
   };
   const { loading, setLoading } = useLoading(true);
@@ -297,7 +294,6 @@
       slotName: 'index',
       fixed: 'left',
     },
-
     {
       title: t('workflow.processName'),
       dataIndex: 'process_name',
@@ -305,6 +301,13 @@
       width: 150,
       tooltip: true,
       fixed: 'left',
+    },
+    {
+      title: t('workflow.name'),
+      dataIndex: 'workflow_name',
+      ellipsis: true,
+      width: 150,
+      tooltip: true,
     },
     {
       title: t('workflow.node'),
@@ -373,7 +376,6 @@
       page: 1,
       page_size: 20,
       tag_ids: tagIds.value,
-      workflow_id: 0,
     }
   ) => {
     setLoading(true);
@@ -416,7 +418,6 @@
       page: basePagination.page,
       page_size: basePagination.pageSize,
       ...formModel.value,
-      workflow_id: 0,
       tag_ids: tagIds.value,
     });
   };

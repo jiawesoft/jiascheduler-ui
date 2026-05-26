@@ -214,50 +214,40 @@
 
     <template #operations="{ record }">
       <a-space direction="horizontal">
-        <a-space>
-          <a-dropdown-button
-            :hide-on-select="false"
-            size="mini"
-            @click="handleOpenRunDetailModal($event, record)"
-          >
-            {{ $t('operations.view') }}
-            <template #icon>
-              <icon-down />
-            </template>
-            <template #content>
-              <a-doption>
-                <a-popconfirm
-                  :content="$t('job.action.confirm.startTimer')"
-                  @before-ok="handleAction($event, record, 'start_timer')"
-                >
-                  <a-button type="dashed" size="mini" status="success">
-                    {{ $t('operations.startTimer') }}
-                  </a-button>
-                </a-popconfirm>
-              </a-doption>
-              <a-doption>
-                <a-popconfirm
-                  :content="$t('job.action.confirm.stopTimer')"
-                  @before-ok="handleAction($event, record, 'stop_timer')"
-                >
-                  <a-button type="dashed" size="mini" status="danger">
-                    {{ $t('operations.stopTimer') }}
-                  </a-button>
-                </a-popconfirm>
-              </a-doption>
-            </template>
-          </a-dropdown-button>
-        </a-space>
-        <a-space>
-          <a-popconfirm
-            :content="$t('job.action.confirm.deleteRunningStatus')"
-            @before-ok="handleDeleteRunningStatus($event, record)"
-          >
-            <a-button type="dashed" size="mini" status="danger">
-              {{ $t('operations.delete') }}
-            </a-button>
-          </a-popconfirm>
-        </a-space>
+        <a-button
+          type="dashed"
+          size="mini"
+          @click="handleOpenRunDetailModal($event, record)"
+        >
+          {{ $t('operations.view') }}
+        </a-button>
+
+        <a-popconfirm
+          :content="$t('job.action.confirm.startTimer')"
+          @before-ok="handleAction($event, record, 'start_timer')"
+        >
+          <a-button type="dashed" size="mini" status="success">
+            {{ $t('operations.start') }}
+          </a-button>
+        </a-popconfirm>
+
+        <a-popconfirm
+          :content="$t('job.action.confirm.stopTimer')"
+          @before-ok="handleAction($event, record, 'stop_timer')"
+        >
+          <a-button type="dashed" size="mini" status="warning">
+            {{ $t('operations.stop') }}
+          </a-button>
+        </a-popconfirm>
+
+        <a-popconfirm
+          :content="$t('job.action.confirm.deleteRunningStatus')"
+          @before-ok="handleDeleteRunningStatus($event, record)"
+        >
+          <a-button type="dashed" size="mini" status="danger">
+            {{ $t('operations.delete') }}
+          </a-button>
+        </a-popconfirm>
       </a-space>
     </template>
   </a-table>
