@@ -303,7 +303,11 @@
             :label="$t('job.arg')"
             :tooltip="$t('job.arg.tips', { name: '{{name}}' })"
           >
-            <job-args :args="jobTimerForm.job_args" />
+            <job-args
+              v-if="jobTimerModalVisible"
+              :key="jobTimerForm.id"
+              :args="jobTimerForm.job_args"
+            />
           </a-form-item>
         </a-form>
       </a-space>
@@ -662,7 +666,11 @@
   const handleOpenJobTimerModal = (e: any, record: any) => {
     saveJobTimerRef.value.clearValidate();
     if (record) {
-      jobTimerForm.value = { ...record, job_args: record.job_args ?? [] };
+      const args = JSON.parse(JSON.stringify(record.job_args ?? []));
+      jobTimerForm.value = {
+        ...record,
+        job_args: args,
+      };
     } else {
       jobTimerForm.value = {
         id: 0,
