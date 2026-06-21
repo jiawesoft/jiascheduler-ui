@@ -173,7 +173,13 @@
     </template>
 
     <template #timerExpr="{ record }">
-      <a-tag color="green">{{ record.dispatch_data.params.timer_expr }}</a-tag>
+      <a-tag color="green">{{
+        typeof record.dispatch_data.params.timer_expr === 'string'
+          ? record.dispatch_data.params.timer_expr
+          : record.dispatch_data.params.timer_expr.timezone +
+            ': ' +
+            record.dispatch_data.params.timer_expr.expr
+      }}</a-tag>
     </template>
 
     <template #runStatus="{ record }">
@@ -486,7 +492,7 @@
     {
       title: t('job.timerExpr'),
       slotName: 'timerExpr',
-      width: 120,
+      width: 150,
     },
     {
       title: t('job.scheduleName'),

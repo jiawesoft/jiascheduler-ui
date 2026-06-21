@@ -88,10 +88,10 @@
   import SelectJob from '@/views/respository/components/select-job.vue';
   import SelectInstance from '@/views/respository/components/select-instance.vue';
 
-  import { computed, ref, watch } from 'vue';
+  import { computed, h, ref, watch } from 'vue';
   import { useI18n } from 'vue-i18n';
   import { JobArg, JobRecord, saveSchedule } from '@/api/job';
-  import { Message } from '@arco-design/web-vue';
+  import { Message, Modal } from '@arco-design/web-vue';
 
   const theme = computed(() => {
     return useAppStore().theme;
@@ -137,7 +137,13 @@
     code: props.modelValue.code,
     eid: props.modelValue.eid,
     snapshot_data: {},
-    timer_expr: props.modelValue.timer_expr,
+    timer_expr:
+      props.modelValue.schedule_type === 'timer'
+        ? props.modelValue.timer_expr || {
+            timezone: 'local',
+            expr: '0 0 0 0 0 0',
+          }
+        : undefined,
     jobArgs: (() => {
       if (
         Array.isArray(props.modelValue.snapshot_data.args) &&
@@ -197,15 +203,28 @@
     }
 
     try {
-      await saveSchedule({
+      const { data } = await saveSchedule({
         id: scheduleForm.value.id!,
         name: scheduleForm.value.name,
         endpoints: scheduleForm.value.instances as any,
         eid: scheduleForm.value.eid,
+        timer_expr: scheduleForm.value.timer_expr,
         args: Object.fromEntries(
           new Map(scheduleForm.value.jobArgs.map((v) => [v.name, v.val]))
         ),
       });
+      if (props.modelValue.schedule_type === 'timer') {
+        Modal.success({
+          title: t('form.submit.success'),
+          content: () => {
+            const inner = data.next_exec_times.map((v) => {
+              return h('div', v);
+            });
+            inner.unshift(h('p', t('workflow.timer.nextPreview')));
+            return inner;
+          },
+        });
+      }
     } catch (err) {
       return false;
     }

@@ -119,6 +119,7 @@ const localeJob = {
   'job.timer.info': '简介',
   'job.timer.name': '名称',
   'job.timer.name.placeholder': '请输入名称',
+  'job.timer.nextPreview': '启动定时器后，最近执行时间预览',
   'job.timerExpr.validation.error':
     '时间表达式不正确，请确实检查时间表达式是否正确，例如: 0 * * * * *',
 
@@ -259,7 +260,7 @@ const localeWorkflow = {
   'workflow.timer.refWorkflow.workflowPlaceholder': '请选择工作流',
   'workflow.timer.refWorkflow.versionPlaceholder': '请选择版本',
   'workflow.timer.refWorkflow.validation.error': '定时器未关联工作流',
-  'workflow.timer.nextPreview': '下次执行时间预览',
+  'workflow.timer.nextPreview': '启动定时器后，最近执行时间预览',
   'workflow.timer.status': '状态',
   'workflow.timer.running': '运行中',
   'workflow.timer.notStarted': '未启动',

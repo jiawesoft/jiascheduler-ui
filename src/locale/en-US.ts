@@ -122,6 +122,7 @@ const localeJob = {
   'job.timer.info': 'Description',
   'job.timer.name': 'Name',
   'job.timer.name.placeholder': 'Please enter a name',
+  'job.timer.nextPreview': 'Latest execution time preview',
   'job.timerExpr.validation.error':
     'The time expression is incorrect. Please verify the time expression carefully. For example: 0 * * * *',
 
@@ -259,7 +260,7 @@ const localeWorkflow = {
     'please select workflow version',
   'workflow.timer.refWorkflow.validation.error':
     'The timer is not associated with a workflow',
-  'workflow.timer.nextExecTimePreview': 'Next execution time preview',
+  'workflow.timer.nextPreview': 'Latest execution time preview',
   'workflow.timer.status': 'Status',
   'workflow.timer.running': 'Running',
   'workflow.timer.notStarted': 'NotStarted',

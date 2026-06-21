@@ -74,6 +74,11 @@ export interface TimerExpr {
   year: string;
 }
 
+export interface CustomTimerExpr {
+  timezone: string;
+  expr: string;
+}
+
 export interface Endpoint {
   namespace: string;
   ip: string;
@@ -299,6 +304,7 @@ export type SaveJobTimerReq = Partial<JobTimerRecord>;
 
 export interface SaveJobTimerRes {
   ret: number;
+  next_exec_times: string[];
 }
 
 export function saveJobTimer(data: SaveJobTimerReq) {
@@ -480,12 +486,13 @@ export interface SaveScheduleReq {
   endpoints: Endpoint[];
   eid: string;
   args?: { [key: string]: any };
-  timer_expr?: TimerExpr;
+  timer_expr?: CustomTimerExpr;
   restart_interval?: number;
 }
 
 export interface SaveScheduleResp {
   ret: number;
+  next_exec_times: string[];
 }
 
 export function saveSchedule(data: SaveScheduleReq) {

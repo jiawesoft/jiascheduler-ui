@@ -389,10 +389,10 @@
   import type { TableColumnData } from '@arco-design/web-vue/es/table/interface';
   import cloneDeep from 'lodash/cloneDeep';
   import Sortable from 'sortablejs';
-  import { computed, nextTick, reactive, ref, toRefs, watch } from 'vue';
+  import { computed, h, nextTick, reactive, ref, toRefs, watch } from 'vue';
   import { useI18n } from 'vue-i18n';
 
-  import { Message } from '@arco-design/web-vue';
+  import { Message, Modal } from '@arco-design/web-vue';
 
   import JobArgs from '@/components/job-args/index.vue';
   import TableTagItem from '@/components/table-tag-item/index.vue';
@@ -719,11 +719,20 @@
       return false;
     }
     try {
-      const data = { ...jobTimerForm.value };
-      await saveJobTimer({
-        ...data,
+      const params = { ...jobTimerForm.value };
+      const { data } = await saveJobTimer({
+        ...params,
       });
-      Message.success(t('form.submit.success'));
+      Modal.success({
+        title: t('form.submit.success'),
+        content: () => {
+          const inner = data.next_exec_times.map((v) => {
+            return h('div', v);
+          });
+          inner.unshift(h('p', t('workflow.timer.nextPreview')));
+          return inner;
+        },
+      });
     } catch (err) {
       return false;
     }

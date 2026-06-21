@@ -155,6 +155,14 @@
       {{ record.snapshot_data?.name }}
     </template>
 
+    <template #timerExpr="{ record }">
+      <a-tag color="green">{{
+        typeof record.timer_expr === 'string' || !record.timer_expr
+          ? record.timer_expr
+          : record.timer_expr.timezone + ': ' + record.timer_expr.expr
+      }}</a-tag>
+    </template>
+
     <template #operations="{ record }">
       <a-space direction="horizontal" size="mini">
         <a-button
@@ -348,17 +356,19 @@
     //   dataIndex: 'schedule_id',
     //   width: 150,
     // },
-    {
-      title: t('job.scheduleName'),
-      dataIndex: 'name',
-      width: 150,
-      fixed: 'left',
-    },
+
     {
       title: t('job.name'),
       dataIndex: 'snapshot_data',
       slotName: 'jobName',
+      fixed: 'left',
       width: 150,
+    },
+    {
+      title: t('job.timerExpr'),
+      slotName: 'timerExpr',
+      width: 150,
+      fixed: 'left',
     },
 
     {
@@ -367,12 +377,17 @@
       slotName: 'tags',
       width: 150,
     },
-
+    {
+      title: t('job.scheduleName'),
+      dataIndex: 'name',
+      width: 150,
+    },
     {
       title: t('job.action'),
       dataIndex: 'action',
       width: 120,
     },
+
     {
       title: t('team.name'),
       dataIndex: 'team_name',
