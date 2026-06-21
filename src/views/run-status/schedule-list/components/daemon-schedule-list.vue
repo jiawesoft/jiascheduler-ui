@@ -206,6 +206,7 @@
       v-if="viewType == 'execHistory' && scheduleDetailVisible"
       :eid="form.eid"
       :schedule-id="form.schedule_id"
+      :schedule-pid="form.id"
       :disable-search="true"
     />
 

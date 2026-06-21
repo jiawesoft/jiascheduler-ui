@@ -405,7 +405,7 @@ export function saveJobSupervisor(data: SaveSupervisorReq) {
 }
 
 export interface DeleteExeHistoryReq {
-  schedule_id?: string;
+  schedule_pid?: number;
   schedule_type?: string;
   eid?: string;
   bind_ip?: string;

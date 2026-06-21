@@ -300,6 +300,7 @@
 
   const props = defineProps<{
     scheduleId?: string;
+    schedulePid?: number;
     bindIp?: string;
     title?: string;
     eid?: string;
@@ -590,7 +591,7 @@
   const handleClearExecHistory = async (e: any) => {
     try {
       await deleteExecHistory({
-        schedule_id: props.scheduleId,
+        schedule_pid: props.schedulePid,
         schedule_type: 'daemon',
         eid: props.eid,
         bind_ip: props.bindIp,

@@ -768,7 +768,7 @@
   const handleClearExecHistory = async (e: any) => {
     try {
       await deleteExecHistory({
-        schedule_id: props.scheduleId,
+        schedule_pid: props.schedulePid,
         schedule_type: 'once',
         eid: props.eid,
         bind_ip: props.bindIp,

@@ -220,6 +220,7 @@
       v-if="viewType == 'execHistory' && scheduleDetailVisible"
       :job-type="formModel.job_type"
       :hide-job-type-switch="true"
+      :eid="form.eid"
       :schedule-pid="form.id"
       :disable-search="true"
     />

@@ -346,6 +346,7 @@
 
   const props = defineProps<{
     scheduleId?: string;
+    schedulePid?: number;
     bindIp?: string;
     title?: string;
     eid?: string;
@@ -685,6 +686,7 @@
       page: 1,
       page_size: 20,
       schedule_id: props.scheduleId,
+      schedule_pid: props.schedulePid,
       schedule_type: formModel.value.schedule_type,
       eid: props.eid,
       job_type: formModel.value.job_type,
@@ -735,6 +737,7 @@
       page_size: basePagination.pageSize,
       ...formModel.value,
       schedule_id: props.scheduleId,
+      schedule_pid: props.schedulePid,
       schedule_type: formModel.value.schedule_type,
       job_type: formModel.value.job_type,
       eid: props.eid,
@@ -748,6 +751,7 @@
       page: current,
       ...formModel.value,
       schedule_id: props.scheduleId,
+      schedule_pid: props.schedulePid,
       schedule_type: formModel.value.schedule_type,
       eid: props.eid,
       job_type: formModel.value.job_type,
@@ -779,7 +783,7 @@
   const handleClearExecHistory = async (e: any) => {
     try {
       await deleteExecHistory({
-        schedule_id: props.scheduleId,
+        schedule_pid: props.schedulePid,
         schedule_type: 'timer',
         eid: props.eid,
         bind_ip: props.bindIp,

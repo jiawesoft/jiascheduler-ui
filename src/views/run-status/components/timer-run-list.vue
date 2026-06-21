@@ -452,6 +452,12 @@
       width: 120,
     },
     {
+      title: t('job.timerExpr'),
+      slotName: 'timerExpr',
+      width: 150,
+      fixed: 'left',
+    },
+    {
       title: t('job.scheduleStatus'),
       dataIndex: 'schedule_status',
       slotName: 'scheduleStatus',
@@ -489,11 +495,7 @@
       slotName: 'tags',
       width: 150,
     },
-    {
-      title: t('job.timerExpr'),
-      slotName: 'timerExpr',
-      width: 150,
-    },
+
     {
       title: t('job.scheduleName'),
       dataIndex: 'schedule_name',

@@ -226,6 +226,7 @@
       :hide-job-type-switch="true"
       :eid="form.eid"
       :schedule-id="form.schedule_id"
+      :schedule-pid="form.id"
       :disable-search="true"
     />
 
@@ -273,6 +274,7 @@
     form: {
       id: 0,
       schedule_id: 'string',
+      schedule_pid: 0,
       name: 'string',
       eid: 'string',
       instance_ids: [],
@@ -356,6 +358,12 @@
     //   dataIndex: 'schedule_id',
     //   width: 150,
     // },
+    {
+      title: t('job.scheduleName'),
+      dataIndex: 'name',
+      fixed: 'left',
+      width: 150,
+    },
 
     {
       title: t('job.name'),
@@ -377,11 +385,7 @@
       slotName: 'tags',
       width: 150,
     },
-    {
-      title: t('job.scheduleName'),
-      dataIndex: 'name',
-      width: 150,
-    },
+
     {
       title: t('job.action'),
       dataIndex: 'action',
