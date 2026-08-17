@@ -476,6 +476,7 @@ export default {
   'operations.dispatch': 'Dispatch',
   'operations.download': 'Download',
   'operations.websshLogin': 'Login',
+  'operations.websshCustomLogin': 'SSH Settings',
   'operations.quickStart': 'Quick Start',
   'operations.start': 'Start',
   'operations.stop': 'Stop',

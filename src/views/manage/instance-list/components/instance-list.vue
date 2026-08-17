@@ -167,6 +167,11 @@
             {{ $t('operations.websshLogin') }}
           </a-button>
         </a-space>
+        <a-space>
+          <a-button size="mini" @click="handleOpenSshConnect($event, record)">
+            {{ $t('operations.websshCustomLogin') }}
+          </a-button>
+        </a-space>
       </a-space>
     </template>
   </a-table>
@@ -252,6 +257,12 @@
       </a-form-item>
     </a-form>
   </a-modal>
+
+  <ssh-connect-modal
+    v-model:visible="sshConnectModalvisible"
+    :record="sshConnectRecord"
+    @cancel="sshConnectModalvisible = false"
+  ></ssh-connect-modal>
 </template>
 
 <script lang="ts" setup>
@@ -275,11 +286,14 @@
   import { Message } from '@arco-design/web-vue';
 
   import SelectGroup from '../../components/select-group.vue';
+  import SshConnectModal from './ssh-connect-modal.vue';
 
   type SizeProps = 'mini' | 'small' | 'medium' | 'large';
   type Column = TableColumnData & { checked?: true };
   const saveInstanceModalvisible = ref(false);
   const grantedUserModalvisible = ref(false);
+  const sshConnectModalvisible = ref(false);
+  const sshConnectRecord = ref<any>(null);
   const saveInstanceFormRef = ref();
   const grantedUserFormRef = ref();
 
@@ -483,6 +497,11 @@
       query: { instance_id: record.instance_id },
     });
     window.open(url.href, '_blank');
+  };
+
+  const handleOpenSshConnect = (e: any, record: any) => {
+    sshConnectRecord.value = record;
+    sshConnectModalvisible.value = true;
   };
 
   const search = () => {

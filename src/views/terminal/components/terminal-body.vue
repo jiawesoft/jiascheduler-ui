@@ -54,6 +54,30 @@
       type: String,
       default: '',
     },
+    sshUser: {
+      type: String,
+      default: '',
+    },
+    sshAuthType: {
+      type: String,
+      default: '',
+    },
+    sshPassword: {
+      type: String,
+      default: '',
+    },
+    sshKeyPath: {
+      type: String,
+      default: '',
+    },
+    sshKeyContent: {
+      type: String,
+      default: '',
+    },
+    sshPort: {
+      type: String,
+      default: '',
+    },
     /**
      * 高度
      */
@@ -213,7 +237,21 @@
       const currentProtocol = window.location.protocol;
       const wsProtocol = currentProtocol.includes('https') ? 'wss:' : 'ws:';
       // const socketUrl = `${wsProtocol}//${window.location.host}/terminal/webssh/${props.ip}?rows=${term?.rows}&cols=${term?.cols}`;
-      const socketUrl = `${wsProtocol}//${window.location.host}/terminal/tunnel/${props.instanceId}?rows=${term?.rows}&cols=${term?.cols}`;
+      const params = new URLSearchParams({
+        rows: `${term?.rows}`,
+        cols: `${term?.cols}`,
+      });
+      // 手动指定账号（可选）：user + auth_type + password/key_path/key_content + port
+      if (props.sshUser) params.append('user', props.sshUser);
+      if (props.sshAuthType) params.append('auth_type', props.sshAuthType);
+      if (props.sshPassword) params.append('password', props.sshPassword);
+      if (props.sshKeyPath) params.append('key_path', props.sshKeyPath);
+      if (props.sshKeyContent)
+        params.append('key_content', props.sshKeyContent);
+      if (props.sshPort) params.append('port', props.sshPort);
+      const socketUrl = `${wsProtocol}//${
+        window.location.host
+      }/terminal/tunnel/${props.instanceId}?${params.toString()}`;
 
       // const socketUrl = `${props.socketUrl}?rows=${term?.rows}&cols=${term?.cols}`;
       socket = new WebSocket(socketUrl);

@@ -125,6 +125,12 @@
           :ref="(el) => setRefMap(el, item.key)"
           :ip="item.ip"
           :instance-id="item.instanceId"
+          :ssh-user="item.sshUser"
+          :ssh-auth-type="item.sshAuthType"
+          :ssh-password="item.sshPassword"
+          :ssh-key-path="item.sshKeyPath"
+          :ssh-key-content="item.sshKeyContent"
+          :ssh-port="item.sshPort"
           :terminal="item"
           @focus-terminal="focusTerminal"
         ></terminal-body>
@@ -179,6 +185,30 @@
       default: '',
     },
     instanceId: {
+      type: String,
+      default: '',
+    },
+    sshUser: {
+      type: String,
+      default: '',
+    },
+    sshAuthType: {
+      type: String,
+      default: '',
+    },
+    sshPassword: {
+      type: String,
+      default: '',
+    },
+    sshKeyPath: {
+      type: String,
+      default: '',
+    },
+    sshKeyContent: {
+      type: String,
+      default: '',
+    },
+    sshPort: {
       type: String,
       default: '',
     },
@@ -275,6 +305,12 @@
         selected: true,
         namespace: props.namespace || 'default',
         instanceId: props.instanceId,
+        sshUser: props.sshUser,
+        sshAuthType: props.sshAuthType,
+        sshPassword: props.sshPassword,
+        sshKeyPath: props.sshKeyPath,
+        sshKeyContent: props.sshKeyContent,
+        sshPort: props.sshPort,
       },
     ];
     setHistoryTerminal({

@@ -471,6 +471,7 @@ export default {
   'operations.dispatch': '启动',
   'operations.download': '下载',
   'operations.websshLogin': '登录',
+  'operations.websshCustomLogin': 'SSH连接设置',
   'operations.quickStart': '快速启动',
   'operations.start': '启动',
   'operations.stop': '停止',

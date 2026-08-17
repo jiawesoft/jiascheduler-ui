@@ -46,6 +46,12 @@
                 :current-ip="item.ip"
                 :namespace="item.namespace"
                 :instance-id="item.instanceId"
+                :ssh-user="item.sshUser"
+                :ssh-auth-type="item.sshAuthType"
+                :ssh-password="item.sshPassword"
+                :ssh-key-path="item.sshKeyPath"
+                :ssh-key-content="item.sshKeyContent"
+                :ssh-port="item.sshPort"
                 :server-ip-list="serverIpList"
                 :loading="loading"
                 @add-split="handleAddTerminal"
@@ -116,6 +122,13 @@
   const route = useRoute();
   const currentIp = ref('');
   const instanceId = ref(`${route.query.instance_id}`);
+  // 手动指定账号参数（可选）
+  const sshUser = ref(`${route.query.user || ''}`);
+  const sshAuthType = ref(`${route.query.auth_type || ''}`);
+  const sshPassword = ref(`${route.query.password || ''}`);
+  const sshKeyPath = ref(`${route.query.key_path || ''}`);
+  const sshKeyContent = ref(`${route.query.key_content || ''}`);
+  const sshPort = ref(`${route.query.port || ''}`);
 
   const terminalRefMap = ref({});
 
@@ -126,6 +139,12 @@
     ip?: string;
     namespace?: string;
     instanceId?: string;
+    sshUser?: string;
+    sshAuthType?: string;
+    sshPassword?: string;
+    sshKeyPath?: string;
+    sshKeyContent?: string;
+    sshPort?: string;
   }
   const splitTerminalList = ref<splitItem[]>([]);
 
@@ -164,6 +183,12 @@
           ip: currentIpItem?.ip || '',
           namespace: currentIpItem?.namespace,
           instanceId: currentIpItem?.instance_id,
+          sshUser: sshUser.value,
+          sshAuthType: sshAuthType.value,
+          sshPassword: sshPassword.value,
+          sshKeyPath: sshKeyPath.value,
+          sshKeyContent: sshKeyContent.value,
+          sshPort: sshPort.value,
         },
       ];
 

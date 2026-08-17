@@ -9,10 +9,35 @@ export interface InstanceRecord {
   instance_group: string;
   instance_id: string;
   sys_user: string;
+  ssh_port?: number;
+  /** agent 上报的 ssh 用户名 */
+  ssh_user?: string;
+  /** agent 上报的认证方式: password | key_path | key_content */
+  ssh_auth_type?: string;
   namespace: string;
   status: number;
   updated_time: string;
   created_time: string;
+}
+
+/** /api/instance/user-server-list 返回的记录 */
+export interface UserServerRecord {
+  instance_id: string;
+  ip: string;
+  namespace: string;
+  instance_group_id: number;
+  instance_group: string;
+  status: number;
+  info: string;
+  /** 系统用户（手动设置） */
+  sys_user?: string;
+  ssh_port?: number;
+  /** agent 上报的 ssh 用户名 */
+  ssh_user?: string;
+  /** agent 上报的认证方式: password | key_path | key_content */
+  ssh_auth_type?: string;
+  created_time: string;
+  updated_time: string;
 }
 export interface QueryInstanceListReq extends Partial<InstanceRecord> {
   role_id?: number;
