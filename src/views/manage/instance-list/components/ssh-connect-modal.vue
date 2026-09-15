@@ -31,11 +31,9 @@
           {{ record?.ssh_port || 22 }}
         </a-descriptions-item>
       </a-descriptions>
-      <a-alert
-        style="margin-top: 12px"
-        type="info"
-        :content="$t('terminal.sshConnect.agentTip')"
-      />
+      <a-alert style="margin-top: 12px">{{
+        $t('terminal.sshConnect.agentTip')
+      }}</a-alert>
     </div>
 
     <!-- 手动指定账号 -->

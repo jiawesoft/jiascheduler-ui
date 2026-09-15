@@ -480,6 +480,7 @@ export default {
   'operations.startSupervising': '启动',
   'operations.stopSupervising': '停止',
   'operations.update': '修改',
+  'operations.settings': '设置',
   'operations.granted': '授权',
   'operations.delete': '删除',
   'operations.delete.confirm': '您确定要删除这条数据么?',

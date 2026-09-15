@@ -485,6 +485,7 @@ export default {
   'operations.startSupervising': 'Start Supervising',
   'operations.stopSupervising': 'Stop Supervising',
   'operations.update': 'Update',
+  'operations.settings': 'Settings',
   'operations.granted': 'Grant',
   'operations.delete': 'Delete',
   'operations.delete.confirm': 'Are you sure you want to delete this data?',

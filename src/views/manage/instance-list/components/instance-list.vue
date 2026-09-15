@@ -159,17 +159,17 @@
             size="mini"
             @click="handleSaveInstanceModal($event, record)"
           >
-            {{ $t('operations.update') }}
+            {{ $t('operations.settings') }}
           </a-button>
         </a-space>
-        <a-space>
+        <!-- <a-space>
           <a-button size="mini" @click="handleViewTerminal($event, record)">
             {{ $t('operations.websshLogin') }}
           </a-button>
-        </a-space>
+        </a-space> -->
         <a-space>
           <a-button size="mini" @click="handleOpenSshConnect($event, record)">
-            {{ $t('operations.websshCustomLogin') }}
+            {{ $t('operations.websshLogin') }}
           </a-button>
         </a-space>
       </a-space>
