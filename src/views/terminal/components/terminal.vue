@@ -131,6 +131,7 @@
           :ssh-key-path="item.sshKeyPath"
           :ssh-key-content="item.sshKeyContent"
           :ssh-port="item.sshPort"
+          :ssh-sys-user="item.sshSysUser"
           :terminal="item"
           @focus-terminal="focusTerminal"
         ></terminal-body>
@@ -149,6 +150,7 @@
       v-if="isShowFile"
       :visible="isShowFile"
       :file-ip="fileIp"
+      :sys-user="fileSysUser"
       :current-ip-params="currentIpParams"
       @handle-close="handleCloseFile"
     ></file-manager>
@@ -209,6 +211,10 @@
       default: '',
     },
     sshPort: {
+      type: String,
+      default: '',
+    },
+    sshSysUser: {
       type: String,
       default: '',
     },
@@ -311,6 +317,7 @@
         sshKeyPath: props.sshKeyPath,
         sshKeyContent: props.sshKeyContent,
         sshPort: props.sshPort,
+        sshSysUser: props.sshSysUser,
       },
     ];
     setHistoryTerminal({
@@ -504,6 +511,8 @@
 
   const isShowFile = ref(false);
   const fileIp = ref('');
+  /** sftp 文件管理器使用的登录用户, 与终端登录时选择的用户一致 */
+  const fileSysUser = ref('');
   const currentIpParams = ref({
     ip: '',
     namespace: '',
@@ -516,6 +525,13 @@
       (v) => v.key === currentServerIndex.value
     );
     fileIp.value = seletedItem ? seletedItem?.ip : '';
+    // sftp 与终端保持同一个登录用户: 优先取登录时选择的用户,
+    // 未显式选择时使用实例的默认登录用户
+    fileSysUser.value =
+      seletedItem?.sshSysUser ||
+      props.serverIpList.find((v) => v.instance_id === seletedItem?.instanceId)
+        ?.sys_user ||
+      '';
     currentIpParams.value = {
       ip: seletedItem?.ip || '',
       namespace: seletedItem?.namespace || 'default',

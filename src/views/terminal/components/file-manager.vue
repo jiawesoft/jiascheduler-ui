@@ -13,6 +13,9 @@
         </a-tag> -->
         {{ `(${currentIpParams.namespace})` }}
         {{ $t('terminal.uploadTitle') }}
+        <a-tag v-if="sysUser" color="arcoblue" size="small">
+          {{ $t('terminal.file.loginUser') }}: {{ sysUser }}
+        </a-tag>
       </a-space>
     </template>
     <div class="file-body">
@@ -233,12 +236,16 @@
     params: QueryFileListParams = {
       dir: defaultPath.value,
       instance_id: props.currentIpParams.instanceId,
+      sys_user: props.sysUser || undefined,
     }
   ) => {
     setLoading(true);
 
     try {
-      const { data } = await queryFileList(params);
+      const { data } = await queryFileList({
+        ...params,
+        sys_user: props.sysUser || undefined,
+      });
       defaultPath.value = data.current_dir;
       fileData.value = data.entry;
     } catch (err) {
@@ -295,6 +302,10 @@
       const formData = new FormData();
       formData.append('instanceId', props.currentIpParams.instanceId);
       formData.append('file_path', `${defaultPath.value}/${fileItem.name}`);
+      // 与登录时选择的用户保持一致
+      if (props.sysUser) {
+        formData.append('sys_user', props.sysUser);
+      }
       formData.append(name as string, fileItem.file as Blob);
       const onUploadProgress = (event: ProgressEvent) => {
         let percent;
@@ -336,7 +347,10 @@
   const downloadFileEvent = async (record: FileRecord) => {
     try {
       const filePath = `${defaultPath.value}/${record.file_name}`;
-      const url = `/api/file/sftp/tunnel/download?file_path=${filePath}&instance_id=${props.currentIpParams.instanceId}`;
+      const sysUserQuery = props.sysUser
+        ? `&sys_user=${encodeURIComponent(props.sysUser)}`
+        : '';
+      const url = `/api/file/sftp/tunnel/download?file_path=${filePath}&instance_id=${props.currentIpParams.instanceId}${sysUserQuery}`;
       const downloadLink = document.createElement('a');
       downloadLink.href = url;
       downloadLink.download = record.file_name;
@@ -352,6 +366,7 @@
         remove_type: record.file_type.toLowerCase(),
         path: `${defaultPath.value}/${record.file_name}`,
         instance_id: props.currentIpParams.instanceId,
+        sys_user: props.sysUser || undefined,
       });
       Message.success(`success`);
       fetchData();

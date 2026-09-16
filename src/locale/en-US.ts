@@ -346,6 +346,30 @@ const localeInstance = {
   'instance.info': 'Description',
   'instance.instanceGroup': 'Group',
   'instance.sysUser': 'System User',
+  'instance.sshUser.title': 'SSH Login Users',
+  'instance.sshUser.tip':
+    'Multiple ssh login users are supported (password or key), and one of them can be chosen as the default login user',
+  'instance.sshUser.default': 'Default',
+  'instance.sshUser.add': 'Add Login User',
+  'instance.sshUser.username.placeholder': 'Login user name',
+  'instance.sshUser.password.placeholder':
+    'Password, leave empty to keep unchanged',
+  'instance.sshUser.keyPath.placeholder':
+    'Key file path, eg: /home/user/.ssh/id_rsa',
+  'instance.sshUser.keyContent.placeholder':
+    'Key content, leave empty to keep unchanged',
+  'instance.sshUser.importKeyFile': 'Import key file',
+  'instance.sshUser.importKeyFileSuccess': 'Imported key file {name}',
+  'instance.sshUser.fileTooLarge': 'File is too large, the maximum is {max}',
+  'instance.sshUser.storedPlaceholder': 'Configured, click to modify',
+  'instance.sshUser.inputPlaceholder': 'Not configured, click to input',
+  'instance.sshUser.resetField': 'Clear and collapse',
+  'instance.sshUser.usernameRequired': 'Please enter the login user name',
+  'instance.sshUser.passwordRequired': 'Please enter the password',
+  'instance.sshUser.keyPathRequired': 'Please enter the key file path',
+  'instance.sshUser.keyContentRequired': 'Please enter the key content',
+  'instance.sshUser.more': 'and {count} more',
+  'instance.sshUser.agentTip': 'Reported by agent: {user}',
   'instance.namespace.tooltips':
     'To prevent IP conflicts, you can set the namespace for the instance. Currently, only the default namespace is supported',
   'instance.userServer': 'User Server',

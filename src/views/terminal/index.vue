@@ -52,6 +52,7 @@
                 :ssh-key-path="item.sshKeyPath"
                 :ssh-key-content="item.sshKeyContent"
                 :ssh-port="item.sshPort"
+                :ssh-sys-user="item.sshSysUser"
                 :server-ip-list="serverIpList"
                 :loading="loading"
                 @add-split="handleAddTerminal"
@@ -129,6 +130,8 @@
   const sshKeyPath = ref(`${route.query.key_path || ''}`);
   const sshKeyContent = ref(`${route.query.key_content || ''}`);
   const sshPort = ref(`${route.query.port || ''}`);
+  /** 从实例的 sys_users 中选择的登录用户 */
+  const sshSysUser = ref(`${route.query.sys_user || ''}`);
 
   const terminalRefMap = ref({});
 
@@ -145,6 +148,7 @@
     sshKeyPath?: string;
     sshKeyContent?: string;
     sshPort?: string;
+    sshSysUser?: string;
   }
   const splitTerminalList = ref<splitItem[]>([]);
 
@@ -189,6 +193,7 @@
           sshKeyPath: sshKeyPath.value,
           sshKeyContent: sshKeyContent.value,
           sshPort: sshPort.value,
+          sshSysUser: sshSysUser.value,
         },
       ];
 

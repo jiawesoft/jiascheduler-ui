@@ -10,7 +10,9 @@ export default {
   'terminal.footer.send': 'Send',
   'terminal.newConnect': 'New Connect',
   'terminal.sshConnect': 'SSH Connect',
-  'terminal.sshConnect.agent': 'Use agent-reported account',
+  'terminal.sshConnect.default': 'Instance default user',
+  'terminal.sshConnect.agent': 'Agent-reported account',
+  'terminal.sshConnect.other': 'Other configured users',
   'terminal.sshConnect.manual': 'Specify account manually',
   'terminal.sshConnect.authType': 'Auth Type',
   'terminal.sshConnect.user': 'Username',
@@ -24,6 +26,14 @@ export default {
   'terminal.sshConnect.sshPort': 'SSH Port',
   'terminal.sshConnect.agentTip':
     'Connect with the ssh user and auth method reported by the agent at startup',
+  'terminal.sshConnect.defaultTip':
+    'Connect with the default login user configured on the instance, it can be changed in "All Instances - Settings"',
+  'terminal.sshConnect.otherTip':
+    'Connect with another login user configured on the instance',
+  'terminal.sshConnect.defaultDisabledTip':
+    'No login user has been configured on this instance yet, add one in "All Instances - Settings - SSH Login Users"',
+  'terminal.sshConnect.otherDisabledTip':
+    'Only one login user is configured on this instance, no other user to pick',
   'terminal.sshConnect.auth.password': 'Password',
   'terminal.sshConnect.auth.keyPath': 'Key File',
   'terminal.sshConnect.auth.keyContent': 'Key Content',
@@ -31,6 +41,7 @@ export default {
   'terminal.create.searchTitle': 'Fast search ip',
   'terminal.create.listTitle': 'Data List',
   'terminal.uploadTitle': 'File Manager',
+  'terminal.file.loginUser': 'Login user',
   'terminal.uploadFile': 'Upload',
   'terminal.createNew': 'Create Folder',
   'terminal.path': 'File Path',

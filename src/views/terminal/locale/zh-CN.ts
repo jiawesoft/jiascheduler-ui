@@ -10,7 +10,9 @@ export default {
   'terminal.footer.send': '发送',
   'terminal.newConnect': '新建连接',
   'terminal.sshConnect': 'SSH 连接',
-  'terminal.sshConnect.agent': '使用Agent上报账号',
+  'terminal.sshConnect.default': '实例默认用户',
+  'terminal.sshConnect.agent': 'Agent 上报账号',
+  'terminal.sshConnect.other': '其他已配置用户',
   'terminal.sshConnect.manual': '手动指定账号',
   'terminal.sshConnect.authType': '认证方式',
   'terminal.sshConnect.user': '用户名',
@@ -24,6 +26,13 @@ export default {
   'terminal.sshConnect.sshPort': 'SSH端口',
   'terminal.sshConnect.agentTip':
     '使用 agent 启动时上报的 ssh 用户及认证方式连接',
+  'terminal.sshConnect.defaultTip':
+    '使用实例上配置的默认登录用户连接，可在「全部实例 - 设置」中调整',
+  'terminal.sshConnect.otherTip': '使用实例上配置的其他登录用户连接',
+  'terminal.sshConnect.defaultDisabledTip':
+    '该实例尚未配置登录用户，请在「全部实例 - 设置 - SSH 登录用户」中添加',
+  'terminal.sshConnect.otherDisabledTip':
+    '该实例只配置了一个登录用户，暂无其他用户可选',
   'terminal.sshConnect.auth.password': '密码',
   'terminal.sshConnect.auth.keyPath': '密钥文件',
   'terminal.sshConnect.auth.keyContent': '密钥内容',
@@ -31,6 +40,7 @@ export default {
   'terminal.create.searchTitle': '快速查找ip',
   'terminal.create.listTitle': '数据列表',
   'terminal.uploadTitle': '的文件管理器',
+  'terminal.file.loginUser': '登录用户',
   'terminal.uploadFile': '上传文件',
   'terminal.createNew': '新建文件夹',
   'terminal.path': '文件路径',

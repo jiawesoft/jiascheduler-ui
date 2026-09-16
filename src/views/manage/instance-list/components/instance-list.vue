@@ -150,6 +150,18 @@
       <a-tag v-else color="green"> <icon-check /></a-tag>
     </template>
 
+    <template #sysUser="{ record }">
+      <span>{{ record.sys_user || '-' }}</span>
+      <a-tag
+        v-if="(record.sys_users || []).length > 1"
+        size="small"
+        color="arcoblue"
+        style="margin-left: 6px"
+      >
+        {{ $t('instance.sshUser.more', { count: record.sys_users.length }) }}
+      </a-tag>
+    </template>
+
     <template #operations="{ record }">
       <a-space direction="horizontal">
         <a-space>
@@ -162,11 +174,6 @@
             {{ $t('operations.settings') }}
           </a-button>
         </a-space>
-        <!-- <a-space>
-          <a-button size="mini" @click="handleViewTerminal($event, record)">
-            {{ $t('operations.websshLogin') }}
-          </a-button>
-        </a-space> -->
         <a-space>
           <a-button size="mini" @click="handleOpenSshConnect($event, record)">
             {{ $t('operations.websshLogin') }}
@@ -176,13 +183,13 @@
     </template>
   </a-table>
 
-  <a-modal
+  <a-drawer
     v-model:visible="saveInstanceModalvisible"
+    placement="right"
     title-align="start"
-    style="width: auto"
+    :width="drawerWidth"
     :draggable="true"
-    width="40%"
-    hide-cancel
+    :ok-text="$t('form.save')"
     @before-ok="handleSubmitSaveInstanceForm"
     @cancel="handleSaveInstanceModalCancel"
   >
@@ -225,8 +232,68 @@
       >
         <a-input v-model="form.namespace" />
       </a-form-item>
-      <a-form-item field="sys_user" :label="$t('instance.sysUser')" :rules="[]">
-        <a-input v-model="form.sys_user" />
+      <a-form-item
+        field="sys_user"
+        :label="$t('instance.sshUser.title')"
+        :rules="[]"
+      >
+        <div class="sys-users">
+          <div class="sys-users-tip">{{ $t('instance.sshUser.tip') }}</div>
+          <div
+            v-for="(item, index) in form.sys_users"
+            :key="index"
+            class="sys-user-item"
+          >
+            <a-radio
+              :model-value="form.sys_user"
+              :value="item.username"
+              @change="handleDefaultUserChange(item.username)"
+            >
+              {{ $t('instance.sshUser.default') }}
+            </a-radio>
+            <a-input
+              v-model="item.username"
+              class="sys-user-name"
+              :placeholder="$t('instance.sshUser.username.placeholder')"
+              @change="handleUserNameChange(index)"
+            />
+            <a-select
+              v-model="item.auth_type"
+              class="sys-user-auth-type"
+              @change="handleAuthTypeChange(item)"
+            >
+              <a-option value="password">
+                {{ $t('terminal.sshConnect.auth.password') }}
+              </a-option>
+              <a-option value="key_content">
+                {{ $t('terminal.sshConnect.auth.keyContent') }}
+              </a-option>
+            </a-select>
+            <ssh-secret-field
+              :key="`${index}-${item.auth_type}`"
+              :type="item.auth_type"
+              :has-stored="!!item.has_stored"
+              :model-value="
+                item.auth_type === 'key_content'
+                  ? item.key_content || ''
+                  : item.password || ''
+              "
+              @update:model-value="handleSecretChange(item, $event)"
+            />
+            <a-button
+              type="text"
+              status="danger"
+              size="mini"
+              @click="handleRemoveSysUser(index)"
+            >
+              <template #icon><icon-delete /></template>
+            </a-button>
+          </div>
+          <a-button type="dashed" long size="small" @click="handleAddSysUser">
+            <template #icon><icon-plus /></template>
+            {{ $t('instance.sshUser.add') }}
+          </a-button>
+        </div>
       </a-form-item>
       <a-form-item
         field="password"
@@ -256,7 +323,7 @@
         <a-textarea v-model="form.info" />
       </a-form-item>
     </a-form>
-  </a-modal>
+  </a-drawer>
 
   <ssh-connect-modal
     v-model:visible="sshConnectModalvisible"
@@ -275,16 +342,16 @@
   import cloneDeep from 'lodash/cloneDeep';
   import Sortable from 'sortablejs';
 
-  import { useRouter } from 'vue-router';
-
   import {
     InstanceRecord,
     QueryInstanceListReq,
+    SysUser,
     queryInstanceList,
     saveInstance,
   } from '@/api/instance';
   import { Message } from '@arco-design/web-vue';
 
+  import SshSecretField from '@/components/ssh-secret-field.vue';
   import SelectGroup from '../../components/select-group.vue';
   import SshConnectModal from './ssh-connect-modal.vue';
 
@@ -305,9 +372,15 @@
     password: '',
     info: '',
     instance_group_id: 0,
-    sys_user: 'root',
+    sys_user: '',
+    sys_users: [] as SysUser[],
     namespace: 'default',
   };
+
+  /** 实例设置抽屉宽度: 窄屏自适应 */
+  const drawerWidth = computed(() =>
+    window.innerWidth < 1200 ? '90%' : '820px'
+  );
 
   const defaultGrantedUserForm = {
     ip: '',
@@ -389,6 +462,7 @@
     {
       title: t('instance.sysUser'),
       dataIndex: 'sys_user',
+      slotName: 'sysUser',
     },
     {
       title: t('instance.status'),
@@ -440,12 +514,109 @@
   const handleSaveInstanceModal = (e: any, record: any) => {
     saveInstanceFormRef.value.clearValidate();
     if (record) {
-      form.value = { ...record };
+      form.value = {
+        ...record,
+        sys_users: (record.sys_users || []).map((item: SysUser) => ({
+          username: item.username,
+          // 实例侧只支持 password / key_content, 历史 key_path 数据回落到密码形式
+          auth_type:
+            item.auth_type === 'key_content' ? 'key_content' : 'password',
+          // 密钥内容与密码不会由服务端下发, 留空表示保持原值
+          key_content: '',
+          password: '',
+          // 服务端已存有凭证, 界面上显示为"已设置";
+          // 历史 key_path 用户需要重新录入密钥内容
+          has_stored: item.auth_type !== 'key_path' && !!item.username,
+          is_default: !!item.is_default,
+        })),
+      };
+      // 兼容历史数据: 默认用户取自 sys_user 列
+      if (!form.value.sys_users.some((item) => item.is_default)) {
+        const defaultItem = form.value.sys_users.find(
+          (item) => item.username === record.sys_user
+        );
+        if (defaultItem) {
+          defaultItem.is_default = true;
+        }
+      }
+      form.value.sys_user =
+        form.value.sys_users.find((item) => item.is_default)?.username || '';
     } else {
-      form.value = { ...defaultSaveInstanceForm };
+      form.value = { ...defaultSaveInstanceForm, sys_users: [] };
     }
 
     saveInstanceModalvisible.value = true;
+  };
+
+  const handleAddSysUser = () => {
+    form.value.sys_users.push({
+      username: '',
+      auth_type: 'password',
+      key_content: '',
+      password: '',
+      has_stored: false,
+      is_default: form.value.sys_users.length === 0,
+    });
+    if (!form.value.sys_user) {
+      syncDefaultUser();
+    }
+  };
+
+  /** 冻结字段回写: 按认证方式写入对应字段 */
+  const handleSecretChange = (item: SysUser, value: string) => {
+    if (item.auth_type === 'key_content') {
+      item.key_content = value;
+    } else {
+      item.password = value;
+    }
+  };
+
+  const handleRemoveSysUser = (index: number) => {
+    const [removed] = form.value.sys_users.splice(index, 1);
+    if (removed?.is_default || form.value.sys_user === removed?.username) {
+      form.value.sys_user = '';
+    }
+    if (!form.value.sys_users.length) {
+      // 清空默认用户, 由服务端清空 sys_user 列
+      form.value.sys_user = '';
+      return;
+    }
+    syncDefaultUser();
+  };
+
+  /** 保证有且仅有一个默认登录用户 */
+  const syncDefaultUser = () => {
+    const users = form.value.sys_users;
+    if (!users.length) {
+      form.value.sys_user = '';
+      return;
+    }
+    if (!users.some((item) => item.is_default)) {
+      users[0].is_default = true;
+    }
+    form.value.sys_user =
+      users.find((item) => item.is_default)?.username || users[0].username;
+  };
+
+  const handleDefaultUserChange = (username: string) => {
+    form.value.sys_users.forEach((item) => {
+      item.is_default = item.username === username;
+    });
+    form.value.sys_user = username;
+  };
+
+  const handleUserNameChange = (index: number) => {
+    const item = form.value.sys_users[index];
+    if (item?.is_default) {
+      form.value.sys_user = item.username;
+    }
+  };
+
+  const handleAuthTypeChange = (item: SysUser) => {
+    item.password = '';
+    item.key_content = '';
+    // 切换认证方式后重新从冻结态开始
+    item.has_stored = false;
   };
 
   const handleSaveInstanceModalCancel = () => {
@@ -488,15 +659,6 @@
     search();
 
     return true;
-  };
-
-  const router = useRouter();
-  const handleViewTerminal = (e: any, record: any) => {
-    const url = router.resolve({
-      name: 'terminal',
-      query: { instance_id: record.instance_id },
-    });
-    window.open(url.href, '_blank');
   };
 
   const handleOpenSshConnect = (e: any, record: any) => {
@@ -603,6 +765,41 @@
   .action-icon {
     margin-left: 12px;
     cursor: pointer;
+  }
+
+  .sys-users {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+
+    .sys-users-tip {
+      color: var(--color-text-3);
+      font-size: 12px;
+      line-height: 18px;
+    }
+
+    .sys-user-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+
+      :deep(.arco-radio) {
+        margin-top: 6px;
+        flex-shrink: 0;
+        white-space: nowrap;
+      }
+
+      .sys-user-name {
+        width: 120px;
+        flex-shrink: 0;
+      }
+
+      .sys-user-auth-type {
+        width: 108px;
+        flex-shrink: 0;
+      }
+    }
   }
 
   .active {

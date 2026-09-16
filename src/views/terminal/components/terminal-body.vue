@@ -78,6 +78,11 @@
       type: String,
       default: '',
     },
+    /** 实例 sys_users 中选中的登录用户 */
+    sshSysUser: {
+      type: String,
+      default: '',
+    },
     /**
      * 高度
      */
@@ -249,6 +254,8 @@
       if (props.sshKeyContent)
         params.append('key_content', props.sshKeyContent);
       if (props.sshPort) params.append('port', props.sshPort);
+      // 从实例 sys_users 中选择的登录用户, 由服务端取出对应的认证信息
+      if (props.sshSysUser) params.append('sys_user', props.sshSysUser);
       const socketUrl = `${wsProtocol}//${
         window.location.host
       }/terminal/tunnel/${props.instanceId}?${params.toString()}`;

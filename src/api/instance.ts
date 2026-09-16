@@ -1,6 +1,26 @@
 import axios from 'axios';
 import qs from 'query-string';
 
+/** 实例上配置的 SSH 登录用户（对应 instance.sys_users） */
+export interface SysUser {
+  username: string;
+  /** password | key_path | key_content */
+  auth_type: string;
+  /** 密钥文件路径（auth_type=key_path 时返回） */
+  key_path?: string;
+  /** 密钥内容，出于安全考虑不会由服务端返回，仅在提交时使用 */
+  key_content?: string;
+  /** 密码，出于安全考虑不会由服务端返回，留空表示保持原值 */
+  password?: string;
+  /** 是否为默认登录用户 */
+  is_default?: boolean;
+  /**
+   * 仅前端使用：服务端是否已保存该用户的凭证（密码或密钥内容）。
+   * 服务端不下发凭证本身，用它来判断"保持原值"还是"尚未设置"。
+   */
+  has_stored?: boolean;
+}
+
 export interface InstanceRecord {
   id: number;
   ip: string;
@@ -9,6 +29,8 @@ export interface InstanceRecord {
   instance_group: string;
   instance_id: string;
   sys_user: string;
+  /** 实例上配置的多个 SSH 登录用户 */
+  sys_users?: SysUser[];
   ssh_port?: number;
   /** agent 上报的 ssh 用户名 */
   ssh_user?: string;
@@ -31,6 +53,8 @@ export interface UserServerRecord {
   info: string;
   /** 系统用户（手动设置） */
   sys_user?: string;
+  /** 实例上配置的多个 SSH 登录用户 */
+  sys_users?: SysUser[];
   ssh_port?: number;
   /** agent 上报的 ssh 用户名 */
   ssh_user?: string;
@@ -61,7 +85,6 @@ export function queryInstanceList(params: QueryInstanceListReq) {
 }
 
 export type SaveInstanceReq = Partial<InstanceRecord>;
-
 export interface SaveInstanceResp {
   ret: number;
 }

@@ -152,18 +152,11 @@
             {{ $t('operations.view') }}
           </a-button> -->
           <a-button
-            type="text"
-            size="small"
-            @click="handleViewTerminal($event, record)"
-          >
-            {{ $t('operations.websshLogin') }}
-          </a-button>
-          <a-button
-            type="text"
-            size="small"
+            type="primary"
+            size="mini"
             @click="handleOpenSshConnect($event, record)"
           >
-            {{ $t('operations.websshCustomLogin') }}
+            {{ $t('operations.websshLogin') }}
           </a-button>
         </template>
       </a-table>
@@ -203,8 +196,6 @@
   import type { TableColumnData } from '@arco-design/web-vue/es/table/interface';
   import cloneDeep from 'lodash/cloneDeep';
   import Sortable from 'sortablejs';
-
-  import { useRouter } from 'vue-router';
 
   import {
     InstanceRecord,
@@ -350,17 +341,10 @@
     visible.value = false;
   };
 
-  const router = useRouter();
-  const handleViewTerminal = (e: any, record: any) => {
-    const url = router.resolve({
-      name: 'terminal',
-      query: {
-        instance_id: record.instance_id,
-      },
-    });
-    window.open(url.href, '_blank');
-  };
-
+  /**
+   * 打开 SSH 登录弹窗，先选择登录用户
+   * （实例默认用户 / agent 上报账号 / 其他已配置用户 / 手动输入）。
+   */
   const handleOpenSshConnect = (e: any, record: any) => {
     sshConnectRecord.value = record;
     sshConnectModalvisible.value = true;

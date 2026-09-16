@@ -15,9 +15,8 @@ export interface QueryFileListParams extends Partial<FileRecord> {
   dir?: string;
   namespace?: string;
   instance_id: string;
-  // status: number;
-  // page: number;
-  // page_size: number;
+  /** 实例 sys_users 中选中的登录用户, 留空使用实例默认登录用户 */
+  sys_user?: string;
 }
 
 export interface QuryFileListRes {
@@ -31,6 +30,8 @@ export interface RemoveParams {
   path: string;
   namespace?: string;
   instance_id?: string;
+  /** 实例 sys_users 中选中的登录用户, 留空使用实例默认登录用户 */
+  sys_user?: string;
 }
 
 export interface DownloadData {
@@ -48,6 +49,16 @@ export interface ServerList {
   selected?: boolean;
   namespace?: string;
   instanceId?: string;
+  /** 手动指定或者从实例 sys_users 中选择的登录用户 */
+  sshUser?: string;
+  /** password | key_path | key_content */
+  sshAuthType?: string;
+  sshPassword?: string;
+  sshKeyPath?: string;
+  sshKeyContent?: string;
+  sshPort?: string;
+  /** 实例 sys_users 中选中的登录用户 */
+  sshSysUser?: string;
 }
 
 export function queryFileList(params: QueryFileListParams) {
