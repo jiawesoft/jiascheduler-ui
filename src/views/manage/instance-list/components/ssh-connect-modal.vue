@@ -33,7 +33,7 @@
         {{ $t('terminal.sshConnect.manual') }}
       </a-radio>
     </a-radio-group>
-    <!-- 实例默认登录用户 -->
+    <!-- Default login user of the instance -->
     <div v-if="mode === 'default'" class="account-info">
       <a-descriptions :column="1" size="small" bordered>
         <a-descriptions-item :label="$t('terminal.sshConnect.user')">
@@ -51,7 +51,7 @@
       </a-alert>
     </div>
 
-    <!-- agent 上报账号 -->
+    <!-- Account reported by the agent -->
     <div v-else-if="mode === 'agent'" class="account-info">
       <a-descriptions :column="1" size="small" bordered>
         <a-descriptions-item :label="$t('terminal.sshConnect.user')">
@@ -69,7 +69,7 @@
       </a-alert>
     </div>
 
-    <!-- 实例上配置的其他登录用户 -->
+    <!-- Other login users configured on the instance -->
     <div v-else-if="mode === 'other'" class="account-info">
       <a-radio-group v-model="selectedUser" direction="vertical">
         <a-radio
@@ -88,7 +88,7 @@
       </a-alert>
     </div>
 
-    <!-- 手动指定账号 -->
+    <!-- Account specified manually -->
     <a-form
       v-else
       ref="manualFormRef"
@@ -205,7 +205,7 @@
     port: 22,
   });
 
-  /** 切换认证方式: 清空另一侧的凭证与校验残留 */
+  /** Switch auth type: clear the other credential and stale validation. */
   function handleAuthTypeChange() {
     manualForm.password = '';
     manualForm.key_content = '';
@@ -213,8 +213,8 @@
   }
 
   /**
-   * 自定义组件不是原生输入框, form-item 取不到它的值,
-   * 因此显式校验对应的表单字段。
+   * A custom component is not a native input, so the form item cannot read its
+   * value; validate the underlying form field explicitly instead.
    */
   function validatePassword(_value: any, callback: (error?: string) => void) {
     callback(manualForm.password ? undefined : '');
@@ -224,17 +224,17 @@
     callback(manualForm.key_content ? undefined : '');
   }
 
-  /** 实例上配置的登录用户 */
+  /** Login users configured on the instance. */
   const sysUsers = computed<SysUser[]>(() => props.record?.sys_users || []);
 
-  /** 默认登录用户: 由 is_default 标记, 兜底使用 sys_user 列 */
+  /** Default login user: marked by is_default, falling back to sys_user. */
   const defaultUser = computed<SysUser | undefined>(
     () =>
       sysUsers.value.find((item) => item.is_default) ||
       sysUsers.value.find((item) => item.username === props.record?.sys_user)
   );
 
-  /** 除默认用户以外的其他登录用户 */
+  /** Login users other than the default one. */
   const otherUsers = computed<SysUser[]>(() =>
     sysUsers.value.filter(
       (item) => item.username !== defaultUser.value?.username
@@ -247,7 +247,8 @@
       if (!val) {
         return;
       }
-      // 优先使用实例默认登录用户, 其次 agent 上报账号, 再其次其他用户
+      // Prefer the instance default user, then the agent reported account, then
+      // any other configured user.
       if (defaultUser.value) {
         mode.value = 'default';
       } else if (props.record?.ssh_user) {
@@ -294,10 +295,12 @@
         Message.error(t('terminal.sshConnect.userRequired'));
         return false;
       }
-      // 只传用户名, 由服务端从实例的 sys_users 中取出对应的认证信息
+      // Only the user name is sent; the server resolves its credentials from
+      // the instance sys_users list.
       query.sys_user = defaultUser.value.username;
     } else if (mode.value === 'agent') {
-      // 不传账号, 由服务端回退到 agent 上报的认证信息
+      // No account is sent, so the server falls back to the agent reported
+      // credentials.
     } else if (mode.value === 'other') {
       if (!selectedUser.value) {
         Message.error(t('terminal.create.notSelected'));
@@ -312,7 +315,7 @@
       query.user = manualForm.user;
       query.auth_type = manualForm.auth_type;
       query.port = String(manualForm.port);
-      // 保持终端与 sftp 文件管理器使用同一个登录用户
+      // Keep the terminal and the sftp file manager on the same login user.
       query.sys_user = manualForm.user;
       if (manualForm.auth_type === 'password') {
         query.password = manualForm.password;

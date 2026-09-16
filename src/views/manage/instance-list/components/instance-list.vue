@@ -377,7 +377,7 @@
     namespace: 'default',
   };
 
-  /** 实例设置抽屉宽度: 窄屏自适应 */
+  /** Instance settings drawer width: adaptive on narrow screens. */
   const drawerWidth = computed(() =>
     window.innerWidth < 1200 ? '90%' : '820px'
   );
@@ -518,19 +518,20 @@
         ...record,
         sys_users: (record.sys_users || []).map((item: SysUser) => ({
           username: item.username,
-          // 实例侧只支持 password / key_content, 历史 key_path 数据回落到密码形式
+          // The instance side supports password / key_content only; legacy
+          // key_path entries fall back to the password form.
           auth_type:
             item.auth_type === 'key_content' ? 'key_content' : 'password',
-          // 密钥内容与密码不会由服务端下发, 留空表示保持原值
+          // Key content and password are never sent down; empty keeps the stored value.
           key_content: '',
           password: '',
-          // 服务端已存有凭证, 界面上显示为"已设置";
-          // 历史 key_path 用户需要重新录入密钥内容
+          // The server already has a credential, shown as "configured"; legacy
+          // key_path users have to enter the key content again.
           has_stored: item.auth_type !== 'key_path' && !!item.username,
           is_default: !!item.is_default,
         })),
       };
-      // 兼容历史数据: 默认用户取自 sys_user 列
+      // Backwards compatibility: the default user comes from the sys_user column.
       if (!form.value.sys_users.some((item) => item.is_default)) {
         const defaultItem = form.value.sys_users.find(
           (item) => item.username === record.sys_user
@@ -562,7 +563,7 @@
     }
   };
 
-  /** 冻结字段回写: 按认证方式写入对应字段 */
+  /** Write back a frozen field into the field matching its auth type. */
   const handleSecretChange = (item: SysUser, value: string) => {
     if (item.auth_type === 'key_content') {
       item.key_content = value;
@@ -577,14 +578,14 @@
       form.value.sys_user = '';
     }
     if (!form.value.sys_users.length) {
-      // 清空默认用户, 由服务端清空 sys_user 列
+      // Clear the default user so the server clears the sys_user column.
       form.value.sys_user = '';
       return;
     }
     syncDefaultUser();
   };
 
-  /** 保证有且仅有一个默认登录用户 */
+  /** Keep exactly one default login user. */
   const syncDefaultUser = () => {
     const users = form.value.sys_users;
     if (!users.length) {
@@ -615,7 +616,7 @@
   const handleAuthTypeChange = (item: SysUser) => {
     item.password = '';
     item.key_content = '';
-    // 切换认证方式后重新从冻结态开始
+    // Start from the frozen state again after switching auth type.
     item.has_stored = false;
   };
 

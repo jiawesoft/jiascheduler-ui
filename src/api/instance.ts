@@ -1,22 +1,23 @@
 import axios from 'axios';
 import qs from 'query-string';
 
-/** 实例上配置的 SSH 登录用户（对应 instance.sys_users） */
+/** An SSH login user configured on an instance (stored in `instance.sys_users`). */
 export interface SysUser {
   username: string;
   /** password | key_path | key_content */
   auth_type: string;
-  /** 密钥文件路径（auth_type=key_path 时返回） */
+  /** Key file path, returned when auth_type is key_path. */
   key_path?: string;
-  /** 密钥内容，出于安全考虑不会由服务端返回，仅在提交时使用 */
+  /** Key content; never returned by the server, only sent when submitting. */
   key_content?: string;
-  /** 密码，出于安全考虑不会由服务端返回，留空表示保持原值 */
+  /** Password; never returned by the server, empty keeps the stored value. */
   password?: string;
-  /** 是否为默认登录用户 */
+  /** Whether this is the default login user. */
   is_default?: boolean;
   /**
-   * 仅前端使用：服务端是否已保存该用户的凭证（密码或密钥内容）。
-   * 服务端不下发凭证本身，用它来判断"保持原值"还是"尚未设置"。
+   * Frontend only: whether the server already stores a credential (password or
+   * key content) for this user. The credential itself is never sent down, so
+   * this flag distinguishes "keep the stored value" from "not configured yet".
    */
   has_stored?: boolean;
 }
@@ -29,12 +30,12 @@ export interface InstanceRecord {
   instance_group: string;
   instance_id: string;
   sys_user: string;
-  /** 实例上配置的多个 SSH 登录用户 */
+  /** SSH login users configured on the instance. */
   sys_users?: SysUser[];
   ssh_port?: number;
-  /** agent 上报的 ssh 用户名 */
+  /** SSH user name reported by the agent. */
   ssh_user?: string;
-  /** agent 上报的认证方式: password | key_path | key_content */
+  /** Auth type reported by the agent: password | key_path | key_content. */
   ssh_auth_type?: string;
   namespace: string;
   status: number;
@@ -42,7 +43,7 @@ export interface InstanceRecord {
   created_time: string;
 }
 
-/** /api/instance/user-server-list 返回的记录 */
+/** A record returned by /api/instance/user-server-list. */
 export interface UserServerRecord {
   instance_id: string;
   ip: string;
@@ -51,14 +52,14 @@ export interface UserServerRecord {
   instance_group: string;
   status: number;
   info: string;
-  /** 系统用户（手动设置） */
+  /** System user configured manually. */
   sys_user?: string;
-  /** 实例上配置的多个 SSH 登录用户 */
+  /** SSH login users configured on the instance. */
   sys_users?: SysUser[];
   ssh_port?: number;
-  /** agent 上报的 ssh 用户名 */
+  /** SSH user name reported by the agent. */
   ssh_user?: string;
-  /** agent 上报的认证方式: password | key_path | key_content */
+  /** Auth type reported by the agent: password | key_path | key_content. */
   ssh_auth_type?: string;
   created_time: string;
   updated_time: string;

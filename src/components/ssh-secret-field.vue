@@ -5,7 +5,7 @@
     :class="{ 'is-full': fullWidth }"
     @focusout="handleFocusOut"
   >
-    <!-- 冻结态：只显示状态，点击后才允许编辑（可关闭） -->
+    <!-- Frozen state: status only, editing starts on click (can be disabled). -->
     <div
       v-if="frozen"
       class="ssh-secret-frozen"
@@ -23,7 +23,7 @@
       </span>
     </div>
 
-    <!-- 编辑态 -->
+    <!-- Editing state -->
     <template v-else>
       <a-textarea
         v-if="type === 'key_content'"
@@ -59,7 +59,7 @@
       </a-tooltip>
     </template>
 
-    <!-- 导入文件: 不限文件类型, 单文件最大 512KB -->
+    <!-- Import a file: any file type, at most 512KB per file -->
     <input
       ref="fileInputRef"
       type="file"
@@ -74,7 +74,7 @@
   import { Message } from '@arco-design/web-vue';
   import { useI18n } from 'vue-i18n';
 
-  /** 单个文件最大读取 512KB */
+  /** Maximum file size that may be imported: 512KB. */
   const MAX_FILE_SIZE = 512 * 1024;
 
   const props = defineProps({
@@ -83,24 +83,25 @@
       type: String,
       default: 'password',
     },
-    /** 明文内容, 由父组件持有 */
+    /** Plaintext content, owned by the parent component. */
     modelValue: {
       type: String,
       default: '',
     },
-    /** 服务端是否已存有该凭证(密码或密钥内容) */
+    /** Whether the server already stores the credential (password or key). */
     hasStored: {
       type: Boolean,
       default: false,
     },
-    /** 占满一行(默认在 flex 行内自适应) */
+    /** Take a full row, instead of flexing inside a row. */
     fullWidth: {
       type: Boolean,
       default: false,
     },
     /**
-     * 是否启用「冻结/点击展开」交互。
-     * 关闭后始终是普通可编辑输入框（用于弹窗内切换认证方式的场景）。
+     * Enable the "frozen until clicked" interaction. When disabled the field is
+     * always a plain editable input, which is what the connection dialog needs
+     * because it switches auth type back and forth.
      */
     collapsible: {
       type: Boolean,
@@ -117,9 +118,9 @@
   const fieldRef = ref<HTMLElement>();
   const fileInputRef = ref<HTMLInputElement>();
 
-  /** 只有本次输入了内容, 或服务端已存有凭证时才算"已填写" */
+  /** Considered filled when typed now, or already stored on the server. */
   const hasStored = computed(() => props.hasStored || !!props.modelValue);
-  /** 关闭折叠交互时永远不会处于冻结态 */
+  /** Never frozen when the collapsing interaction is disabled. */
   const frozen = computed(
     () => props.collapsible && !editing.value && !props.modelValue
   );
@@ -133,11 +134,13 @@
   }
 
   /**
-   * 焦点移出本字段且没有内容时, 才退回冻结态。
+   * Collapse back to the frozen state only when focus leaves the whole field and
+   * nothing was typed.
    *
-   * 不能在输入框的 blur 里直接收起：点击「导入密钥文件」时 blur 先于 click
-   * 触发，按钮会被先卸载掉，click 便永远不会派发，文件选择框也就打不开。
-   * 因此这里把判断推迟到当前事件循环之后（click 已派发）再执行。
+   * This cannot live on the input `blur`: clicking "import key file" fires blur
+   * before click, so the button would be unmounted before the click is
+   * dispatched and the file picker would never open. The check is therefore
+   * deferred until after the current task, when the click has been dispatched.
    */
   function handleFocusOut(e: FocusEvent) {
     const next = e.relatedTarget as Node | null;
@@ -146,7 +149,7 @@
       e.currentTarget instanceof HTMLElement &&
       e.currentTarget.contains(next)
     ) {
-      // 焦点仍在本字段内部的其它控件上（例如上传/收起按钮）
+      // Focus is still on another control of this field (import/collapse button).
       return;
     }
     setTimeout(() => {
@@ -159,7 +162,7 @@
     }, 0);
   }
 
-  /** 清空并退回冻结态 */
+  /** Clear the value and collapse back to the frozen state. */
   function reset() {
     emit('update:modelValue', '');
     editing.value = false;
@@ -185,7 +188,7 @@
         return;
       }
       emit('update:modelValue', await file.text());
-      // 导入后保持编辑态, 方便继续手工修改
+      // Stay editable after importing so the content can be tweaked by hand.
       editing.value = true;
       Message.success(
         t('instance.sshUser.importKeyFileSuccess', { name: file.name })

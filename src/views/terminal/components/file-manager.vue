@@ -154,8 +154,10 @@
     QueryFileListParams,
     FileRecord,
     queryFileList,
-    uploadFile,
     removeFile,
+    uploadFileInChunks,
+    downloadFileStream,
+    queryDownloadSize,
   } from '@/api/terminal';
 
   const props = defineProps({
@@ -291,37 +293,20 @@
     const controller = new AbortController();
 
     (async function requestWrap() {
-      const {
-        onProgress,
-        onError,
-        onSuccess,
-        fileItem,
-        name = 'file',
-      } = options;
-      onProgress(20);
-      const formData = new FormData();
-      formData.append('instanceId', props.currentIpParams.instanceId);
-      formData.append('file_path', `${defaultPath.value}/${fileItem.name}`);
-      // 与登录时选择的用户保持一致
-      if (props.sysUser) {
-        formData.append('sys_user', props.sysUser);
-      }
-      formData.append(name as string, fileItem.file as Blob);
-      const onUploadProgress = (event: ProgressEvent) => {
-        let percent;
-        if (event.total > 0) {
-          percent = (event.loaded / event.total) * 100;
-        }
-        onProgress(parseInt(String(percent), 10), event);
-      };
-
+      const { onProgress, onError, onSuccess, fileItem } = options;
+      const filePath = `${defaultPath.value}/${fileItem.name}`;
       try {
-        const res = await uploadFile(formData, {
-          controller,
-          onUploadProgress,
+        // Chunked upload: not bound by the 16MiB single frame limit, so large
+        // files are supported.
+        await uploadFileInChunks({
+          file: fileItem.file as Blob,
+          filePath,
+          instanceId: props.currentIpParams.instanceId,
+          signal: controller.signal,
+          onProgress: (percent) => onProgress(percent),
         });
         fetchData();
-        onSuccess(res);
+        onSuccess({});
       } catch (error) {
         onError(error);
       }
@@ -345,18 +330,38 @@
   };
 
   const downloadFileEvent = async (record: FileRecord) => {
+    setLoading(true);
     try {
       const filePath = `${defaultPath.value}/${record.file_name}`;
-      const sysUserQuery = props.sysUser
-        ? `&sys_user=${encodeURIComponent(props.sysUser)}`
-        : '';
-      const url = `/api/file/sftp/tunnel/download?file_path=${filePath}&instance_id=${props.currentIpParams.instanceId}${sysUserQuery}`;
-      const downloadLink = document.createElement('a');
-      downloadLink.href = url;
-      downloadLink.download = record.file_name;
-      downloadLink.click();
+      const { instanceId } = props.currentIpParams;
+      // Learn the size first so the user gets immediate feedback and an empty
+      // download can be reported instead of silently saving a 0 byte file.
+      const size = await queryDownloadSize({
+        filePath,
+        instanceId,
+        sysUser: props.sysUser,
+      });
+      const blob = await downloadFileStream({
+        filePath,
+        instanceId,
+        sysUser: props.sysUser,
+      });
+      Message.success(`${record.file_name} downloaded (${bytesToSize(size)})`);
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = record.file_name;
+      link.click();
+      // Revoking synchronously can cancel the download before the browser has
+      // taken the blob, so release the object url on a later task instead.
+      setTimeout(() => URL.revokeObjectURL(url), 60_000);
     } catch (err) {
-      console.log('Error:', err);
+      // Surface the real reason instead of a bare "Error"
+      const reason = err instanceof Error ? err.message : `${err}`;
+      Message.error(reason);
+      console.error('sftp download failed', err);
+    } finally {
+      setLoading(false);
     }
   };
   const deleteFile = async (record: FileRecord) => {

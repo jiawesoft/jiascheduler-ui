@@ -130,7 +130,7 @@
   const sshKeyPath = ref(`${route.query.key_path || ''}`);
   const sshKeyContent = ref(`${route.query.key_content || ''}`);
   const sshPort = ref(`${route.query.port || ''}`);
-  /** 从实例的 sys_users 中选择的登录用户 */
+  /** Login user picked from the instance sys_users list. */
   const sshSysUser = ref(`${route.query.sys_user || ''}`);
 
   const terminalRefMap = ref({});

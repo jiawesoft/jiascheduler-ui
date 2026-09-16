@@ -511,7 +511,7 @@
 
   const isShowFile = ref(false);
   const fileIp = ref('');
-  /** sftp 文件管理器使用的登录用户, 与终端登录时选择的用户一致 */
+  /** Login user for the sftp file manager, same as the one chosen at login. */
   const fileSysUser = ref('');
   const currentIpParams = ref({
     ip: '',
@@ -525,8 +525,8 @@
       (v) => v.key === currentServerIndex.value
     );
     fileIp.value = seletedItem ? seletedItem?.ip : '';
-    // sftp 与终端保持同一个登录用户: 优先取登录时选择的用户,
-    // 未显式选择时使用实例的默认登录用户
+    // Keep sftp on the same login user as the terminal: prefer the user chosen
+    // at login, otherwise fall back to the instance default user.
     fileSysUser.value =
       seletedItem?.sshSysUser ||
       props.serverIpList.find((v) => v.instance_id === seletedItem?.instanceId)

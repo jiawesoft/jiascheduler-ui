@@ -342,8 +342,8 @@
   };
 
   /**
-   * 打开 SSH 登录弹窗，先选择登录用户
-   * （实例默认用户 / agent 上报账号 / 其他已配置用户 / 手动输入）。
+   * Open the ssh login dialog so a login user is chosen first (instance default
+   * user / agent reported account / other configured user / manual input).
    */
   const handleOpenSshConnect = (e: any, record: any) => {
     sshConnectRecord.value = record;
