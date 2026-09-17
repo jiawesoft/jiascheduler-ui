@@ -14,8 +14,8 @@
             <a-form-item field="schedule_name" :label="$t('instance.ip')">
               <a-input
                 v-model="formModel.ip"
-                @press-enter="search"
                 :placeholder="$t('instance.ip.placeholder')"
+                @press-enter="search"
               />
             </a-form-item>
           </a-col>
@@ -23,9 +23,9 @@
           <a-col :span="10">
             <a-form-item field="status" :label="$t('instance.status')">
               <a-radio-group
-                @change="search"
                 v-model="formModel.status"
                 type="button"
+                @change="search"
               >
                 <a-radio :value="1">
                   {{ $t('instance.online') }}
@@ -241,7 +241,7 @@
           <div class="sys-users-tip">{{ $t('instance.sshUser.tip') }}</div>
           <div
             v-for="(item, index) in form.sys_users"
-            :key="index"
+            :key="`${formVersion}-${index}`"
             class="sys-user-item"
           >
             <a-radio
@@ -270,7 +270,7 @@
               </a-option>
             </a-select>
             <ssh-secret-field
-              :key="`${index}-${item.auth_type}`"
+              :key="`${formVersion}-${index}-${item.auth_type}`"
               :type="item.auth_type"
               :has-stored="!!item.has_stored"
               :model-value="
@@ -313,8 +313,8 @@
         />
       </a-form-item>
       <a-form-item
-        field="instance-group-id"
         v-if="saveInstanceModalvisible"
+        field="instance-group-id"
         :label="$t('instance.instanceGroup')"
       >
         <select-group v-model:instance-group-id="form.instance_group_id" />
@@ -363,6 +363,16 @@
   const sshConnectRecord = ref<any>(null);
   const saveInstanceFormRef = ref();
   const grantedUserFormRef = ref();
+
+  /**
+   * Bumped every time the drawer opens.
+   *
+   * The ssh user rows keep local ui state (the secret field remembers whether it
+   * was expanded), and their v-for key is index based, so Vue would reuse the
+   * old component instances and show the previous session's state. Including this
+   * version in the keys forces a fresh mount on every open.
+   */
+  const formVersion = ref(0);
 
   const defaultSaveInstanceForm = {
     ip: '',
@@ -511,42 +521,88 @@
     }
   };
 
-  const handleSaveInstanceModal = (e: any, record: any) => {
-    saveInstanceFormRef.value.clearValidate();
-    if (record) {
-      form.value = {
-        ...record,
-        sys_users: (record.sys_users || []).map((item: SysUser) => ({
-          username: item.username,
-          // The instance side supports password / key_content only; legacy
-          // key_path entries fall back to the password form.
-          auth_type:
-            item.auth_type === 'key_content' ? 'key_content' : 'password',
-          // Key content and password are never sent down; empty keeps the stored value.
-          key_content: '',
-          password: '',
-          // The server already has a credential, shown as "configured"; legacy
-          // key_path users have to enter the key content again.
-          has_stored: item.auth_type !== 'key_path' && !!item.username,
-          is_default: !!item.is_default,
-        })),
-      };
-      // Backwards compatibility: the default user comes from the sys_user column.
-      if (!form.value.sys_users.some((item) => item.is_default)) {
-        const defaultItem = form.value.sys_users.find(
-          (item) => item.username === record.sys_user
-        );
-        if (defaultItem) {
-          defaultItem.is_default = true;
-        }
+  /**
+   * Map an api record onto the editable form shape.
+   *
+   * Passwords and key contents are never returned by the server, so they start
+   * empty and an empty value means "keep whatever is stored".
+   */
+  const buildFormFromRecord = (record: any) => {
+    const sysUsers = (record.sys_users || []).map((item: SysUser) => ({
+      username: item.username,
+      // The instance side supports password / key_content only; legacy key_path
+      // entries fall back to the password form.
+      auth_type: item.auth_type === 'key_content' ? 'key_content' : 'password',
+      key_content: '',
+      password: '',
+      // The server already has a credential, shown as "configured"; legacy
+      // key_path users have to enter the key content again.
+      has_stored: item.auth_type !== 'key_path' && !!item.username,
+      is_default: !!item.is_default,
+    }));
+
+    // Backwards compatibility: the default user comes from the sys_user column.
+    if (!sysUsers.some((item: SysUser) => item.is_default)) {
+      const defaultItem = sysUsers.find(
+        (item: SysUser) => item.username === record.sys_user
+      );
+      if (defaultItem) {
+        defaultItem.is_default = true;
       }
-      form.value.sys_user =
-        form.value.sys_users.find((item) => item.is_default)?.username || '';
-    } else {
-      form.value = { ...defaultSaveInstanceForm, sys_users: [] };
     }
 
+    return {
+      ...record,
+      sys_users: sysUsers,
+      sys_user:
+        sysUsers.find((item: SysUser) => item.is_default)?.username || '',
+    };
+  };
+
+  /**
+   * Open the settings drawer.
+   *
+   * The row data comes from the list query and may be minutes old (another admin
+   * may have edited the instance, or a previous edit may still be in the form),
+   * so the record is re-fetched every time the drawer opens instead of reusing
+   * the row object. That is what keeps stale values from leaking into the form.
+   */
+  const handleSaveInstanceModal = async (e: any, record: any) => {
+    saveInstanceFormRef.value.clearValidate();
+    formVersion.value += 1;
+
+    if (!record) {
+      form.value = { ...defaultSaveInstanceForm, sys_users: [] };
+      saveInstanceModalvisible.value = true;
+      return;
+    }
+
+    // Show the row immediately, then replace it with fresh data.
+    form.value = buildFormFromRecord(record);
     saveInstanceModalvisible.value = true;
+
+    const loading = Message.loading({
+      content: t('instance.loadingLatest'),
+      duration: 0,
+    });
+    try {
+      const { data } = await queryInstanceList({
+        page: 1,
+        page_size: 10000,
+        ip: record.ip,
+      });
+      const latest = (data.list || []).find(
+        (v) => v.instance_id === record.instance_id
+      );
+      if (latest) {
+        saveInstanceFormRef.value?.clearValidate();
+        form.value = buildFormFromRecord(latest);
+      }
+    } catch (err) {
+      Message.error(`${err}`);
+    } finally {
+      loading.close();
+    }
   };
 
   const handleAddSysUser = () => {

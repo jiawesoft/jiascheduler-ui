@@ -339,6 +339,7 @@ const localeInstance = {
   'instance.grant': '授权',
   'instance.ip.placeholder': '请输入要查询的IP',
   'instance.updateInstance': '修改实例',
+  'instance.loadingLatest': '正在加载最新配置…',
   'instance.namespace': '命名空间',
   'instance.info': '简介',
   'instance.instanceGroup': '分组',

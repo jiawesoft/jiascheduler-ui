@@ -342,6 +342,7 @@ const localeInstance = {
   'instance.grant': 'Grant',
   'instance.ip.placeholder': 'Please enter the IP to search',
   'instance.updateInstance': 'Update Instance',
+  'instance.loadingLatest': 'Loading the latest configuration…',
   'instance.namespace': 'Namespace',
   'instance.info': 'Description',
   'instance.instanceGroup': 'Group',

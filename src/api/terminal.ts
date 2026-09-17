@@ -243,6 +243,9 @@ export async function downloadFileStream(params: {
   instanceId: string;
   sysUser?: string;
   signal?: AbortSignal;
+  /** total size, used to report a percentage while the stream is read */
+  total?: number;
+  onProgress?: (percent: number) => void;
 }): Promise<Blob> {
   const url = buildDownloadStreamUrl(params);
   const res = await fetch(url, {
@@ -264,7 +267,17 @@ export async function downloadFileStream(params: {
       `GET ${url} returned no data, the agent side download did not start`
     );
   }
+
   const parts: BlobPart[] = [first.value as BlobPart];
+  let received = first.value.length;
+  const report = () => {
+    if (params.total && params.total > 0) {
+      params.onProgress?.(
+        Math.min(100, Math.round((received / params.total) * 100))
+      );
+    }
+  };
+  report();
 
   for (;;) {
     // Sequential reads keep memory at one chunk; the browser owns the rest.
@@ -276,6 +289,8 @@ export async function downloadFileStream(params: {
     }
     if (next.value?.length) {
       parts.push(next.value as BlobPart);
+      received += next.value.length;
+      report();
     }
   }
 
