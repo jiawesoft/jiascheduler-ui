@@ -54,7 +54,7 @@
       type: String,
       default: '',
     },
-    sshUser: {
+    sysUser: {
       type: String,
       default: '',
     },
@@ -66,10 +66,6 @@
       type: String,
       default: '',
     },
-    sshKeyPath: {
-      type: String,
-      default: '',
-    },
     sshKeyContent: {
       type: String,
       default: '',
@@ -78,8 +74,8 @@
       type: String,
       default: '',
     },
-    /** 实例 sys_users 中选中的登录用户 */
-    sshSysUser: {
+
+    userSource: {
       type: String,
       default: '',
     },
@@ -246,16 +242,18 @@
         rows: `${term?.rows}`,
         cols: `${term?.cols}`,
       });
+
+      // user_source: 指定登录用户来源，值为 `sys_user`, `manual`, `agent`，分别表示从实例的系统用户列表中选择或手动指定账号登录或使用agent上报的用户
+      if (props.userSource) params.append('user_source', props.userSource);
+
       // 手动指定账号（可选）：user + auth_type + password/key_path/key_content + port
-      if (props.sshUser) params.append('user', props.sshUser);
+      if (props.sysUser) params.append('sys_user', props.sysUser);
       if (props.sshAuthType) params.append('auth_type', props.sshAuthType);
       if (props.sshPassword) params.append('password', props.sshPassword);
-      if (props.sshKeyPath) params.append('key_path', props.sshKeyPath);
       if (props.sshKeyContent)
         params.append('key_content', props.sshKeyContent);
       if (props.sshPort) params.append('port', props.sshPort);
-      // 从实例 sys_users 中选择的登录用户, 由服务端取出对应的认证信息
-      if (props.sshSysUser) params.append('sys_user', props.sshSysUser);
+
       const socketUrl = `${wsProtocol}//${
         window.location.host
       }/terminal/tunnel/${props.instanceId}?${params.toString()}`;

@@ -125,13 +125,12 @@
           :ref="(el) => setRefMap(el, item.key)"
           :ip="item.ip"
           :instance-id="item.instanceId"
-          :ssh-user="item.sshUser"
+          :sys-user="item.sysUser"
+          :user-source="item.userSource"
           :ssh-auth-type="item.sshAuthType"
           :ssh-password="item.sshPassword"
-          :ssh-key-path="item.sshKeyPath"
           :ssh-key-content="item.sshKeyContent"
           :ssh-port="item.sshPort"
-          :ssh-sys-user="item.sshSysUser"
           :terminal="item"
           @focus-terminal="focusTerminal"
         ></terminal-body>
@@ -190,7 +189,11 @@
       type: String,
       default: '',
     },
-    sshUser: {
+    userSource: {
+      type: String,
+      default: '',
+    },
+    sysUser: {
       type: String,
       default: '',
     },
@@ -202,19 +205,11 @@
       type: String,
       default: '',
     },
-    sshKeyPath: {
-      type: String,
-      default: '',
-    },
     sshKeyContent: {
       type: String,
       default: '',
     },
     sshPort: {
-      type: String,
-      default: '',
-    },
-    sshSysUser: {
       type: String,
       default: '',
     },
@@ -311,13 +306,12 @@
         selected: true,
         namespace: props.namespace || 'default',
         instanceId: props.instanceId,
-        sshUser: props.sshUser,
+        sysUser: props.sysUser,
+        userSource: props.userSource,
         sshAuthType: props.sshAuthType,
         sshPassword: props.sshPassword,
-        sshKeyPath: props.sshKeyPath,
         sshKeyContent: props.sshKeyContent,
         sshPort: props.sshPort,
-        sshSysUser: props.sshSysUser,
       },
     ];
     setHistoryTerminal({
@@ -525,13 +519,8 @@
       (v) => v.key === currentServerIndex.value
     );
     fileIp.value = seletedItem ? seletedItem?.ip : '';
-    // Keep sftp on the same login user as the terminal: prefer the user chosen
-    // at login, otherwise fall back to the instance default user.
-    fileSysUser.value =
-      seletedItem?.sshSysUser ||
-      props.serverIpList.find((v) => v.instance_id === seletedItem?.instanceId)
-        ?.sys_user ||
-      '';
+    // Keep sftp on the same login user as the terminal
+    fileSysUser.value = seletedItem?.sysUser || '';
     currentIpParams.value = {
       ip: seletedItem?.ip || '',
       namespace: seletedItem?.namespace || 'default',

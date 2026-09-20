@@ -49,16 +49,14 @@ export interface ServerList {
   selected?: boolean;
   namespace?: string;
   instanceId?: string;
-  /** Login user: either specified manually or picked from `sys_users`. */
-  sshUser?: string;
+  sysUser?: string;
+  userSource?: string;
   /** password | key_path | key_content */
   sshAuthType?: string;
   sshPassword?: string;
   sshKeyPath?: string;
   sshKeyContent?: string;
   sshPort?: string;
-  /** Login user picked from instance `sys_users`. */
-  sshSysUser?: string;
 }
 
 export function queryFileList(params: QueryFileListParams) {

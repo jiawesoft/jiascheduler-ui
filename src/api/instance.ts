@@ -35,7 +35,7 @@ export interface InstanceRecord {
   ssh_port?: number;
   /** SSH user name reported by the agent. */
   ssh_user?: string;
-  /** Auth type reported by the agent: password | key_path | key_content. */
+  /** Auth type reported by the agent: password | key_content. */
   ssh_auth_type?: string;
   namespace: string;
   status: number;

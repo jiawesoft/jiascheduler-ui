@@ -71,7 +71,7 @@
 
   const progressStatus = (status: TransferTask['status']) => {
     if (status === 'success') return 'success';
-    if (status === 'failed') return 'error';
+    if (status === 'failed') return 'danger';
     if (status === 'cancelled') return 'warning';
     return 'normal';
   };

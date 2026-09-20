@@ -299,8 +299,8 @@
       // the instance sys_users list.
       query.sys_user = defaultUser.value.username;
     } else if (mode.value === 'agent') {
-      // No account is sent, so the server falls back to the agent reported
-      // credentials.
+      query.sys_user = props.record?.ssh_user || '';
+      query.user_source = 'agent';
     } else if (mode.value === 'other') {
       if (!selectedUser.value) {
         Message.error(t('terminal.create.notSelected'));
@@ -312,11 +312,11 @@
       if (ret) {
         return false;
       }
-      query.user = manualForm.user;
       query.auth_type = manualForm.auth_type;
       query.port = String(manualForm.port);
       // Keep the terminal and the sftp file manager on the same login user.
       query.sys_user = manualForm.user;
+      query.user_source = 'manual';
       if (manualForm.auth_type === 'password') {
         query.password = manualForm.password;
       } else {

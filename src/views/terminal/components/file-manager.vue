@@ -425,7 +425,7 @@
       const filePath = `${defaultPath.value}/${fileItem.name}`;
       const total = (fileItem.file as Blob).size;
       const taskId = createTask({
-        name: fileItem.name,
+        name: fileItem.name || '',
         direction: 'upload',
         total,
       });
