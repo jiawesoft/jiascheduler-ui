@@ -124,8 +124,9 @@
         :label="$t('terminal.sshConnect.password')"
         :rules="[
           {
+            required: true,
             validator: validatePassword,
-            message: $t('terminal.sshConnect.passwordRequired'),
+            // message: $t('terminal.sshConnect.passwordRequired'),
           },
         ]"
       >
@@ -143,8 +144,9 @@
         :label="$t('terminal.sshConnect.keyContent')"
         :rules="[
           {
+            required: true,
             validator: validateKeyContent,
-            message: $t('terminal.sshConnect.keyContentRequired'),
+            // message: $t('terminal.sshConnect.keyContentRequired'),
           },
         ]"
       >
@@ -217,11 +219,19 @@
    * value; validate the underlying form field explicitly instead.
    */
   function validatePassword(_value: any, callback: (error?: string) => void) {
-    callback(manualForm.password ? undefined : '');
+    callback(
+      manualForm.password
+        ? undefined
+        : t('terminal.sshConnect.passwordRequired')
+    );
   }
 
   function validateKeyContent(_value: any, callback: (error?: string) => void) {
-    callback(manualForm.key_content ? undefined : '');
+    callback(
+      manualForm.key_content
+        ? undefined
+        : t('terminal.sshConnect.keyContentRequired')
+    );
   }
 
   /** Login users configured on the instance. */
@@ -315,7 +325,7 @@
       query.auth_type = manualForm.auth_type;
       query.port = String(manualForm.port);
       // Keep the terminal and the sftp file manager on the same login user.
-      query.sys_user = manualForm.user;
+      query.sys_user = manualForm.user.trim();
       query.user_source = 'manual';
       if (manualForm.auth_type === 'password') {
         query.password = manualForm.password;
