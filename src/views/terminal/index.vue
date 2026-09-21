@@ -132,11 +132,14 @@
   const sshKeyContent = ref(`${route.query.key_content || ''}`);
   const sshPort = ref(`${route.query.port || ''}`);
 
+  const sessionId = `${route.query.session_id || ''}`;
+
   const terminalRefMap = ref({});
 
   interface splitItem {
     id: string;
     config?: string;
+    session_id?: string;
     selected?: boolean;
     ip?: string;
     namespace?: string;
@@ -193,6 +196,7 @@
           sshPassword: sshPassword.value,
           sshKeyContent: sshKeyContent.value,
           sshPort: sshPort.value,
+          session_id: sessionId,
         },
       ];
 
@@ -202,6 +206,7 @@
       setLoading(false);
     }
   };
+
   fetchData({ page: 1, page_size: 20, instance_id: instanceId.value });
 
   const changeIp = (ip: string) => {

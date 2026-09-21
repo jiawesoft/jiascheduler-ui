@@ -310,3 +310,32 @@ export function downloadFile(params: DownloadData) {
     responseType: 'blob',
   });
 }
+
+export interface TerminalSession {
+  session_id: string;
+}
+
+export interface CreateTerminalSessionParams {
+  instance_id: string;
+  user_source?: string;
+  auth_type?: string;
+  password?: string;
+  key_content?: string;
+  port?: number;
+  sys_user?: string;
+}
+
+export function createTerminalSession(params: CreateTerminalSessionParams) {
+  return axios.post<TerminalSession>('/api/terminal/session/create', {
+    ...params,
+  });
+}
+
+export function getTerminalSession(params: { session_id: string }) {
+  return axios.get<TerminalSession>('/api/terminal/session/detail', {
+    params,
+    paramsSerializer: (obj) => {
+      return qs.stringify(obj);
+    },
+  });
+}

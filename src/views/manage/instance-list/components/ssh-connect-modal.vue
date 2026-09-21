@@ -176,6 +176,7 @@
   import { Message } from '@arco-design/web-vue';
   import { InstanceRecord, SysUser, UserServerRecord } from '@/api/instance';
   import SshSecretField from '@/components/ssh-secret-field.vue';
+  import { createTerminalSession } from '@/api/terminal';
 
   const props = defineProps({
     visible: {
@@ -296,7 +297,7 @@
       return false;
     }
 
-    const query: Record<string, string> = {
+    const params: Record<string, string> = {
       instance_id: props.record.instance_id,
     };
 
@@ -307,36 +308,46 @@
       }
       // Only the user name is sent; the server resolves its credentials from
       // the instance sys_users list.
-      query.sys_user = defaultUser.value.username;
+      params.sys_user = defaultUser.value.username;
     } else if (mode.value === 'agent') {
-      query.sys_user = props.record?.ssh_user || '';
-      query.user_source = 'agent';
+      params.sys_user = props.record?.ssh_user || '';
+      params.user_source = 'agent';
     } else if (mode.value === 'other') {
       if (!selectedUser.value) {
         Message.error(t('terminal.create.notSelected'));
         return false;
       }
-      query.sys_user = selectedUser.value;
+      params.sys_user = selectedUser.value;
     } else {
       const ret = await manualFormRef.value.validate();
       if (ret) {
         return false;
       }
-      query.auth_type = manualForm.auth_type;
-      query.port = String(manualForm.port);
+      params.auth_type = manualForm.auth_type;
+      params.port = String(manualForm.port);
       // Keep the terminal and the sftp file manager on the same login user.
-      query.sys_user = manualForm.user.trim();
-      query.user_source = 'manual';
+      params.sys_user = manualForm.user.trim();
+      params.user_source = 'manual';
       if (manualForm.auth_type === 'password') {
-        query.password = manualForm.password;
+        params.password = manualForm.password;
       } else {
-        query.key_content = manualForm.key_content;
+        params.key_content = manualForm.key_content;
       }
     }
 
+    const { data } = await createTerminalSession({
+      instance_id: params.instance_id,
+      sys_user: params.sys_user,
+      user_source: params.user_source,
+      auth_type: params.auth_type,
+      password: params.password,
+      key_content: params.key_content,
+      port: (params.port && Number(params.port)) || undefined,
+    });
+
     const url = router.resolve({
       name: 'terminal',
-      query,
+      query: { session_id: data.session_id },
     });
     window.open(url.href, '_blank');
 
