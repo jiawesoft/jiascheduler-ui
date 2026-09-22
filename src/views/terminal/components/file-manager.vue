@@ -192,6 +192,10 @@
       type: String,
       default: '',
     },
+    sessionId: {
+      type: String,
+      default: '',
+    },
     currentIpParams: {
       type: Object,
       default: () => {
@@ -256,8 +260,7 @@
   const fetchData = async (
     params: QueryFileListParams = {
       dir: defaultPath.value,
-      instance_id: props.currentIpParams.instanceId,
-      sys_user: props.sysUser || undefined,
+      terminal_session_id: props.sessionId,
     }
   ) => {
     setLoading(true);
@@ -265,7 +268,6 @@
     try {
       const { data } = await queryFileList({
         ...params,
-        sys_user: props.sysUser || undefined,
       });
       defaultPath.value = data.current_dir;
       fileData.value = data.entry;
@@ -440,7 +442,7 @@
         await uploadFileInChunks({
           file: fileItem.file as Blob,
           filePath,
-          instanceId: props.currentIpParams.instanceId,
+          terminalSessionId: props.sessionId,
           signal: controller.signal,
           onProgress: (percent) => {
             onProgress(percent);
@@ -482,15 +484,13 @@
 
   const downloadFileEvent = async (record: FileRecord) => {
     const filePath = `${defaultPath.value}/${record.file_name}`;
-    const { instanceId } = props.currentIpParams;
 
     try {
       // Learn the size first: it feeds the progress bar and turns a silent empty
       // download into a real error.
       const size = await queryDownloadSize({
         filePath,
-        instanceId,
-        sysUser: props.sysUser,
+        terminalSessionId: props.sessionId,
       });
       const taskId = createTask({
         name: record.file_name,
@@ -505,8 +505,7 @@
 
       const blob = await downloadFileStream({
         filePath,
-        instanceId,
-        sysUser: props.sysUser,
+        terminalSessionId: props.sessionId,
         total: size,
         signal: controller.signal,
         onProgress: (percent) => {
@@ -546,8 +545,7 @@
       await removeFile({
         remove_type: record.file_type.toLowerCase(),
         path: `${defaultPath.value}/${record.file_name}`,
-        instance_id: props.currentIpParams.instanceId,
-        sys_user: props.sysUser || undefined,
+        terminal_session_id: props.sessionId,
       });
       Message.success(`success`);
       fetchData();

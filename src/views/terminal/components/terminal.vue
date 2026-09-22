@@ -125,11 +125,9 @@
           :ref="(el) => setRefMap(el, item.key)"
           :ip="item.ip"
           :instance-id="item.instanceId"
+          :session-id="item.sessionId"
           :sys-user="item.sysUser"
           :user-source="item.userSource"
-          :ssh-auth-type="item.sshAuthType"
-          :ssh-password="item.sshPassword"
-          :ssh-key-content="item.sshKeyContent"
           :ssh-port="item.sshPort"
           :terminal="item"
           @focus-terminal="focusTerminal"
@@ -148,9 +146,10 @@
     <file-manager
       v-if="isShowFile"
       :visible="isShowFile"
+      :session-id="fileSessionId"
+      :current-ip-params="currentIpParams"
       :file-ip="fileIp"
       :sys-user="fileSysUser"
-      :current-ip-params="currentIpParams"
       @handle-close="handleCloseFile"
     ></file-manager>
   </div>
@@ -159,7 +158,7 @@
 <script lang="ts" setup>
   import { nextTick, ref, watch, PropType, computed } from 'vue';
   import { useAppStore } from '@/store';
-  import { ServerList } from '@/api/terminal';
+  import { TerminalServer, TerminalSession } from '@/api/terminal';
   import { InstanceRecord } from '@/api/instance';
   import { cloneDeep } from 'lodash';
 
@@ -189,27 +188,15 @@
       type: String,
       default: '',
     },
+    sessionId: {
+      type: String,
+      default: '',
+    },
     userSource: {
       type: String,
       default: '',
     },
     sysUser: {
-      type: String,
-      default: '',
-    },
-    sshAuthType: {
-      type: String,
-      default: '',
-    },
-    sshPassword: {
-      type: String,
-      default: '',
-    },
-    sshKeyContent: {
-      type: String,
-      default: '',
-    },
-    sshPort: {
       type: String,
       default: '',
     },
@@ -245,19 +232,21 @@
   ]);
 
   const fetchIpList = (params) => {
+    alert('fetchIpList');
     emit('fetchList', params);
   };
 
-  interface HistoryList {
+  interface HistoryItem {
     ip: string;
     id?: number;
     namespace?: string;
     instance_id?: string;
+    session_id?: string;
   }
-  const historyList = ref<HistoryList[]>([]);
+  const historyList = ref<HistoryItem[]>([]);
 
   const HISTORYTERMINAL = 'historyTerminalList';
-  const setHistoryTerminal = (history: HistoryList) => {
+  const setHistoryTerminal = (history: HistoryItem) => {
     if (!history.ip) return;
     const historyString = localStorage.getItem(HISTORYTERMINAL);
     historyList.value = historyString ? JSON.parse(historyString) : [];
@@ -274,6 +263,7 @@
       ip: history.ip,
       namespace: history.namespace || 'default',
       instance_id: history.instance_id,
+      session_id: history.session_id,
     });
     if (historyList.value.length > 5) {
       historyList.value.shift();
@@ -297,7 +287,7 @@
   //   namespace?: string;
   //   instanceId?: string;
   // }
-  const serverList = ref<ServerList[]>([]);
+  const serverList = ref<TerminalServer[]>([]);
   if (props.currentIp) {
     serverList.value = [
       {
@@ -308,16 +298,14 @@
         instanceId: props.instanceId,
         sysUser: props.sysUser,
         userSource: props.userSource,
-        sshAuthType: props.sshAuthType,
-        sshPassword: props.sshPassword,
-        sshKeyContent: props.sshKeyContent,
-        sshPort: props.sshPort,
+        sessionId: props.sessionId,
       },
     ];
     setHistoryTerminal({
       ip: `${props.currentIp}`,
       namespace: props.namespace || 'default',
       instance_id: props.instanceId,
+      session_id: props.sessionId,
     });
   }
 
@@ -332,7 +320,7 @@
     });
   }
 
-  function handleServerTab(item: ServerList) {
+  function handleServerTab(item: TerminalServer) {
     currentServerIndex.value = item.key;
     terminalResize();
     emit('outerSplitSelected', props.id);
@@ -345,15 +333,16 @@
     }
   }
 
-  function handleAddTerminal(list: HistoryList) {
-    const curIp = list.ip;
+  function handleAddTerminal(item: HistoryItem) {
+    const curIp = item.ip;
     // const addServerKey = serverList.value.length + 1;
     const lastServer = serverList.value[serverList.value.length - 1];
     serverList.value.push({
       ip: `${curIp}`,
       key: lastServer ? lastServer.key + 1 : 1,
-      namespace: list.namespace || 'default',
-      instanceId: list.instance_id,
+      namespace: item.namespace || 'default',
+      instanceId: item.instance_id,
+      sessionId: item.session_id,
     });
     currentServerIndex.value = lastServer ? lastServer.key + 1 : 1;
     nextTick(() => {
@@ -365,8 +354,9 @@
     appStore.setConnectNumber(currentNum + 1);
     setHistoryTerminal({
       ip: `${curIp}`,
-      namespace: list.namespace || 'default',
-      instance_id: list.instance_id,
+      namespace: item.namespace || 'default',
+      instance_id: item.instance_id,
+      session_id: item.session_id,
     });
   }
 
@@ -380,7 +370,7 @@
 
   const contextVisible = ref(false);
 
-  function deleteServer(item?: ServerList) {
+  function deleteServer(item?: TerminalServer) {
     if (!item) {
       return;
     }
@@ -417,9 +407,9 @@
 
   const top = ref(0);
   const left = ref(0);
-  const openCurrentItem = ref<ServerList>();
+  const openCurrentItem = ref<TerminalServer>();
 
-  function openMenu(item: ServerList, e: any) {
+  function openMenu(item: TerminalServer, e: any) {
     openCurrentItem.value = item;
     const offsetLeft = 48; // container margin left
     const l = e.clientX - offsetLeft + 15; // 15: margin right
@@ -504,8 +494,8 @@
   };
 
   const isShowFile = ref(false);
+  const fileSessionId = ref('');
   const fileIp = ref('');
-  /** Login user for the sftp file manager, same as the one chosen at login. */
   const fileSysUser = ref('');
   const currentIpParams = ref({
     ip: '',
@@ -518,8 +508,9 @@
     const seletedItem = serverList.value.find(
       (v) => v.key === currentServerIndex.value
     );
-    fileIp.value = seletedItem ? seletedItem?.ip : '';
-    // Keep sftp on the same login user as the terminal
+
+    fileSessionId.value = seletedItem?.sessionId || '';
+    fileIp.value = seletedItem?.ip || '';
     fileSysUser.value = seletedItem?.sysUser || '';
     currentIpParams.value = {
       ip: seletedItem?.ip || '',

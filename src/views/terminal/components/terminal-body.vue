@@ -54,28 +54,15 @@
       type: String,
       default: '',
     },
+    sessionId: {
+      type: String,
+      default: '',
+    },
     sysUser: {
       type: String,
       default: '',
     },
-    sshAuthType: {
-      type: String,
-      default: '',
-    },
-    sshPassword: {
-      type: String,
-      default: '',
-    },
-    sshKeyContent: {
-      type: String,
-      default: '',
-    },
     sshPort: {
-      type: String,
-      default: '',
-    },
-
-    userSource: {
       type: String,
       default: '',
     },
@@ -243,20 +230,9 @@
         cols: `${term?.cols}`,
       });
 
-      // user_source: 指定登录用户来源，值为 `sys_user`, `manual`, `agent`，分别表示从实例的系统用户列表中选择或手动指定账号登录或使用agent上报的用户
-      if (props.userSource) params.append('user_source', props.userSource);
-
-      // 手动指定账号（可选）：user + auth_type + password/key_path/key_content + port
-      if (props.sysUser) params.append('sys_user', props.sysUser);
-      if (props.sshAuthType) params.append('auth_type', props.sshAuthType);
-      if (props.sshPassword) params.append('password', props.sshPassword);
-      if (props.sshKeyContent)
-        params.append('key_content', props.sshKeyContent);
-      if (props.sshPort) params.append('port', props.sshPort);
-
       const socketUrl = `${wsProtocol}//${
         window.location.host
-      }/terminal/tunnel/${props.instanceId}?${params.toString()}`;
+      }/terminal/tunnel/${props.sessionId}?${params.toString()}`;
 
       // const socketUrl = `${props.socketUrl}?rows=${term?.rows}&cols=${term?.cols}`;
       socket = new WebSocket(socketUrl);

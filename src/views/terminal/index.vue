@@ -46,21 +46,15 @@
                 :current-ip="item.ip"
                 :namespace="item.namespace"
                 :instance-id="item.instanceId"
+                :session-id="item.sessionId"
                 :sys-user="item.sysUser"
                 :user-source="item.userSource"
-                :ssh-auth-type="item.sshAuthType"
-                :ssh-password="item.sshPassword"
-                :ssh-key-path="item.sshKeyPath"
-                :ssh-key-content="item.sshKeyContent"
-                :ssh-port="item.sshPort"
-                :ssh-sys-user="item.sshSysUser"
                 :server-ip-list="serverIpList"
                 :loading="loading"
                 @add-split="handleAddTerminal"
                 @delete-split="handleDeleteTerminal"
                 @full-screen-terminal="handleFullScreen"
                 @outer-split-selected="outerSplitSelected"
-                @fetch-list="fetchData"
                 @change-ip="changeIp"
               ></terminal>
             </pane>
@@ -101,7 +95,7 @@
     QueryUserServerReq,
     queryUserServerList,
   } from '@/api/instance';
-  import { ServerList } from '@/api/terminal';
+  import { getTerminalSession, TerminalServer } from '@/api/terminal';
   import terminal from './components/terminal.vue';
   import quickCommand from './components/quick-command.vue';
 
@@ -127,11 +121,6 @@
   // 手动指定账号参数（可选）
   const userSource = ref(`${route.query.user_source || ''}`);
   const sysUser = ref(`${route.query.sys_user || ''}`);
-  const sshAuthType = ref(`${route.query.auth_type || ''}`);
-  const sshPassword = ref(`${route.query.password || ''}`);
-  const sshKeyContent = ref(`${route.query.key_content || ''}`);
-  const sshPort = ref(`${route.query.port || ''}`);
-
   const sessionId = `${route.query.session_id || ''}`;
 
   const terminalRefMap = ref({});
@@ -139,75 +128,88 @@
   interface splitItem {
     id: string;
     config?: string;
-    session_id?: string;
+    sessionId?: string;
     selected?: boolean;
     ip?: string;
     namespace?: string;
     instanceId?: string;
     userSource?: string;
     sysUser?: string;
-    sshAuthType?: string;
-    sshPassword?: string;
-    sshKeyPath?: string;
-    sshKeyContent?: string;
-    sshPort?: string;
-    sshSysUser?: string;
   }
   const splitTerminalList = ref<splitItem[]>([]);
 
   const { loading, setLoading } = useLoading(false);
   const serverIpList = ref<InstanceRecord[]>([]);
-  const fetchData = async (
-    params: QueryUserServerReq = {
-      page: 1,
-      page_size: 20,
-    }
-  ) => {
-    try {
-      setLoading(true);
-      const { data } = await queryUserServerList(params);
-      serverIpList.value = data?.list || [];
+  // const fetchData = async (
+  //   params: QueryUserServerReq = {
+  //     page: 1,
+  //     page_size: 20,
+  //   }
+  // ) => {
+  //   try {
+  //     setLoading(true);
+  //     const { data } = await queryUserServerList(params);
+  //     serverIpList.value = data?.list || [];
 
-      const currentIpItem = serverIpList.value.find(
-        (v) => v.instance_id === instanceId.value
-      );
-      if (!currentIpItem) {
-        Modal.error({
-          content: 'No data found!',
-          escToClose: false,
-          maskClosable: false,
-          onOk: () => {
-            router.push({
-              path: '/',
-            });
-          },
-        });
-        return;
-      }
+  //     const currentIpItem = serverIpList.value.find(
+  //       (v) => v.instance_id === instanceId.value
+  //     );
+  //     if (!currentIpItem) {
+  //       Modal.error({
+  //         content: 'No data found!',
+  //         escToClose: false,
+  //         maskClosable: false,
+  //         onOk: () => {
+  //           router.push({
+  //             path: '/',
+  //           });
+  //         },
+  //       });
+  //       return;
+  //     }
+  //     splitTerminalList.value = [
+  //       {
+  //         id: Math.random().toString(16).substring(2),
+  //         ip: currentIpItem?.ip || '',
+  //         namespace: currentIpItem?.namespace,
+  //         instanceId: currentIpItem?.instance_id,
+  //         sysUser: sysUser.value,
+  //         userSource: userSource.value,
+  //       },
+  //     ];
+
+  //     setLoading(false);
+  //   } catch (err) {
+  //     console.log(err);
+  //     setLoading(false);
+  //   }
+  // };
+
+  // fetchData({ page: 1, page_size: 20, instance_id: instanceId.value });
+
+  const initTerminal = async () => {
+    setLoading(true);
+    try {
+      const { data } = await getTerminalSession({ session_id: sessionId });
       splitTerminalList.value = [
         {
-          id: Math.random().toString(16).substring(2),
-          ip: currentIpItem?.ip || '',
-          namespace: currentIpItem?.namespace,
-          instanceId: currentIpItem?.instance_id,
-          sysUser: sysUser.value,
-          userSource: userSource.value,
-          sshAuthType: sshAuthType.value,
-          sshPassword: sshPassword.value,
-          sshKeyContent: sshKeyContent.value,
-          sshPort: sshPort.value,
-          session_id: sessionId,
+          id: data.session_id,
+          ip: data.instance.ip,
+          namespace: data.instance.namespace,
+          instanceId: data.instance.instance_id,
+          sysUser: data.connect_opts.user,
+          userSource: data.user_source,
+          sessionId: data.session_id,
         },
       ];
-
-      setLoading(false);
     } catch (err) {
       console.log(err);
+    } finally {
       setLoading(false);
     }
   };
 
-  fetchData({ page: 1, page_size: 20, instance_id: instanceId.value });
+  initTerminal();
 
   const changeIp = (ip: string) => {
     if (!ip) return;
@@ -259,7 +261,7 @@
     });
   }
 
-  function handleAddTerminal(server: ServerList) {
+  function handleAddTerminal(server: TerminalServer) {
     const currentNum = appStore.connect_number;
     appStore.setConnectNumber(currentNum + 1);
     splitTerminalList.value.push({
@@ -267,6 +269,7 @@
       ip: server.ip,
       namespace: server?.namespace,
       instanceId: server?.instanceId,
+      sessionId: server?.sessionId,
     });
     splitResized();
   }

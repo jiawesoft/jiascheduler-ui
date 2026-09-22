@@ -11,12 +11,9 @@ export interface FileRecord {
   modified: string;
   instance_id: string;
 }
-export interface QueryFileListParams extends Partial<FileRecord> {
+export interface QueryFileListParams {
   dir?: string;
-  namespace?: string;
-  instance_id: string;
-  /** Login user picked from instance `sys_users`; empty means the default one. */
-  sys_user?: string;
+  terminal_session_id?: string;
 }
 
 export interface QuryFileListRes {
@@ -28,10 +25,7 @@ export interface QuryFileListRes {
 export interface RemoveParams {
   remove_type: string;
   path: string;
-  namespace?: string;
-  instance_id?: string;
-  /** Login user picked from instance `sys_users`; empty means the default one. */
-  sys_user?: string;
+  terminal_session_id?: string;
 }
 
 export interface DownloadData {
@@ -40,7 +34,7 @@ export interface DownloadData {
   namespace?: string;
 }
 
-export interface ServerList {
+export interface TerminalServer {
   ip: string;
   key: number;
   info?: string;
@@ -49,13 +43,11 @@ export interface ServerList {
   selected?: boolean;
   namespace?: string;
   instanceId?: string;
+  sessionId?: string;
   sysUser?: string;
   userSource?: string;
   /** password | key_path | key_content */
   sshAuthType?: string;
-  sshPassword?: string;
-  sshKeyPath?: string;
-  sshKeyContent?: string;
   sshPort?: string;
 }
 
@@ -119,11 +111,11 @@ function blobToBase64(blob: Blob): Promise<string> {
 export async function uploadFileInChunks(params: {
   file: File | Blob;
   filePath: string;
-  instanceId: string;
+  terminalSessionId: string;
   onProgress?: (percent: number) => void;
   signal?: AbortSignal;
 }): Promise<void> {
-  const { file, filePath, instanceId, onProgress, signal } = params;
+  const { file, filePath, terminalSessionId, onProgress, signal } = params;
 
   const total = file.size;
   const sessionId = `${Date.now()}-${Math.random().toString(16).slice(2)}`;
@@ -132,7 +124,7 @@ export async function uploadFileInChunks(params: {
     await axios.post<{ session_id: string; chunk_size: number }>(
       '/api/file/sftp/tunnel/upload/start',
       {
-        instance_id: instanceId,
+        terminal_session_id: terminalSessionId,
         file_path: filePath,
         session_id: sessionId,
         total_size: total,
@@ -153,7 +145,7 @@ export async function uploadFileInChunks(params: {
       await axios.post<{ next_offset: number }>(
         '/api/file/sftp/tunnel/upload/chunk',
         {
-          instance_id: instanceId,
+          terminal_session_id: terminalSessionId,
           file_path: filePath,
           session_id: sessionId,
           offset,
@@ -172,7 +164,7 @@ export async function uploadFileInChunks(params: {
     await axios.post<{ result: string }>(
       '/api/file/sftp/tunnel/upload/finish',
       {
-        instance_id: instanceId,
+        terminal_session_id: terminalSessionId,
         file_path: filePath,
         session_id: sessionId,
         total_size: total,
@@ -193,23 +185,18 @@ export async function uploadFileInChunks(params: {
  */
 export function buildDownloadStreamUrl(params: {
   filePath: string;
-  instanceId: string;
-  sysUser?: string;
+  terminalSessionId: string;
 }): string {
   const search = new URLSearchParams({
     file_path: params.filePath,
-    instance_id: params.instanceId,
+    terminal_session_id: params.terminalSessionId,
   });
-  if (params.sysUser) {
-    search.set('sys_user', params.sysUser);
-  }
   return `/file/sftp/tunnel/download/stream?${search.toString()}`;
 }
 
 export async function queryDownloadSize(params: {
   filePath: string;
-  instanceId: string;
-  sysUser?: string;
+  terminalSessionId: string;
 }): Promise<number> {
   const stat = body(
     await axios.get<{ result: string; next_offset: number }>(
@@ -217,8 +204,7 @@ export async function queryDownloadSize(params: {
       {
         params: {
           file_path: params.filePath,
-          instance_id: params.instanceId,
-          ...(params.sysUser ? { sys_user: params.sysUser } : {}),
+          terminal_session_id: params.terminalSessionId,
         },
         paramsSerializer: (obj) => qs.stringify(obj),
       }
@@ -238,8 +224,7 @@ export async function queryDownloadSize(params: {
  */
 export async function downloadFileStream(params: {
   filePath: string;
-  instanceId: string;
-  sysUser?: string;
+  terminalSessionId: string;
   signal?: AbortSignal;
   /** total size, used to report a percentage while the stream is read */
   total?: number;
@@ -311,7 +296,7 @@ export function downloadFile(params: DownloadData) {
   });
 }
 
-export interface TerminalSession {
+export interface CreateTerminalSessionResp {
   session_id: string;
 }
 
@@ -326,11 +311,44 @@ export interface CreateTerminalSessionParams {
 }
 
 export function createTerminalSession(params: CreateTerminalSessionParams) {
-  return axios.post<TerminalSession>('/api/terminal/session/create', {
+  return axios.post<CreateTerminalSessionResp>('/api/terminal/session/create', {
     ...params,
   });
 }
 
+export interface TerminalSession {
+  connect_opts: {
+    user: string;
+    port: number;
+    auth_type: {
+      Paassword?: string;
+      KeyPath?: string;
+      KeyContent?: string;
+    };
+  };
+  created_username: string;
+  session_id: string;
+  user_source: string;
+  instance: {
+    id: number;
+    ip: string;
+    instance_id: string;
+    mac_addr: string;
+    info: string;
+    namespace: string;
+    sys_user: string;
+    sys_users?: [];
+    register_data?: object;
+    ssh_port?: number;
+    password?: string;
+    instance_group_id?: number;
+    instance_group_name?: string;
+    tag_id?: number;
+    status: number;
+    created_time: string;
+    updated_time: string;
+  };
+}
 export function getTerminalSession(params: { session_id: string }) {
   return axios.get<TerminalSession>('/api/terminal/session/detail', {
     params,
