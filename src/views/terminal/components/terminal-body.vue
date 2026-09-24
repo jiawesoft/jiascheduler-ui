@@ -240,6 +240,8 @@
 
     // 监听socket连接
     socket.onopen = () => {
+      const currentNum = appStore.connect_number;
+      appStore.setConnectNumber(currentNum + 1);
       onConnected();
     };
 

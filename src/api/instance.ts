@@ -45,6 +45,7 @@ export interface InstanceRecord {
 
 /** A record returned by /api/instance/user-server-list. */
 export interface UserServerRecord {
+  id: number;
   instance_id: string;
   ip: string;
   namespace: string;

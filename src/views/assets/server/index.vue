@@ -15,8 +15,9 @@
             <a-row :gutter="5">
               <a-col :span="10">
                 <a-form-item field="ip" :label="$t('instance.ip')">
-                  <a-input
+                  <a-textarea
                     v-model="formModel.ip"
+                    auto-size
                     :placeholder="$t('instance.ip.placeholder')"
                     @press-enter="search"
                   />
@@ -311,6 +312,7 @@
       page: 1,
       page_size: 20,
       status: formModel.value.status,
+      ips: formModel.value.ip.split('\n').filter((v) => v.trim() !== ''),
     }
   ) => {
     setLoading(true);
@@ -354,14 +356,16 @@
     fetchData({
       page: basePagination.page,
       page_size: basePagination.pageSize,
-      ...formModel.value,
-    } as unknown as QueryInstanceListReq);
+      status: formModel.value.status,
+      ips: formModel.value.ip.split('\n').filter((v) => v.trim() !== ''),
+    });
   };
   const onPageChange = (current: number) => {
     fetchData({
       page_size: pagination.pageSize,
       page: current,
-      ...formModel.value,
+      status: formModel.value.status,
+      ips: formModel.value.ip.split('\n').filter((v) => v.trim() !== ''),
     });
   };
 

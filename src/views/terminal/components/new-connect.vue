@@ -1,10 +1,12 @@
 <template>
   <a-modal
     :visible="isCreate"
-    :on-before-ok="handleBeforeOk"
     :unmount-on-close="true"
     :draggable="true"
     width="50%"
+    hide-cancel
+    :footer="false"
+    @ok="handleCancel"
     @cancel="handleCancel"
   >
     <template #title> {{ $t('terminal.newConnect') }} </template>
@@ -12,18 +14,23 @@
       <div style="margin-bottom: 16px">
         <div class="sub-title">{{ $t('terminal.create.searchTitle') }}</div>
         <a-space>
-          <a-input
+          <!-- <a-input
             v-model="searchKey"
             :style="{ width: '320px' }"
             :placeholder="$t('terminal.create.notSelected')"
             allow-clear
             @press-enter="searchIp"
-          >
-            <template #prefix>
-              <icon-search />
-            </template>
-          </a-input>
-          <!-- <a-form-item field="status" :label="$t('instance.status')"> -->
+          > </input>-->
+          <a-textarea
+            v-model="searchKey"
+            :style="{ width: '320px' }"
+            :placeholder="$t('terminal.create.notSelected')"
+            allow-clear
+            auto-size
+          />
+
+          <icon-search @click="searchIp" style="cursor: pointer" />
+
           <a-radio-group
             v-model="currentStatus"
             type="button"
@@ -36,7 +43,6 @@
               {{ $t('instance.offline') }}
             </a-radio>
           </a-radio-group>
-          <!-- </a-form-item> -->
         </a-space>
       </div>
       <div class="sub-title">{{ $t('terminal.create.listTitle') }}</div>
@@ -48,11 +54,6 @@
         :data="renderData"
         :bordered="false"
         :size="size"
-        :row-selection="{
-          type: 'radio',
-          showCheckedAll: true,
-          onlyCurrent: false,
-        }"
         @page-change="onPageChange"
         @selection-change="selectedChangeIp"
       >
@@ -69,16 +70,36 @@
           <a-tag v-if="record.status === 0" color="red"><icon-close /></a-tag>
           <a-tag v-else color="green"> <icon-check /></a-tag>
         </template>
+        <template #operations="{ record }">
+          <!-- <a-button
+            type="text"
+            size="small"
+            @click="handleViewExecDetailModal($event, record)"
+          >
+            {{ $t('operations.view') }}
+          </a-button> -->
+          <a-button
+            type="primary"
+            size="mini"
+            @click="handleOpenSshConnect($event, record)"
+          >
+            {{ $t('operations.websshLogin') }}
+          </a-button>
+        </template>
       </a-table>
     </div>
   </a-modal>
+  <connect-modal
+    v-model:visible="sshConnectModalvisible"
+    :record="sshConnectRecord"
+    @cancel="sshConnectModalvisible = false"
+    @add-terminal="handleAddTerminal"
+  />
 </template>
 
 <script lang="ts" setup>
   import { ref, reactive, PropType, computed } from 'vue';
   import { useI18n } from 'vue-i18n';
-  import { Message, Modal } from '@arco-design/web-vue';
-  import { useRouter } from 'vue-router';
   import { Pagination } from '@/types/global';
   import type { TableColumnData } from '@arco-design/web-vue/es/table/interface';
   import {
@@ -87,8 +108,8 @@
     queryUserServerList,
   } from '@/api/instance';
   import useLoading from '@/hooks/loading';
+  import connectModal from '@/views/terminal/components/connect-modal.vue';
 
-  const router = useRouter();
   const { t } = useI18n();
 
   defineProps({
@@ -110,9 +131,8 @@
 
   const searchKey = ref('');
   const currentStatus = ref(1);
-
   const selectedRowKeys = ref([]);
-  const emit = defineEmits(['cancelModal', 'fetchData', 'addTerminal']);
+  const emit = defineEmits(['cancelModal', 'addTerminal']);
 
   const basePagination: Pagination = {
     page: 1,
@@ -148,10 +168,16 @@
       title: t('columns.updatedTime'),
       dataIndex: 'updated_time',
     },
+    {
+      title: t('operations'),
+      dataIndex: 'operations',
+      slotName: 'operations',
+    },
   ]);
   const renderData = ref<InstanceRecord[]>([]);
   const size = ref<SizeProps>('medium');
-
+  const sshConnectModalvisible = ref(false);
+  const sshConnectRecord = ref<any>(null);
   const { loading, setLoading } = useLoading(false);
   const fetchData = async (
     params: QueryUserServerReq = {
@@ -163,9 +189,9 @@
       setLoading(true);
       const { data } = await queryUserServerList(params);
       renderData.value = data?.list || [];
-      setLoading(false);
     } catch (err) {
       console.log(err);
+    } finally {
       setLoading(false);
     }
   };
@@ -173,47 +199,47 @@
     page_size: pagination.pageSize,
     page: pagination.page,
     status: 1,
+    ips: searchKey.value.split('\n').filter((item) => item.trim() !== ''),
   });
 
   function handleCancel() {
     emit('cancelModal');
   }
 
-  async function handleBeforeOk() {
-    if (selectedRowKeys.value.length === 0) {
-      Message.error(t('terminal.create.notSelected'));
-    } else {
+  async function handleAddTerminal(info: any) {
+    setLoading(true);
+    try {
+      // const { data } = await getTerminalSession({ session_id: sessionId });
+      // const selectItem = {
+      //   id: data.session_id,
+      //   ip: data.instance.ip,
+      //   namespace: data.instance.namespace,
+      //   instanceId: data.instance.instance_id,
+      //   sysUser: data.connect_opts.user,
+      //   userSource: data.user_source,
+      //   sessionId: data.session_id,
+      // };
+      emit('addTerminal', info);
       emit('cancelModal');
-      const selectItem = renderData.value.find(
-        (item) => item.instance_id === selectedRowKeys.value[0]
-      );
-      if (!selectItem) {
-        Modal.error({
-          content: 'No data found!',
-          escToClose: false,
-          maskClosable: false,
-          onOk: () => {
-            router.push({
-              path: '/',
-            });
-          },
-        });
-      } else {
-        emit('addTerminal', selectItem);
-      }
+    } catch (err) {
+      console.log(err);
+    } finally {
+      setLoading(false);
     }
 
     return true;
   }
+
   const onPageChange = (current: number) => {
     fetchData({
       page_size: pagination.pageSize,
       page: current,
-      ip: searchKey.value,
+      status: currentStatus.value,
+      ips: searchKey.value.split('\n').filter((item) => item.trim() !== ''),
     });
   };
 
-  const selectedChangeIp = (rowKeys) => {
+  const selectedChangeIp = (rowKeys: any) => {
     selectedRowKeys.value = rowKeys;
   };
 
@@ -221,9 +247,14 @@
     fetchData({
       page_size: pagination.pageSize,
       page: pagination.page,
-      ip: searchKey.value,
+      ips: searchKey.value.split('\n').filter((item) => item.trim() !== ''),
       status: currentStatus.value,
     });
+  };
+
+  const handleOpenSshConnect = (e: any, record: any) => {
+    sshConnectRecord.value = record;
+    sshConnectModalvisible.value = true;
   };
 </script>
 

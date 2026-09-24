@@ -141,7 +141,6 @@
       :loading="loading"
       @cancel-modal="cancelModal"
       @add-terminal="handleAddTerminal"
-      @fetch-data="fetchIpList"
     ></new-connect>
     <file-manager
       v-if="isShowFile"
@@ -231,17 +230,13 @@
     'changeIp',
   ]);
 
-  const fetchIpList = (params) => {
-    alert('fetchIpList');
-    emit('fetchList', params);
-  };
-
   interface HistoryItem {
     ip: string;
     id?: number;
     namespace?: string;
     instance_id?: string;
     session_id?: string;
+    sys_user: string;
   }
   const historyList = ref<HistoryItem[]>([]);
 
@@ -264,6 +259,7 @@
       namespace: history.namespace || 'default',
       instance_id: history.instance_id,
       session_id: history.session_id,
+      sys_user: history.sys_user,
     });
     if (historyList.value.length > 5) {
       historyList.value.shift();
@@ -306,6 +302,7 @@
       namespace: props.namespace || 'default',
       instance_id: props.instanceId,
       session_id: props.sessionId,
+      sys_user: props.sysUser,
     });
   }
 
@@ -343,6 +340,7 @@
       namespace: item.namespace || 'default',
       instanceId: item.instance_id,
       sessionId: item.session_id,
+      sysUser: item.sys_user,
     });
     currentServerIndex.value = lastServer ? lastServer.key + 1 : 1;
     nextTick(() => {
@@ -350,13 +348,13 @@
         left: 99999,
       });
     });
-    const currentNum = appStore.connect_number;
-    appStore.setConnectNumber(currentNum + 1);
+
     setHistoryTerminal({
       ip: `${curIp}`,
       namespace: item.namespace || 'default',
       instance_id: item.instance_id,
       session_id: item.session_id,
+      sys_user: item.sys_user,
     });
   }
 
@@ -364,6 +362,7 @@
   function handleNewTerminal() {
     isNewCreate.value = true;
   }
+
   function cancelModal() {
     isNewCreate.value = false;
   }

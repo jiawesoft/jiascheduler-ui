@@ -7,21 +7,6 @@
             <img src="/src/assets/logo.png" />
           </a-avatar>
         </div>
-        <!-- <div class="terminal-list">
-          <a-menu mode="pop" :default-collapsed="true">
-            <a-sub-menu key="1">
-              <template #icon><icon-apps></icon-apps></template>
-              <a-menu-item key="2_0">Beijing</a-menu-item>
-              <a-menu-item key="2_1">Shanghai</a-menu-item>
-              <a-menu-item key="2_2">Guangzhou</a-menu-item>
-            </a-sub-menu>
-            <a-sub-menu key="2">
-              <template #icon><icon-bulb></icon-bulb></template>
-              <a-menu-item key="3_0">Wuhan</a-menu-item>
-              <a-menu-item key="3_1">Chengdu</a-menu-item>
-            </a-sub-menu>
-          </a-menu>
-        </div> -->
       </div>
       <div class="terminal-main">
         <div
@@ -83,23 +68,17 @@
 <script lang="ts" setup>
   import { Splitpanes, Pane } from 'splitpanes';
   import 'splitpanes/dist/splitpanes.css';
-  import { Modal } from '@arco-design/web-vue';
 
   import { computed, nextTick, ref } from 'vue';
   import { useRoute, useRouter } from 'vue-router';
   import useLoading from '@/hooks/loading';
   import { useDark, useToggle, useFullscreen } from '@vueuse/core';
   import { useAppStore } from '@/store';
-  import {
-    InstanceRecord,
-    QueryUserServerReq,
-    queryUserServerList,
-  } from '@/api/instance';
+  import { InstanceRecord } from '@/api/instance';
   import { getTerminalSession, TerminalServer } from '@/api/terminal';
   import terminal from './components/terminal.vue';
   import quickCommand from './components/quick-command.vue';
 
-  const router = useRouter();
   const terminalRef = ref<HTMLElement | null>(null);
   const { isFullscreen, toggle } = useFullscreen(terminalRef);
 
@@ -117,10 +96,6 @@
   useToggle(isDark);
   const route = useRoute();
   const currentIp = ref('');
-  const instanceId = ref(`${route.query.instance_id}`);
-  // 手动指定账号参数（可选）
-  const userSource = ref(`${route.query.user_source || ''}`);
-  const sysUser = ref(`${route.query.sys_user || ''}`);
   const sessionId = `${route.query.session_id || ''}`;
 
   const terminalRefMap = ref({});
@@ -140,52 +115,6 @@
 
   const { loading, setLoading } = useLoading(false);
   const serverIpList = ref<InstanceRecord[]>([]);
-  // const fetchData = async (
-  //   params: QueryUserServerReq = {
-  //     page: 1,
-  //     page_size: 20,
-  //   }
-  // ) => {
-  //   try {
-  //     setLoading(true);
-  //     const { data } = await queryUserServerList(params);
-  //     serverIpList.value = data?.list || [];
-
-  //     const currentIpItem = serverIpList.value.find(
-  //       (v) => v.instance_id === instanceId.value
-  //     );
-  //     if (!currentIpItem) {
-  //       Modal.error({
-  //         content: 'No data found!',
-  //         escToClose: false,
-  //         maskClosable: false,
-  //         onOk: () => {
-  //           router.push({
-  //             path: '/',
-  //           });
-  //         },
-  //       });
-  //       return;
-  //     }
-  //     splitTerminalList.value = [
-  //       {
-  //         id: Math.random().toString(16).substring(2),
-  //         ip: currentIpItem?.ip || '',
-  //         namespace: currentIpItem?.namespace,
-  //         instanceId: currentIpItem?.instance_id,
-  //         sysUser: sysUser.value,
-  //         userSource: userSource.value,
-  //       },
-  //     ];
-
-  //     setLoading(false);
-  //   } catch (err) {
-  //     console.log(err);
-  //     setLoading(false);
-  //   }
-  // };
-
-  // fetchData({ page: 1, page_size: 20, instance_id: instanceId.value });
 
   const initTerminal = async () => {
     setLoading(true);
@@ -262,14 +191,14 @@
   }
 
   function handleAddTerminal(server: TerminalServer) {
-    const currentNum = appStore.connect_number;
-    appStore.setConnectNumber(currentNum + 1);
     splitTerminalList.value.push({
       id: Math.random().toString(16).substring(2),
       ip: server.ip,
       namespace: server?.namespace,
       instanceId: server?.instanceId,
       sessionId: server?.sessionId,
+      userSource: server?.userSource,
+      sysUser: server?.sysUser,
     });
     splitResized();
   }
