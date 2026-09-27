@@ -13,9 +13,24 @@
         </a-tag> -->
         {{ `(${currentIpParams.namespace})` }}
         {{ $t('terminal.uploadTitle') }}
+        <a-tag v-if="sysUser" color="arcoblue" size="small">
+          {{ $t('terminal.file.loginUser') }}: {{ sysUser }}
+        </a-tag>
       </a-space>
     </template>
     <div class="file-body">
+      <!-- In-drawer transfer progress: a reactive bar instead of a toast, because
+           the toast api cannot re-render when only its content string changes. -->
+      <div v-if="hasFinishedTask" class="transfer-actions">
+        <a-button type="text" size="mini" @click="dismissFinished">
+          {{ $t('terminal.transfer.clearDone') }}
+        </a-button>
+      </div>
+      <transfer-list
+        :tasks="tasks"
+        @cancel="cancelTask"
+        @dismiss="dismissTask"
+      />
       <!-- <a-space> -->
       <!-- <a-button type="primary">
           <template #icon>
@@ -55,6 +70,7 @@
         </a-space>
         <a-upload
           ref="uploadRef"
+          multiple
           :custom-request="customRequest"
           :show-file-list="false"
         >
@@ -142,7 +158,7 @@
   import { ref, computed } from 'vue';
   import { useI18n } from 'vue-i18n';
   import useLoading from '@/hooks/loading';
-  import { Message } from '@arco-design/web-vue';
+  import { Message, Modal } from '@arco-design/web-vue';
   import type {
     TableData,
     TableColumnData,
@@ -151,9 +167,17 @@
     QueryFileListParams,
     FileRecord,
     queryFileList,
-    uploadFile,
     removeFile,
+    uploadFileInChunks,
+    downloadFileStream,
+    queryDownloadSize,
   } from '@/api/terminal';
+  import TransferList from '@/components/transfer-list.vue';
+  import {
+    MAX_CONCURRENT_TRANSFERS,
+    nextTransferId,
+    type TransferTask,
+  } from '@/components/transfer-types';
 
   const props = defineProps({
     visible: {
@@ -165,6 +189,10 @@
       default: '',
     },
     sysUser: {
+      type: String,
+      default: '',
+    },
+    sessionId: {
       type: String,
       default: '',
     },
@@ -232,13 +260,15 @@
   const fetchData = async (
     params: QueryFileListParams = {
       dir: defaultPath.value,
-      instance_id: props.currentIpParams.instanceId,
+      terminal_session_id: props.sessionId,
     }
   ) => {
     setLoading(true);
 
     try {
-      const { data } = await queryFileList(params);
+      const { data } = await queryFileList({
+        ...params,
+      });
       defaultPath.value = data.current_dir;
       fileData.value = data.entry;
     } catch (err) {
@@ -279,46 +309,165 @@
 
   const uploadRef = ref();
 
-  const customRequest = (options: RequestOption) => {
-    // docs: https://axios-http.com/docs/cancellation
-    const controller = new AbortController();
+  /** Aborts surface as DOMException/AbortError or axios' CanceledError. */
+  function isAbortError(error: unknown): boolean {
+    if (!error) return false;
+    const name = (error as { name?: string })?.name;
+    const code = (error as { code?: string })?.code;
+    return (
+      name === 'AbortError' ||
+      name === 'CanceledError' ||
+      code === 'ERR_CANCELED'
+    );
+  }
 
+  /** Uploads and downloads run side by side, each with its own progress row. */
+  const tasks = ref<TransferTask[]>([]);
+  /** Abort handles keyed by task id, so any task can be cancelled individually. */
+  const controllers = new Map<string, AbortController>();
+
+  const runningCount = computed(
+    () => tasks.value.filter((v) => v.status === 'running').length
+  );
+  const hasFinishedTask = computed(() =>
+    tasks.value.some((v) => v.status === 'success' || v.status === 'failed')
+  );
+
+  /**
+   * Create a task and return its id.
+   *
+   * Note: elements pushed into a `ref([])` are only turned into proxies when
+   * they are read back through `tasks.value[i]`. Mutating the raw object that
+   * was pushed does NOT trigger re-rendering, which is why every update below
+   * goes through the task id and mutates the proxy found in the array.
+   */
+  function createTask(
+    state: Pick<TransferTask, 'name' | 'direction' | 'total'>
+  ): string {
+    const task: TransferTask = {
+      id: nextTransferId(),
+      name: state.name,
+      direction: state.direction,
+      total: state.total,
+      loaded: 0,
+      percent: 0,
+      status: 'pending',
+    };
+    tasks.value.push(task);
+    return task.id;
+  }
+
+  /** Mutate the reactive proxy of a task, never the raw pushed object. */
+  function patchTask(id: string, patch: Partial<TransferTask>): void {
+    const task = tasks.value.find((v) => v.id === id);
+    if (!task) return;
+    Object.assign(task, patch);
+  }
+
+  function updateTask(id: string, loaded: number, total?: number): void {
+    patchTask(id, {
+      loaded,
+      total,
+      percent:
+        total && total > 0
+          ? Math.min(100, Math.round((loaded / total) * 100))
+          : 0,
+    });
+  }
+
+  function settleTask(
+    id: string,
+    status: 'success' | 'failed' | 'cancelled'
+  ): void {
+    patchTask(id, status === 'success' ? { status, percent: 100 } : { status });
+    controllers.delete(id);
+  }
+
+  function cancelTask(id: string): void {
+    const task = tasks.value.find((v) => v.id === id);
+    if (!task) return;
+
+    Modal.warning({
+      title: t('terminal.transfer.cancel'),
+      content: t('terminal.transfer.cancelConfirm', { name: task.name }),
+      hideCancel: false,
+      onOk: () => {
+        controllers.get(id)?.abort();
+        settleTask(id, 'cancelled');
+        Message.info(`${task.name} ${t('terminal.transfer.cancelled')}`);
+      },
+    });
+  }
+
+  function dismissTask(id: string): void {
+    tasks.value = tasks.value.filter((v) => v.id !== id);
+  }
+
+  function dismissFinished(): void {
+    tasks.value = tasks.value.filter(
+      (v) => v.status === 'running' || v.status === 'pending'
+    );
+  }
+
+  /** Wait until fewer than the concurrency cap transfers are running. */
+  async function acquireSlot(): Promise<void> {
+    while (runningCount.value >= MAX_CONCURRENT_TRANSFERS) {
+      // Polling a reactive counter keeps this simple and avoids a semaphore
+      // implementation; the interval is short enough to feel instant.
+      // eslint-disable-next-line no-await-in-loop
+      await new Promise<void>((resolve) => {
+        setTimeout(resolve, 120);
+      });
+    }
+  }
+
+  const customRequest = (options: RequestOption) => {
     (async function requestWrap() {
-      const {
-        onProgress,
-        onError,
-        onSuccess,
-        fileItem,
-        name = 'file',
-      } = options;
-      onProgress(20);
-      const formData = new FormData();
-      formData.append('instanceId', props.currentIpParams.instanceId);
-      formData.append('file_path', `${defaultPath.value}/${fileItem.name}`);
-      formData.append(name as string, fileItem.file as Blob);
-      const onUploadProgress = (event: ProgressEvent) => {
-        let percent;
-        if (event.total > 0) {
-          percent = (event.loaded / event.total) * 100;
-        }
-        onProgress(parseInt(String(percent), 10), event);
-      };
+      const { onProgress, onError, onSuccess, fileItem } = options;
+      const filePath = `${defaultPath.value}/${fileItem.name}`;
+      const total = (fileItem.file as Blob).size;
+      const taskId = createTask({
+        name: fileItem.name || '',
+        direction: 'upload',
+        total,
+      });
+      const controller = new AbortController();
+      controllers.set(taskId, controller);
 
       try {
-        const res = await uploadFile(formData, {
-          controller,
-          onUploadProgress,
+        await acquireSlot();
+        patchTask(taskId, { status: 'running' });
+        // Chunked upload: not bound by the 16MiB single frame limit, so large
+        // files are supported.
+        await uploadFileInChunks({
+          file: fileItem.file as Blob,
+          filePath,
+          terminalSessionId: props.sessionId,
+          signal: controller.signal,
+          onProgress: (percent) => {
+            onProgress(percent);
+            updateTask(taskId, Math.round((percent / 100) * total), total);
+          },
         });
+        settleTask(taskId, 'success');
+        Message.success(
+          `${fileItem.name} ${t('terminal.transfer.uploadSuccess')}`
+        );
         fetchData();
-        onSuccess(res);
+        onSuccess({});
       } catch (error) {
+        // A user triggered abort is already reported by cancelTask.
+        if (!isAbortError(error)) {
+          settleTask(taskId, 'failed');
+        }
         onError(error);
       }
     })();
+
     return {
-      abort() {
-        controller.abort();
-      },
+      // Each file owns its own controller and is cancelled from the transfer
+      // list, so there is nothing to abort here.
+      abort: () => undefined,
     };
   };
 
@@ -334,24 +483,69 @@
   };
 
   const downloadFileEvent = async (record: FileRecord) => {
+    const filePath = `${defaultPath.value}/${record.file_name}`;
+
     try {
-      const filePath = `${defaultPath.value}/${record.file_name}`;
-      const url = `/api/file/sftp/tunnel/download?file_path=${filePath}&instance_id=${props.currentIpParams.instanceId}`;
-      const downloadLink = document.createElement('a');
-      downloadLink.href = url;
-      downloadLink.download = record.file_name;
-      downloadLink.click();
+      // Learn the size first: it feeds the progress bar and turns a silent empty
+      // download into a real error.
+      const size = await queryDownloadSize({
+        filePath,
+        terminalSessionId: props.sessionId,
+      });
+      const taskId = createTask({
+        name: record.file_name,
+        direction: 'download',
+        total: size,
+      });
+      const controller = new AbortController();
+      controllers.set(taskId, controller);
+
+      await acquireSlot();
+      patchTask(taskId, { status: 'running' });
+
+      const blob = await downloadFileStream({
+        filePath,
+        terminalSessionId: props.sessionId,
+        total: size,
+        signal: controller.signal,
+        onProgress: (percent) => {
+          updateTask(taskId, Math.round((percent / 100) * size), size);
+        },
+      });
+      settleTask(taskId, 'success');
+
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = record.file_name;
+      link.click();
+      // Revoking synchronously can cancel the download before the browser has
+      // taken the blob, so release the object url on a later task instead.
+      setTimeout(() => URL.revokeObjectURL(url), 60_000);
+
+      Message.success(
+        `${record.file_name} ${t(
+          'terminal.transfer.downloadSuccess'
+        )} (${bytesToSize(size)})`
+      );
     } catch (err) {
-      console.log('Error:', err);
+      if (isAbortError(err)) {
+        return;
+      }
+      // Surface the real reason instead of a bare "Error"
+      const reason = err instanceof Error ? err.message : `${err}`;
+      Message.error(reason);
+      console.error('sftp download failed', err);
     }
   };
+
   const deleteFile = async (record: FileRecord) => {
     setLoading(true);
     try {
       await removeFile({
         remove_type: record.file_type.toLowerCase(),
         path: `${defaultPath.value}/${record.file_name}`,
-        instance_id: props.currentIpParams.instanceId,
+        terminal_session_id: props.sessionId,
       });
       Message.success(`success`);
       fetchData();

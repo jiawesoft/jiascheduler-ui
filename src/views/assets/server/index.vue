@@ -15,8 +15,9 @@
             <a-row :gutter="5">
               <a-col :span="10">
                 <a-form-item field="ip" :label="$t('instance.ip')">
-                  <a-input
+                  <a-textarea
                     v-model="formModel.ip"
+                    auto-size
                     :placeholder="$t('instance.ip.placeholder')"
                     @press-enter="search"
                   />
@@ -152,9 +153,9 @@
             {{ $t('operations.view') }}
           </a-button> -->
           <a-button
-            type="text"
-            size="small"
-            @click="handleViewTerminal($event, record)"
+            type="primary"
+            size="mini"
+            @click="handleOpenSshConnect($event, record)"
           >
             {{ $t('operations.websshLogin') }}
           </a-button>
@@ -178,6 +179,12 @@
         </a-form-item>
       </a-form>
     </a-modal>
+
+    <ssh-connect-modal
+      v-model:visible="sshConnectModalvisible"
+      :record="sshConnectRecord"
+      @cancel="sshConnectModalvisible = false"
+    ></ssh-connect-modal>
   </div>
 </template>
 
@@ -191,8 +198,6 @@
   import cloneDeep from 'lodash/cloneDeep';
   import Sortable from 'sortablejs';
 
-  import { useRouter } from 'vue-router';
-
   import {
     InstanceRecord,
     QueryInstanceListReq,
@@ -200,10 +205,13 @@
     queryUserServerList,
   } from '@/api/instance';
   import { Message } from '@arco-design/web-vue';
+  import SshConnectModal from '@/views/manage/instance-list/components/ssh-connect-modal.vue';
 
   type SizeProps = 'mini' | 'small' | 'medium' | 'large';
   type Column = TableColumnData & { checked?: true };
   const visible = ref(false);
+  const sshConnectModalvisible = ref(false);
+  const sshConnectRecord = ref<any>(null);
 
   const state = reactive({
     form: {
@@ -304,6 +312,7 @@
       page: 1,
       page_size: 20,
       status: formModel.value.status,
+      ips: formModel.value.ip.split('\n').filter((v) => v.trim() !== ''),
     }
   ) => {
     setLoading(true);
@@ -334,29 +343,29 @@
     visible.value = false;
   };
 
-  const router = useRouter();
-  const handleViewTerminal = (e: any, record: any) => {
-    const url = router.resolve({
-      name: 'terminal',
-      query: {
-        instance_id: record.instance_id,
-      },
-    });
-    window.open(url.href, '_blank');
+  /**
+   * Open the ssh login dialog so a login user is chosen first (instance default
+   * user / agent reported account / other configured user / manual input).
+   */
+  const handleOpenSshConnect = (e: any, record: any) => {
+    sshConnectRecord.value = record;
+    sshConnectModalvisible.value = true;
   };
 
   const search = () => {
     fetchData({
       page: basePagination.page,
       page_size: basePagination.pageSize,
-      ...formModel.value,
-    } as unknown as QueryInstanceListReq);
+      status: formModel.value.status,
+      ips: formModel.value.ip.split('\n').filter((v) => v.trim() !== ''),
+    });
   };
   const onPageChange = (current: number) => {
     fetchData({
       page_size: pagination.pageSize,
       page: current,
-      ...formModel.value,
+      status: formModel.value.status,
+      ips: formModel.value.ip.split('\n').filter((v) => v.trim() !== ''),
     });
   };
 

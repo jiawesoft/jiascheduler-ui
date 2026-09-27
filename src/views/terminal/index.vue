@@ -7,21 +7,6 @@
             <img src="/src/assets/logo.png" />
           </a-avatar>
         </div>
-        <!-- <div class="terminal-list">
-          <a-menu mode="pop" :default-collapsed="true">
-            <a-sub-menu key="1">
-              <template #icon><icon-apps></icon-apps></template>
-              <a-menu-item key="2_0">Beijing</a-menu-item>
-              <a-menu-item key="2_1">Shanghai</a-menu-item>
-              <a-menu-item key="2_2">Guangzhou</a-menu-item>
-            </a-sub-menu>
-            <a-sub-menu key="2">
-              <template #icon><icon-bulb></icon-bulb></template>
-              <a-menu-item key="3_0">Wuhan</a-menu-item>
-              <a-menu-item key="3_1">Chengdu</a-menu-item>
-            </a-sub-menu>
-          </a-menu>
-        </div> -->
       </div>
       <div class="terminal-main">
         <div
@@ -46,13 +31,15 @@
                 :current-ip="item.ip"
                 :namespace="item.namespace"
                 :instance-id="item.instanceId"
+                :session-id="item.sessionId"
+                :sys-user="item.sysUser"
+                :user-source="item.userSource"
                 :server-ip-list="serverIpList"
                 :loading="loading"
                 @add-split="handleAddTerminal"
                 @delete-split="handleDeleteTerminal"
                 @full-screen-terminal="handleFullScreen"
                 @outer-split-selected="outerSplitSelected"
-                @fetch-list="fetchData"
                 @change-ip="changeIp"
               ></terminal>
             </pane>
@@ -81,23 +68,17 @@
 <script lang="ts" setup>
   import { Splitpanes, Pane } from 'splitpanes';
   import 'splitpanes/dist/splitpanes.css';
-  import { Modal } from '@arco-design/web-vue';
 
   import { computed, nextTick, ref } from 'vue';
   import { useRoute, useRouter } from 'vue-router';
   import useLoading from '@/hooks/loading';
   import { useDark, useToggle, useFullscreen } from '@vueuse/core';
   import { useAppStore } from '@/store';
-  import {
-    InstanceRecord,
-    QueryUserServerReq,
-    queryUserServerList,
-  } from '@/api/instance';
-  import { ServerList } from '@/api/terminal';
+  import { InstanceRecord } from '@/api/instance';
+  import { getTerminalSession, TerminalServer } from '@/api/terminal';
   import terminal from './components/terminal.vue';
   import quickCommand from './components/quick-command.vue';
 
-  const router = useRouter();
   const terminalRef = ref<HTMLElement | null>(null);
   const { isFullscreen, toggle } = useFullscreen(terminalRef);
 
@@ -115,65 +96,49 @@
   useToggle(isDark);
   const route = useRoute();
   const currentIp = ref('');
-  const instanceId = ref(`${route.query.instance_id}`);
+  const sessionId = `${route.query.session_id || ''}`;
 
   const terminalRefMap = ref({});
 
   interface splitItem {
     id: string;
     config?: string;
+    sessionId?: string;
     selected?: boolean;
     ip?: string;
     namespace?: string;
     instanceId?: string;
+    userSource?: string;
+    sysUser?: string;
   }
   const splitTerminalList = ref<splitItem[]>([]);
 
   const { loading, setLoading } = useLoading(false);
   const serverIpList = ref<InstanceRecord[]>([]);
-  const fetchData = async (
-    params: QueryUserServerReq = {
-      page: 1,
-      page_size: 20,
-    }
-  ) => {
-    try {
-      setLoading(true);
-      const { data } = await queryUserServerList(params);
-      serverIpList.value = data?.list || [];
 
-      const currentIpItem = serverIpList.value.find(
-        (v) => v.instance_id === instanceId.value
-      );
-      if (!currentIpItem) {
-        Modal.error({
-          content: 'No data found!',
-          escToClose: false,
-          maskClosable: false,
-          onOk: () => {
-            router.push({
-              path: '/',
-            });
-          },
-        });
-        return;
-      }
+  const initTerminal = async () => {
+    setLoading(true);
+    try {
+      const { data } = await getTerminalSession({ session_id: sessionId });
       splitTerminalList.value = [
         {
-          id: Math.random().toString(16).substring(2),
-          ip: currentIpItem?.ip || '',
-          namespace: currentIpItem?.namespace,
-          instanceId: currentIpItem?.instance_id,
+          id: data.session_id,
+          ip: data.instance.ip,
+          namespace: data.instance.namespace,
+          instanceId: data.instance.instance_id,
+          sysUser: data.connect_opts.user,
+          userSource: data.user_source,
+          sessionId: data.session_id,
         },
       ];
-
-      setLoading(false);
     } catch (err) {
       console.log(err);
+    } finally {
       setLoading(false);
     }
   };
-  fetchData({ page: 1, page_size: 20, instance_id: instanceId.value });
+
+  initTerminal();
 
   const changeIp = (ip: string) => {
     if (!ip) return;
@@ -225,14 +190,15 @@
     });
   }
 
-  function handleAddTerminal(server: ServerList) {
-    const currentNum = appStore.connect_number;
-    appStore.setConnectNumber(currentNum + 1);
+  function handleAddTerminal(server: TerminalServer) {
     splitTerminalList.value.push({
       id: Math.random().toString(16).substring(2),
       ip: server.ip,
       namespace: server?.namespace,
       instanceId: server?.instanceId,
+      sessionId: server?.sessionId,
+      userSource: server?.userSource,
+      sysUser: server?.sysUser,
     });
     splitResized();
   }

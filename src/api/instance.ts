@@ -1,6 +1,27 @@
 import axios from 'axios';
 import qs from 'query-string';
 
+/** An SSH login user configured on an instance (stored in `instance.sys_users`). */
+export interface SysUser {
+  username: string;
+  /** password | key_path | key_content */
+  auth_type: string;
+  /** Key file path, returned when auth_type is key_path. */
+  key_path?: string;
+  /** Key content; never returned by the server, only sent when submitting. */
+  key_content?: string;
+  /** Password; never returned by the server, empty keeps the stored value. */
+  password?: string;
+  /** Whether this is the default login user. */
+  is_default?: boolean;
+  /**
+   * Frontend only: whether the server already stores a credential (password or
+   * key content) for this user. The credential itself is never sent down, so
+   * this flag distinguishes "keep the stored value" from "not configured yet".
+   */
+  has_stored?: boolean;
+}
+
 export interface InstanceRecord {
   id: number;
   ip: string;
@@ -9,10 +30,40 @@ export interface InstanceRecord {
   instance_group: string;
   instance_id: string;
   sys_user: string;
+  /** SSH login users configured on the instance. */
+  sys_users?: SysUser[];
+  ssh_port?: number;
+  /** SSH user name reported by the agent. */
+  ssh_user?: string;
+  /** Auth type reported by the agent: password | key_content. */
+  ssh_auth_type?: string;
   namespace: string;
   status: number;
   updated_time: string;
   created_time: string;
+}
+
+/** A record returned by /api/instance/user-server-list. */
+export interface UserServerRecord {
+  id: number;
+  instance_id: string;
+  ip: string;
+  namespace: string;
+  instance_group_id: number;
+  instance_group: string;
+  status: number;
+  info: string;
+  /** System user configured manually. */
+  sys_user?: string;
+  /** SSH login users configured on the instance. */
+  sys_users?: SysUser[];
+  ssh_port?: number;
+  /** SSH user name reported by the agent. */
+  ssh_user?: string;
+  /** Auth type reported by the agent: password | key_path | key_content. */
+  ssh_auth_type?: string;
+  created_time: string;
+  updated_time: string;
 }
 export interface QueryInstanceListReq extends Partial<InstanceRecord> {
   role_id?: number;
@@ -36,7 +87,6 @@ export function queryInstanceList(params: QueryInstanceListReq) {
 }
 
 export type SaveInstanceReq = Partial<InstanceRecord>;
-
 export interface SaveInstanceResp {
   ret: number;
 }

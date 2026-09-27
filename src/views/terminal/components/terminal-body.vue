@@ -54,6 +54,18 @@
       type: String,
       default: '',
     },
+    sessionId: {
+      type: String,
+      default: '',
+    },
+    sysUser: {
+      type: String,
+      default: '',
+    },
+    sshPort: {
+      type: String,
+      default: '',
+    },
     /**
      * 高度
      */
@@ -213,7 +225,14 @@
       const currentProtocol = window.location.protocol;
       const wsProtocol = currentProtocol.includes('https') ? 'wss:' : 'ws:';
       // const socketUrl = `${wsProtocol}//${window.location.host}/terminal/webssh/${props.ip}?rows=${term?.rows}&cols=${term?.cols}`;
-      const socketUrl = `${wsProtocol}//${window.location.host}/terminal/tunnel/${props.instanceId}?rows=${term?.rows}&cols=${term?.cols}`;
+      const params = new URLSearchParams({
+        rows: `${term?.rows}`,
+        cols: `${term?.cols}`,
+      });
+
+      const socketUrl = `${wsProtocol}//${
+        window.location.host
+      }/terminal/tunnel/${props.sessionId}?${params.toString()}`;
 
       // const socketUrl = `${props.socketUrl}?rows=${term?.rows}&cols=${term?.cols}`;
       socket = new WebSocket(socketUrl);
@@ -221,6 +240,8 @@
 
     // 监听socket连接
     socket.onopen = () => {
+      const currentNum = appStore.connect_number;
+      appStore.setConnectNumber(currentNum + 1);
       onConnected();
     };
 

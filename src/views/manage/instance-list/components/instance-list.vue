@@ -14,8 +14,8 @@
             <a-form-item field="schedule_name" :label="$t('instance.ip')">
               <a-input
                 v-model="formModel.ip"
-                @press-enter="search"
                 :placeholder="$t('instance.ip.placeholder')"
+                @press-enter="search"
               />
             </a-form-item>
           </a-col>
@@ -23,9 +23,9 @@
           <a-col :span="10">
             <a-form-item field="status" :label="$t('instance.status')">
               <a-radio-group
-                @change="search"
                 v-model="formModel.status"
                 type="button"
+                @change="search"
               >
                 <a-radio :value="1">
                   {{ $t('instance.online') }}
@@ -150,6 +150,18 @@
       <a-tag v-else color="green"> <icon-check /></a-tag>
     </template>
 
+    <template #sysUser="{ record }">
+      <span>{{ record.sys_user || '-' }}</span>
+      <a-tag
+        v-if="(record.sys_users || []).length > 1"
+        size="small"
+        color="arcoblue"
+        style="margin-left: 6px"
+      >
+        {{ $t('instance.sshUser.more', { count: record.sys_users.length }) }}
+      </a-tag>
+    </template>
+
     <template #operations="{ record }">
       <a-space direction="horizontal">
         <a-space>
@@ -159,11 +171,11 @@
             size="mini"
             @click="handleSaveInstanceModal($event, record)"
           >
-            {{ $t('operations.update') }}
+            {{ $t('operations.settings') }}
           </a-button>
         </a-space>
         <a-space>
-          <a-button size="mini" @click="handleViewTerminal($event, record)">
+          <a-button size="mini" @click="handleOpenSshConnect($event, record)">
             {{ $t('operations.websshLogin') }}
           </a-button>
         </a-space>
@@ -171,13 +183,13 @@
     </template>
   </a-table>
 
-  <a-modal
+  <a-drawer
     v-model:visible="saveInstanceModalvisible"
+    placement="right"
     title-align="start"
-    style="width: auto"
+    :width="drawerWidth"
     :draggable="true"
-    width="40%"
-    hide-cancel
+    :ok-text="$t('form.save')"
     @before-ok="handleSubmitSaveInstanceForm"
     @cancel="handleSaveInstanceModalCancel"
   >
@@ -220,8 +232,68 @@
       >
         <a-input v-model="form.namespace" />
       </a-form-item>
-      <a-form-item field="sys_user" :label="$t('instance.sysUser')" :rules="[]">
-        <a-input v-model="form.sys_user" />
+      <a-form-item
+        field="sys_user"
+        :label="$t('instance.sshUser.title')"
+        :rules="[]"
+      >
+        <div class="sys-users">
+          <div class="sys-users-tip">{{ $t('instance.sshUser.tip') }}</div>
+          <div
+            v-for="(item, index) in form.sys_users"
+            :key="`${formVersion}-${index}`"
+            class="sys-user-item"
+          >
+            <a-radio
+              :model-value="form.sys_user"
+              :value="item.username"
+              @change="handleDefaultUserChange(item.username)"
+            >
+              {{ $t('instance.sshUser.default') }}
+            </a-radio>
+            <a-input
+              v-model="item.username"
+              class="sys-user-name"
+              :placeholder="$t('instance.sshUser.username.placeholder')"
+              @change="handleUserNameChange(index)"
+            />
+            <a-select
+              v-model="item.auth_type"
+              class="sys-user-auth-type"
+              @change="handleAuthTypeChange(item)"
+            >
+              <a-option value="password">
+                {{ $t('terminal.sshConnect.auth.password') }}
+              </a-option>
+              <a-option value="key_content">
+                {{ $t('terminal.sshConnect.auth.keyContent') }}
+              </a-option>
+            </a-select>
+            <ssh-secret-field
+              :key="`${formVersion}-${index}-${item.auth_type}`"
+              :type="item.auth_type"
+              :has-stored="!!item.has_stored"
+              :model-value="
+                item.auth_type === 'key_content'
+                  ? item.key_content || ''
+                  : item.password || ''
+              "
+              @update:model-value="handleSecretChange(item, $event)"
+            />
+            <a-button
+              type="text"
+              status="danger"
+              size="mini"
+              @click="handleRemoveSysUser(index)"
+            >
+              <template #icon><icon-delete /></template>
+            </a-button>
+          </div>
+          <a-button type="dashed" long size="small" @click="handleAddSysUser">
+            <template #icon><icon-plus /></template>
+            {{ $t('instance.sshUser.add') }}
+          </a-button>
+        </div>
       </a-form-item>
       <a-form-item
         field="password"
@@ -241,8 +313,8 @@
         />
       </a-form-item>
       <a-form-item
-        field="instance-group-id"
         v-if="saveInstanceModalvisible"
+        field="instance-group-id"
         :label="$t('instance.instanceGroup')"
       >
         <select-group v-model:instance-group-id="form.instance_group_id" />
@@ -251,7 +323,13 @@
         <a-textarea v-model="form.info" />
       </a-form-item>
     </a-form>
-  </a-modal>
+  </a-drawer>
+
+  <ssh-connect-modal
+    v-model:visible="sshConnectModalvisible"
+    :record="sshConnectRecord"
+    @cancel="sshConnectModalvisible = false"
+  ></ssh-connect-modal>
 </template>
 
 <script lang="ts" setup>
@@ -264,24 +342,37 @@
   import cloneDeep from 'lodash/cloneDeep';
   import Sortable from 'sortablejs';
 
-  import { useRouter } from 'vue-router';
-
   import {
     InstanceRecord,
     QueryInstanceListReq,
+    SysUser,
     queryInstanceList,
     saveInstance,
   } from '@/api/instance';
   import { Message } from '@arco-design/web-vue';
 
+  import SshSecretField from '@/components/ssh-secret-field.vue';
   import SelectGroup from '../../components/select-group.vue';
+  import SshConnectModal from './ssh-connect-modal.vue';
 
   type SizeProps = 'mini' | 'small' | 'medium' | 'large';
   type Column = TableColumnData & { checked?: true };
   const saveInstanceModalvisible = ref(false);
   const grantedUserModalvisible = ref(false);
+  const sshConnectModalvisible = ref(false);
+  const sshConnectRecord = ref<any>(null);
   const saveInstanceFormRef = ref();
   const grantedUserFormRef = ref();
+
+  /**
+   * Bumped every time the drawer opens.
+   *
+   * The ssh user rows keep local ui state (the secret field remembers whether it
+   * was expanded), and their v-for key is index based, so Vue would reuse the
+   * old component instances and show the previous session's state. Including this
+   * version in the keys forces a fresh mount on every open.
+   */
+  const formVersion = ref(0);
 
   const defaultSaveInstanceForm = {
     ip: '',
@@ -291,9 +382,15 @@
     password: '',
     info: '',
     instance_group_id: 0,
-    sys_user: 'root',
+    sys_user: '',
+    sys_users: [] as SysUser[],
     namespace: 'default',
   };
+
+  /** Instance settings drawer width: adaptive on narrow screens. */
+  const drawerWidth = computed(() =>
+    window.innerWidth < 1200 ? '90%' : '820px'
+  );
 
   const defaultGrantedUserForm = {
     ip: '',
@@ -375,6 +472,7 @@
     {
       title: t('instance.sysUser'),
       dataIndex: 'sys_user',
+      slotName: 'sysUser',
     },
     {
       title: t('instance.status'),
@@ -423,15 +521,159 @@
     }
   };
 
-  const handleSaveInstanceModal = (e: any, record: any) => {
-    saveInstanceFormRef.value.clearValidate();
-    if (record) {
-      form.value = { ...record };
-    } else {
-      form.value = { ...defaultSaveInstanceForm };
+  /**
+   * Map an api record onto the editable form shape.
+   *
+   * Passwords and key contents are never returned by the server, so they start
+   * empty and an empty value means "keep whatever is stored".
+   */
+  const buildFormFromRecord = (record: any) => {
+    const sysUsers = (record.sys_users || []).map((item: SysUser) => ({
+      username: item.username,
+      // The instance side supports password / key_content only; legacy key_path
+      // entries fall back to the password form.
+      auth_type: item.auth_type === 'key_content' ? 'key_content' : 'password',
+      key_content: '',
+      password: '',
+      // The server already has a credential, shown as "configured"; legacy
+      // key_path users have to enter the key content again.
+      has_stored: item.auth_type !== 'key_path' && !!item.username,
+      is_default: !!item.is_default,
+    }));
+
+    // Backwards compatibility: the default user comes from the sys_user column.
+    if (!sysUsers.some((item: SysUser) => item.is_default)) {
+      const defaultItem = sysUsers.find(
+        (item: SysUser) => item.username === record.sys_user
+      );
+      if (defaultItem) {
+        defaultItem.is_default = true;
+      }
     }
 
+    return {
+      ...record,
+      sys_users: sysUsers,
+      sys_user:
+        sysUsers.find((item: SysUser) => item.is_default)?.username || '',
+    };
+  };
+
+  /**
+   * Open the settings drawer.
+   *
+   * The row data comes from the list query and may be minutes old (another admin
+   * may have edited the instance, or a previous edit may still be in the form),
+   * so the record is re-fetched every time the drawer opens instead of reusing
+   * the row object. That is what keeps stale values from leaking into the form.
+   */
+  const handleSaveInstanceModal = async (e: any, record: any) => {
+    saveInstanceFormRef.value.clearValidate();
+    formVersion.value += 1;
+
+    if (!record) {
+      form.value = { ...defaultSaveInstanceForm, sys_users: [] };
+      saveInstanceModalvisible.value = true;
+      return;
+    }
+
+    // Show the row immediately, then replace it with fresh data.
+    form.value = buildFormFromRecord(record);
     saveInstanceModalvisible.value = true;
+
+    const loading = Message.loading({
+      content: t('instance.loadingLatest'),
+      duration: 0,
+    });
+    try {
+      const { data } = await queryInstanceList({
+        page: 1,
+        page_size: 10000,
+        ip: record.ip,
+      });
+      const latest = (data.list || []).find(
+        (v) => v.instance_id === record.instance_id
+      );
+      if (latest) {
+        saveInstanceFormRef.value?.clearValidate();
+        form.value = buildFormFromRecord(latest);
+      }
+    } catch (err) {
+      Message.error(`${err}`);
+    } finally {
+      loading.close();
+    }
+  };
+
+  const handleAddSysUser = () => {
+    form.value.sys_users.push({
+      username: '',
+      auth_type: 'password',
+      key_content: '',
+      password: '',
+      has_stored: false,
+      is_default: form.value.sys_users.length === 0,
+    });
+    if (!form.value.sys_user) {
+      syncDefaultUser();
+    }
+  };
+
+  /** Write back a frozen field into the field matching its auth type. */
+  const handleSecretChange = (item: SysUser, value: string) => {
+    if (item.auth_type === 'key_content') {
+      item.key_content = value;
+    } else {
+      item.password = value;
+    }
+  };
+
+  const handleRemoveSysUser = (index: number) => {
+    const [removed] = form.value.sys_users.splice(index, 1);
+    if (removed?.is_default || form.value.sys_user === removed?.username) {
+      form.value.sys_user = '';
+    }
+    if (!form.value.sys_users.length) {
+      // Clear the default user so the server clears the sys_user column.
+      form.value.sys_user = '';
+      return;
+    }
+    syncDefaultUser();
+  };
+
+  /** Keep exactly one default login user. */
+  const syncDefaultUser = () => {
+    const users = form.value.sys_users;
+    if (!users.length) {
+      form.value.sys_user = '';
+      return;
+    }
+    if (!users.some((item) => item.is_default)) {
+      users[0].is_default = true;
+    }
+    form.value.sys_user =
+      users.find((item) => item.is_default)?.username || users[0].username;
+  };
+
+  const handleDefaultUserChange = (username: string) => {
+    form.value.sys_users.forEach((item) => {
+      item.is_default = item.username === username;
+    });
+    form.value.sys_user = username;
+  };
+
+  const handleUserNameChange = (index: number) => {
+    const item = form.value.sys_users[index];
+    if (item?.is_default) {
+      form.value.sys_user = item.username;
+    }
+  };
+
+  const handleAuthTypeChange = (item: SysUser) => {
+    item.password = '';
+    item.key_content = '';
+    // Start from the frozen state again after switching auth type.
+    item.has_stored = false;
   };
 
   const handleSaveInstanceModalCancel = () => {
@@ -476,13 +718,9 @@
     return true;
   };
 
-  const router = useRouter();
-  const handleViewTerminal = (e: any, record: any) => {
-    const url = router.resolve({
-      name: 'terminal',
-      query: { instance_id: record.instance_id },
-    });
-    window.open(url.href, '_blank');
+  const handleOpenSshConnect = (e: any, record: any) => {
+    sshConnectRecord.value = record;
+    sshConnectModalvisible.value = true;
   };
 
   const search = () => {
@@ -584,6 +822,41 @@
   .action-icon {
     margin-left: 12px;
     cursor: pointer;
+  }
+
+  .sys-users {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+
+    .sys-users-tip {
+      color: var(--color-text-3);
+      font-size: 12px;
+      line-height: 18px;
+    }
+
+    .sys-user-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+
+      :deep(.arco-radio) {
+        margin-top: 6px;
+        flex-shrink: 0;
+        white-space: nowrap;
+      }
+
+      .sys-user-name {
+        width: 120px;
+        flex-shrink: 0;
+      }
+
+      .sys-user-auth-type {
+        width: 108px;
+        flex-shrink: 0;
+      }
+    }
   }
 
   .active {

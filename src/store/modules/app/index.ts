@@ -14,7 +14,7 @@ const defaultConfig = settingConfig
 const useAppStore = defineStore('app', {
   state: (): AppState => ({
     ...defaultConfig,
-    connect_number: 1,
+    connect_number: 0,
     teamList: [],
     currentTeamId: -99,
   }),
